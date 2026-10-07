@@ -1,0 +1,30 @@
+# ---- 依赖 ----
+node_modules/
+package-lock.json
+
+# ---- 构建产物（可由 node plugin/build.mjs 重新生成）----
+# 注意：plugin/dist/core.js 是打包产物，但它让插件无需 esbuild 即可运行，
+# 因此**纳入版本控制**（下一行的注释即为说明）。
+# plugin/dist/
+
+# ---- 临时与诊断输出 ----
+*.tmp
+*.log
+_*.py
+tools/*.tmp
+ui-preview/panel-harness.html
+ui-preview/panel-harness-open.html
+ui-preview/harness-preview.png
+ui-preview/screenshot-*.png
+ui-preview/zoom-*.png
+
+# ---- 大体积可再生产物 ----
+# out/ 里的对比图都可由 node tools/run.mjs 与 node tools/e2e.mjs 重新生成。
+# 但它们是「当前版本确实长这样」的证据，保留最近的几张（体积约 8 MB）。
+# 要瘦身仓库可整体忽略：
+# out/
+
+# ---- 系统 ----
+Thumbs.db
+desktop.ini
+.DS_Store

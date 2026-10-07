@@ -1,0 +1,37 @@
+{
+  "name": "silverhalide-film-grain",
+  "version": "0.5.4",
+  "description": "银盐 · Silver Halide —— 基于胶片物理模型的 Photoshop UXP 胶片颗粒插件（核心算法平台无关）",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "node tools/run.mjs",
+    "verify": "node tools/verify-bundle.mjs",
+    "build": "node plugin/build.mjs",
+    "e2e": "node tools/e2e.mjs",
+    "install-plugin": "node tools/install-plugin.mjs",
+    "bench:l3": "node tools/bench-l3.mjs",
+    "bench:conv": "node tools/bench-conv.mjs",
+    "bench:film": "node tools/bench-film.mjs",
+    "ui:preview": "node ui-preview/build-dark.mjs && node tools/build-panel-preview.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2",
+    "jpeg-js": "0.4.4"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "photoshop",
+    "uxp",
+    "film-grain",
+    "plugin",
+    "silver-halide"
+  ],
+  "notes": [
+    "核心算法（core/）零依赖，可在 Node / 浏览器 / UXP 中直接运行。",
+    "esbuild 只在打包 UXP 面板脚本时需要；jpeg-js 只在离线端到端测试时需要。",
+    "不含数据集与模型权重 —— 颗粒是程序化合成，不是 AI 生成。"
+  ]
+}

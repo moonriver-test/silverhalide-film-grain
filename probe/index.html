@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  :root { --fg:#1b1b1f; --bg:#f6f6f3; --mut:#5b5b66; --line:#d8d7d0; --ac:#a8471f; --ok:#1f7a4d; --bad:#b0342c; }
+  @media (prefers-color-scheme: dark) {
+    :root { --fg:#e9e9ec; --bg:#1c1c20; --mut:#a6a6b0; --line:#3a3a44; --ac:#e0906a; --ok:#6fc28e; --bad:#e07070; }
+  }
+  body { margin:0; padding:10px; background:var(--bg); color:var(--fg);
+         font-family:"Source Han Sans SC","Microsoft YaHei",sans-serif; font-size:12px; line-height:1.7; }
+  h1 { font-size:13px; margin:0 0 4px; font-weight:700; }
+  .sub { color:var(--mut); font-size:11px; margin-bottom:10px; }
+  button { width:100%; padding:9px 10px; margin:0 0 8px; font-size:12.5px; font-weight:700;
+           border-radius:6px; border:1px solid var(--line); background:var(--ac); color:#fff; }
+  button.sec { background:transparent; color:var(--fg); font-weight:600; }
+  button[disabled] { opacity:.45; }
+  #status { color:var(--mut); font-size:11.5px; margin:6px 0 10px; min-height:16px; }
+  #out { white-space:pre-wrap; word-break:break-all; font-family:Consolas,"Courier New",monospace;
+         font-size:11px; line-height:1.55; border:1px solid var(--line); border-radius:6px;
+         padding:10px; max-height:520px; overflow:auto; background:rgba(127,127,127,.06); }
+  .hl { color:var(--ac); font-weight:700; }
+  .ok { color:var(--ok); }
+  .bad { color:var(--bad); }
+  .note { color:var(--mut); font-size:11px; margin-top:10px; line-height:1.6; }
+</style>
+</head>
+<body>
+  <h1>银盐 · 吞吐探针 v0.6</h1>
+  <div class="sub">测量 UXP 像素读写吞吐，并定位「写回破坏文档状态」的根因</div>
+
+  <button id="run">开始检测</button>
+  <button id="copy" class="sec">复制结果</button>
+  <button id="save" class="sec">保存到文件</button>
+  <div id="status">请先打开一张图像，然后点「开始检测」。</div>
+  <div id="out">（结果将显示在这里）</div>
+
+  <div class="note">
+    判据：全图读取 + 写回往返 &lt; 800 ms → 走 UXP；800 ms – 1.5 s → 条件可行；
+    &gt; 1.5 s → 转 C++ Plug-in SDK 智能滤镜。<br>
+    8 位文档也能测：请求 16 位时 PS 会升位返回。<br>
+    <strong>只读测试全部排在写回之前。</strong>写回只把原像素写回，视觉上不变，可用 Ctrl+Z 撤销。<br>
+    最后一段「写回实验」逐步验证哪一步会破坏文档状态，遇到第一个失败就停。
+  </div>
+
+  <script src="main.js"></script>
+</body>
+</html>

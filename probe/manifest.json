@@ -1,0 +1,27 @@
+{
+  "id": "com.silverhalide.probe",
+  "name": "银盐 · 吞吐探针",
+  "version": "0.6.0",
+  "main": "index.html",
+  "host": {
+    "app": "PS",
+    "minVersion": "23.0.0",
+    "data": { "apiVersion": 2 }
+  },
+  "manifestVersion": 5,
+  "requiredPermissions": {
+    "localFileSystem": "fullAccess",
+    "clipboard": "readAndWrite"
+  },
+  "entrypoints": [
+    {
+      "type": "panel",
+      "id": "probePanel",
+      "label": { "default": "银盐 · 吞吐探针" },
+      "minimumSize": { "width": 320, "height": 360 },
+      "maximumSize": { "width": 900, "height": 1600 },
+      "preferredDockedSize": { "width": 400, "height": 660 },
+      "preferredFloatingSize": { "width": 560, "height": 740 }
+    }
+  ]
+}

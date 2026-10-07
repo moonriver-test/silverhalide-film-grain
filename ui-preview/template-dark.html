@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>银盐 · UI 预览稿 v0.6（深色主题）</title>
+<style>
+  /* ============================================================
+     本版
+     ① 整体转深色主题：页面底取参考图那块牛仔布的蓝黑，面板取 PS 深色主题的
+        中性灰（真实面板会跟随 PS 主题，这里只是把深色态画出来）。
+     ② 胶片素材换成「珐琅徽章」：扁平高饱和色块 + 匀黑描边 + 右侧带齿孔的
+        片头条 + 树脂高光，形制与配色对照参考图。素材是内联 SVG，不是位图。
+
+     ⚠️ token 不在这里写死 —— 由 tools/design-tokens.mjs 注入（见 {{tokens}}）。
+        面板 plugin/index.html 内联同一份数值，预检断言两者逐条相等。
+        这样「设计稿与实现各写一份数值、然后慢慢漂移」不会再发生。
+     ============================================================ */
+{{tokens}}
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background-color: var(--page);
+    background-image:
+      repeating-linear-gradient(90deg, rgba(150,190,225,.048) 0 1px, transparent 1px 3px),
+      repeating-linear-gradient(0deg,  rgba(150,190,225,.034) 0 1px, transparent 1px 3px),
+      radial-gradient(ellipse 130% 80% at 50% -8%, #1c2634 0%, #0d1117 72%);
+    font-family: "Inter", system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    padding: 42px 28px 70px;
+    display: flex; flex-direction: column; align-items: center; gap: 34px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .pagehead { text-align: center; max-width: 1000px; }
+  .pagehead h1 { font-size: 30px; font-weight: 800; letter-spacing: -.6px; color: #f2f2f0; }
+  .pagehead h1 span { color: #7f8b9a; font-weight: 600; }
+  .pagehead p { margin-top: 12px; font-size: 13.5px; line-height: 1.85; color: #9aa6b4; }
+  .pagehead p b { color: #e8e8e4; font-weight: 700; }
+
+  .row { display: flex; gap: 34px; flex-wrap: wrap; justify-content: center; align-items: flex-start; }
+  .col { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .caption { font-size: 11.5px; color: #8b96a4; letter-spacing: .04em; }
+  .caption b { color: #d9d9d4; font-weight: 600; }
+
+  /* ---- 徽章 ---- */
+  .pin { display: block; filter: drop-shadow(0 3px 4px rgba(0,0,0,.62)); }
+  .pin.card { width: 56px; height: 56px; }
+  .pin.mini { width: 30px; height: 30px; filter: drop-shadow(0 1px 2px rgba(0,0,0,.7)); }
+
+  /* ---- 参考图风格的散落陈列 ---- */
+  .scatter { position: relative; width: 760px; height: 236px; max-width: 100%;
+             border-radius: 22px; overflow: hidden;
+             background-color: #0d1420;
+             background-image:
+               repeating-linear-gradient(90deg, rgba(150,190,225,.055) 0 1px, transparent 1px 3px),
+               repeating-linear-gradient(0deg,  rgba(150,190,225,.04) 0 1px, transparent 1px 3px),
+               radial-gradient(ellipse 90% 120% at 30% 10%, #1a2532 0%, #0b1119 78%);
+             box-shadow: inset 0 0 60px rgba(0,0,0,.6); }
+  .scatter .label { position: absolute; left: 18px; top: 15px; z-index: 2;
+                    font-size: 10px; font-weight: 700; letter-spacing: .2em; color: #6f7e8f; }
+  .scatter b { position: absolute; z-index: 2; left: 18px; bottom: 14px;
+               font-size: 11px; color: #8b96a4; font-weight: 500; }
+  .scatter b u { color: #d9d9d4; text-decoration: none; font-weight: 700; }
+  .scatter svg { position: absolute; width: 76px; height: 76px;
+                 filter: drop-shadow(0 9px 14px rgba(0,0,0,.62)); }
+  .p1 { left: 76px;  top: 26px;  transform: rotate(-13deg); }
+  .p2 { left: 176px; top: 62px;  transform: rotate(6deg); }
+  .p3 { left: 268px; top: 22px;  transform: rotate(-6deg); }
+  .p4 { left: 356px; top: 78px;  transform: rotate(11deg); }
+  .p5 { left: 452px; top: 30px;  transform: rotate(-9deg); }
+  .p6 { left: 552px; top: 70px;  transform: rotate(7deg); }
+  .p7 { left: 640px; top: 132px; transform: rotate(-16deg); width: 66px; height: 66px; }
+  .p8 { left: 130px; top: 132px; transform: rotate(14deg);  width: 66px; height: 66px; }
+  .p9 { left: 300px; top: 150px; transform: rotate(-8deg);  width: 62px; height: 62px; }
+  .p10 { left: 470px; top: 152px; transform: rotate(17deg); width: 62px; height: 62px; }
+
+  /* ---- 面板 ---- */
+  .panel {
+    width: 348px; background: var(--bg); color: var(--ink);
+    border-radius: 26px; padding: 18px 16px 20px;
+    box-shadow: 0 22px 50px rgba(0,0,0,.62), inset 0 1px 0 rgba(255,255,255,.045);
+  }
+
+  .brand { font-size: 25px; font-weight: 800; line-height: 1.08; letter-spacing: -.6px; }
+  .brand em { display: block; font-style: normal; color: var(--faint); }
+
+  /* ---- 预览（半调网点本身就是「颗粒」的视觉隐喻）---- */
+  .view { position: relative; margin-top: 16px; height: 150px; border-radius: 18px;
+          overflow: hidden; background: #151515; }
+  .view .sky  { position: absolute; inset: 0;
+                background: linear-gradient(180deg, #8e8d86 0%, #6a6961 44%, #494840 72%, #2f2e29 100%); }
+  .view .sun  { position: absolute; left: 62%; top: 15%; width: 50px; height: 50px;
+                border-radius: 50%; background: rgba(255,252,244,.60); }
+  .view .hill { position: absolute; left: -14%; right: -14%; bottom: -44%; height: 74%;
+                border-radius: 50% 50% 0 0 / 62% 62% 0 0; background: #2b2925; }
+  .view .h2   { left: -46%; right: 18%; bottom: -58%; height: 70%; background: #1a1815; }
+  .view .tone { position: absolute; inset: 0;
+                background-image: radial-gradient(rgba(14,12,10,.26) 0.9px, transparent 1.1px);
+                background-size: 3px 3px; }
+  .view .tag { position: absolute; left: 10px; bottom: 9px; font-family: ui-monospace, Consolas, monospace;
+               font-size: 9.5px; letter-spacing: .04em; color: rgba(255,255,255,.8); }
+  .viewcap { display: flex; justify-content: space-between; align-items: center; margin-top: 9px; }
+  .chip { border: 1.5px solid var(--mut); border-radius: 999px; padding: 3px 11px;
+          font-size: 10.5px; font-weight: 600; color: var(--ink); }
+  .mono { font-family: ui-monospace, Consolas, monospace; font-variant-numeric: tabular-nums; }
+  .viewcap .mono { font-size: 9.5px; color: var(--faint); }
+
+  .lab { display: flex; justify-content: space-between; align-items: baseline;
+         margin: 17px 2px 8px; }
+  .lab b { font-size: 11px; font-weight: 700; letter-spacing: .16em; color: var(--mut); }
+  .lab i { font-style: normal; font-size: 11px; color: var(--faint); }
+
+  /* ---- 胶片卡片：徽章放在一块内凹的承台上 ---- */
+  .film { display: flex; align-items: center; gap: 13px; background: var(--card);
+          border-radius: 18px; padding: 10px 14px 10px 10px; }
+  .stage { width: 62px; height: 62px; flex: 0 0 62px; border-radius: 14px;
+           background: radial-gradient(ellipse 76% 56% at 50% 74%, #171717 0%, #1e1e1e 62%, #272727 100%);
+           display: flex; align-items: center; justify-content: center;
+           box-shadow: inset 0 2px 4px rgba(0,0,0,.72), inset 0 -1px 0 rgba(255,255,255,.05); }
+  .film .txt { flex: 1 1 auto; min-width: 0; }
+  .film .brandline { font-size: 10px; font-weight: 700; letter-spacing: .14em; color: var(--mut); }
+  .film .name { font-size: 20px; font-weight: 800; letter-spacing: -.3px; line-height: 1.16; }
+  .film .meta { font-size: 10.5px; color: var(--mut); margin-top: 2px; }
+  .caret { font-size: 10px; color: var(--mut); }
+
+  /* ---- 感光度：全稿唯一的强调色块 ---- */
+  .hero { margin-top: 17px; background: var(--accent); border-radius: 18px;
+          padding: 13px 14px 12px; color: #fff;
+          box-shadow: inset 0 1px 0 rgba(255,255,255,.16); }
+  .hero .top { display: flex; justify-content: space-between; align-items: baseline;
+               font-size: 10.5px; font-weight: 700; letter-spacing: .16em; }
+  .hero .big { font-size: 46px; font-weight: 800; letter-spacing: -2px; line-height: 1;
+               font-variant-numeric: tabular-nums; margin: 5px 0 2px; }
+  .hero .big small { font-size: 15px; font-weight: 700; letter-spacing: 0; margin-right: 6px;
+                     vertical-align: 13px; opacity: .82; }
+  .hero .sub { font-size: 11px; font-weight: 600; opacity: .88; }
+  .seg { display: flex; gap: 6px; margin-top: 11px; }
+  .seg span { flex: 1 1 0; text-align: center; font-size: 10.5px; font-weight: 700;
+              padding: 6px 0; border-radius: 999px;
+              background: rgba(0,0,0,.22); color: #fff; }
+  .seg span.on { background: #fff; color: var(--accentd); }
+  .seg.plain span { background: var(--card); color: var(--mut); }
+  .seg.plain span.on { background: var(--accent); color: #fff; }
+
+  .amt { display: flex; justify-content: space-between; align-items: baseline; }
+  .amt .v { font-size: 19px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .track { position: relative; height: 22px; margin-top: 4px; }
+  .track .rail { position: absolute; left: 0; right: 0; top: 10px; height: 3px;
+                 border-radius: 2px; background: #3d3d3d; }
+  .track .fill { position: absolute; left: 0; top: 10px; height: 3px; border-radius: 2px;
+                 background: var(--accent); }
+  .track .knob { position: absolute; top: 3px; width: 16px; height: 16px; border-radius: 50%;
+                 background: var(--accent); border: 3px solid var(--bg);
+                 box-shadow: 0 1px 3px rgba(0,0,0,.6); }
+
+  .actions { display: flex; gap: 9px; margin-top: 19px; }
+  .btn { flex: 1 1 auto; text-align: center; padding: 13px; border-radius: 999px;
+         font-size: 13.5px; font-weight: 800; background: var(--accent); color: #fff; }
+  .btn.ghost { flex: 0 0 78px; background: transparent; color: var(--mut);
+               border: 1.5px solid #4a4a4a; font-weight: 600; font-size: 11.5px; }
+
+  .foot { display: flex; justify-content: space-between; margin-top: 15px;
+          padding-top: 11px; border-top: 1.5px solid var(--line);
+          font-size: 9.5px; color: var(--faint); }
+  .foot b { color: var(--mut); font-weight: 700; }
+
+  /* ---- 展开的胶片列表 ---- */
+  .film.open { border-radius: 18px 18px 0 0; }
+  .list { background: var(--card); border-radius: 0 0 18px 18px; padding-bottom: 6px; }
+  .grp { font-size: 9.5px; font-weight: 700; letter-spacing: .16em; color: var(--faint);
+         padding: 10px 14px 3px; }
+  .opt { display: flex; align-items: center; gap: 11px; padding: 6px 14px; }
+  .opt .mini { width: 32px; height: 32px; flex: 0 0 32px; display: flex;
+               align-items: center; justify-content: center; }
+  .opt .n { flex: 1 1 auto; font-size: 13px; font-weight: 600; }
+  .opt .iso { font-size: 10px; color: var(--faint); font-variant-numeric: tabular-nums; }
+  .opt.on { background: var(--accent); color: #fff; border-radius: 10px;
+            margin: 0 6px; padding-left: 8px; padding-right: 8px; }
+  .opt.on .iso { color: rgba(255,255,255,.76); }
+  .scrollhint { text-align: center; font-size: 9.5px; color: var(--faint); padding: 6px 0 2px;
+                letter-spacing: .1em; }
+
+  /* ---- 说明区 ---- */
+  .spec { color: #98a4b2; font-size: 12.5px; line-height: 1.9; max-width: 980px; }
+  .spec h2 { font-size: 16px; color: #f0f0ec; margin-bottom: 10px; font-weight: 700; }
+  .spec ul { list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(320px,1fr)); gap: 2px 30px; }
+  .spec li::before { content: "— "; color: #57636f; }
+  .spec code { font-family: ui-monospace, Consolas, monospace; font-size: 11.5px;
+               background: rgba(255,255,255,.08); padding: 1px 6px; border-radius: 5px; color: #e8e8e4; }
+  .swatch { display: inline-block; width: 11px; height: 11px; border-radius: 3px;
+            vertical-align: -1px; margin-right: 5px; border: 1px solid rgba(255,255,255,.22); }
+</style>
+</head>
+<body>
+
+{{sprite}}
+
+<div class="pagehead">
+  <h1>银盐 <span>UI 预览稿 · 深色主题</span></h1>
+  <p>结构沿用方案 B，整体换成<b>深色主题</b>；胶片素材按参考图重做为<b>珐琅徽章</b>风格。<br>
+     仅视觉预览，<b>未改动插件本体</b>。真实面板会跟随 Photoshop 主题自动切换。</p>
+</div>
+
+<div class="scatter">
+  <div class="label">SILVER HALIDE · FILM STOCKS</div>
+  <svg class="p1"  viewBox="0 0 120 120"><use href="#pin-portra400"/></svg>
+  <svg class="p2"  viewBox="0 0 120 120"><use href="#pin-superia400"/></svg>
+  <svg class="p3"  viewBox="0 0 120 120"><use href="#pin-e100"/></svg>
+  <svg class="p4"  viewBox="0 0 120 120"><use href="#pin-hp5"/></svg>
+  <svg class="p5"  viewBox="0 0 120 120"><use href="#pin-velvia50"/></svg>
+  <svg class="p6"  viewBox="0 0 120 120"><use href="#pin-tmax400"/></svg>
+  <svg class="p7"  viewBox="0 0 120 120"><use href="#pin-ektar100"/></svg>
+  <svg class="p8"  viewBox="0 0 120 120"><use href="#pin-gold200"/></svg>
+  <svg class="p9"  viewBox="0 0 120 120"><use href="#pin-trix400"/></svg>
+  <svg class="p10" viewBox="0 0 120 120"><use href="#pin-provia100f"/></svg>
+  <b>{{cw}} 条色路 · {{groups}} 个分组 · {{films}} 款胶片，徽章由内联 SVG 参数化生成</b>
+</div>
+
+<div class="row">
+
+  <!-- ================= 展开态 ================= -->
+  <div class="col">
+    <div class="panel">
+      <div class="brand">银盐<em>Silver Halide</em></div>
+
+      <div class="view">
+        <div class="sky"></div><div class="sun"></div><div class="hill"></div><div class="hill h2"></div><div class="tone"></div>
+        <div class="tag">1:1 · 336×180</div>
+      </div>
+      <div class="viewcap"><span class="chip">看原图</span><span class="mono">@ 2000,3000</span></div>
+
+      <div class="lab"><b>胶片</b><i>点击收起</i></div>
+      <div class="film open">
+        <div class="stage">{{pin:portra400|card}}</div>
+        <div class="txt">
+          <div class="brandline">KODAK</div>
+          <div class="name">Portra 400</div>
+          <div class="meta">彩色负片 · 细颗粒</div>
+        </div>
+        <div class="caret">▲</div>
+      </div>
+      <div class="list">{{list}}</div>
+
+      <div class="hero">
+        <div class="top"><span>感光度</span><span>箱速</span></div>
+        <div class="big"><small>ISO</small>400</div>
+        <div class="sub">Portra 400 · 未推冲</div>
+        <div class="seg">
+          <span>−1</span><span class="on">箱速</span><span>+1</span><span>+2</span><span>+3</span>
+        </div>
+      </div>
+
+      <div class="lab"><b>画幅</b><i>36 × 24 mm · 全画幅</i></div>
+      <div class="seg plain">
+        <span class="on">135</span><span>120</span><span>4×5</span><span>16mm</span>
+      </div>
+
+      <div class="lab"><b>颗粒量</b></div>
+      <div class="amt"><span class="v">100<small style="font-size:12px">%</small></span></div>
+      <div class="track">
+        <div class="rail"></div><div class="fill" style="width:50%"></div>
+        <div class="knob" style="left:calc(50% - 8px)"></div>
+      </div>
+
+      <div class="actions">
+        <div class="btn">应用颗粒</div>
+        <div class="btn ghost">移除</div>
+      </div>
+
+      <div class="foot mono">
+        <span><b>μr</b> 2.00px</span><span><b>σc</b> 6.8px</span><span><b>S</b> .0140</span>
+      </div>
+    </div>
+    <div class="caption"><b>展开态</b>　按组分段浏览全部胶片</div>
+  </div>
+
+  <!-- ================= 收起态 / 黑白片 ================= -->
+  <div class="col">
+    <div class="panel">
+      <div class="brand">银盐<em>Silver Halide</em></div>
+
+      <div class="view">
+        <div class="sky"></div><div class="sun"></div><div class="hill"></div><div class="hill h2"></div><div class="tone"></div>
+        <div class="tag">1:1 · 336×180</div>
+      </div>
+      <div class="viewcap"><span class="chip">看效果</span><span class="mono">@ 2000,3000</span></div>
+
+      <div class="lab"><b>胶片</b><i>黑白负片 · 强团簇</i></div>
+      <div class="film">
+        <div class="stage">{{pin:hp5|card}}</div>
+        <div class="txt">
+          <div class="brandline">ILFORD</div>
+          <div class="name">HP5 Plus 400</div>
+          <div class="meta">黑白负片 · 经典厚乳剂</div>
+        </div>
+        <div class="caret">▼</div>
+      </div>
+
+      <div class="hero">
+        <div class="top"><span>感光度</span><span>推一档</span></div>
+        <div class="big"><small>ISO</small>800</div>
+        <div class="sub">HP5 Plus 400 · +1 EV · 颗粒略变粗</div>
+        <div class="seg">
+          <span>−1</span><span>箱速</span><span class="on">+1</span><span>+2</span><span>+3</span>
+        </div>
+      </div>
+
+      <div class="lab"><b>画幅</b><i>120 · 6 × 6 cm</i></div>
+      <div class="seg plain">
+        <span>135</span><span class="on">120</span><span>4×5</span><span>16mm</span>
+      </div>
+
+      <div class="lab"><b>颗粒量</b></div>
+      <div class="amt"><span class="v">75<small style="font-size:12px">%</small></span></div>
+      <div class="track">
+        <div class="rail"></div><div class="fill" style="width:37.5%"></div>
+        <div class="knob" style="left:calc(37.5% - 8px)"></div>
+      </div>
+
+      <div class="actions">
+        <div class="btn">应用颗粒</div>
+        <div class="btn ghost">移除</div>
+      </div>
+
+      <div class="foot mono">
+        <span><b>μr</b> 1.65px</span><span><b>σc</b> 6.2px</span><span><b>S</b> .0105</span>
+      </div>
+    </div>
+    <div class="caption"><b>收起态</b>　日常使用时的样子（黑白片、色度通道关闭）</div>
+  </div>
+
+</div>
+
+<div class="spec">
+  <h2>这一版改了什么</h2>
+  <ul>
+    <li>整体转<b>深色主题</b>：页面底取参考图那块牛仔布的蓝黑 <code>#0f141b</code>，面板用 PS 深色主题的中性灰 <code>#232323</code></li>
+    <li>胶片素材从写实渲染改为<b>珐琅徽章</b>：扁平高饱和色块 + 匀黑描边 + 右侧带齿孔的片头条 + 顶层树脂高光</li>
+    <li>素材改为<b>内联 SVG 参数化生成</b>，不再是位图 —— <b>{{films}}</b> 款共用同一套几何，只换色路与文字</li>
+    <li>色路按<b>「品牌 × 分组」</b>分配，共 {{cw}} 条：柯达彩负琥珀 / 富士彩负绿 / 柯达黑白炭黑 / 富士黑白冷灰蓝 / 依尔福黑白象牙 / 柯达反转红 / 富士反转紫蓝</li>
+    <li>感光度数字<b>按框宽自动收字号</b>，三位数与一位数都不会溢出</li>
+    <li>承台在深色下改为<b>内凹更深的井</b>（浅色主题是凸起的台面，方向相反）</li>
+    <li>强调色只用在「<b>当前状态</b>」上：ISO 块 / 列表选中行 / 画幅选中 / 滑块 / 主按钮 —— 语义一致，不滥用</li>
+  </ul>
+  <h2 style="margin-top:24px">设计 token</h2>
+  <ul>
+    <li>面板 <code>#232323</code> · 卡片 <code>#2c2c2c</code> · 承台 <code>#191919</code> · 分割线 <code>#383838</code></li>
+    <li>强调 <span class="swatch" style="background:#c1382a"></span><code>#c1382a</code>（按下 <code>#96291f</code>，暗底小字用 <code>#e0705f</code>）</li>
+    <li>对白字对比度 <b>5.4:1</b>（AAA 大字号 / AA 正文），对面板底 2.9:1 —— 只用于大块面，不用于小字</li>
+    <li>正文 <code>#eeeeee</code> · 次要 <code>#9e9e9e</code> · 极淡 <code>#6e6e6e</code></li>
+    <li>圆角：面板 26 / 卡片 18 / 承台 14 / 胶囊 999 · 字重只用 600 / 700 / 800，数字一律等宽</li>
+  </ul>
+</div>
+
+</body>
+</html>

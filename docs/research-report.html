@@ -1,0 +1,1645 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>胶片颗粒形成机理与视觉特征研究报告</title>
+<style>
+  :root{
+    --bg:#f6f6f3;
+    --panel:#ffffff;
+    --panel-2:#f1f0ea;
+    --text:#1b1b1f;
+    --muted:#5b5b66;
+    --faint:#8a8a94;
+    --line:#e0dfd8;
+    --line-strong:#c9c8be;
+    --accent:#a8471f;
+    --accent-soft:#f3e3da;
+    --accent-2:#20625e;
+    --accent-2-soft:#dcecea;
+    --warn:#8a5a00;
+    --warn-soft:#f8ecd4;
+    --code-bg:#f0efe8;
+    --shadow:0 1px 2px rgba(0,0,0,.04),0 8px 24px rgba(0,0,0,.05);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#141416;
+      --panel:#1c1c20;
+      --panel-2:#232329;
+      --text:#e9e9ec;
+      --muted:#a6a6b0;
+      --faint:#7e7e88;
+      --line:#2e2e36;
+      --line-strong:#42424c;
+      --accent:#e0906a;
+      --accent-soft:#3a2318;
+      --accent-2:#6fc2b8;
+      --accent-2-soft:#16302e;
+      --warn:#e0b063;
+      --warn-soft:#33280f;
+      --code-bg:#232329;
+      --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35);
+    }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:"Source Han Sans SC","Noto Sans SC","PingFang SC","Microsoft YaHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    font-size:16px;
+    line-height:1.85;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:860px;margin:0 auto;padding:0 24px 120px}
+  header.hero{
+    padding:72px 0 40px;
+    border-bottom:1px solid var(--line);
+    margin-bottom:48px;
+  }
+  .kicker{
+    font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--accent);font-weight:700;margin-bottom:18px;
+  }
+  h1{
+    font-size:38px;line-height:1.28;margin:0 0 18px;font-weight:800;letter-spacing:-.01em;
+  }
+  .subtitle{font-size:18px;color:var(--muted);margin:0 0 28px;line-height:1.7;max-width:44em}
+  .meta{
+    display:flex;flex-wrap:wrap;gap:10px 28px;font-size:13.5px;color:var(--faint);
+    padding-top:8px;
+  }
+  .meta b{color:var(--text);font-weight:600}
+  h2{
+    font-size:26px;margin:64px 0 20px;font-weight:750;letter-spacing:-.01em;
+    padding-bottom:12px;border-bottom:2px solid var(--accent);display:inline-block;
+  }
+  h2 .num{color:var(--accent);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;margin-right:10px;font-size:.85em}
+  h3{font-size:19.5px;margin:42px 0 14px;font-weight:700}
+  h4{font-size:16.5px;margin:28px 0 10px;font-weight:700;color:var(--text)}
+  p{margin:0 0 16px}
+  ul,ol{margin:0 0 18px;padding-left:24px}
+  li{margin-bottom:8px}
+  li::marker{color:var(--accent)}
+  strong{font-weight:700}
+  em{font-style:normal;background:var(--accent-soft);padding:1px 5px;border-radius:3px;color:var(--text)}
+  code{
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    background:var(--code-bg);padding:2px 6px;border-radius:4px;font-size:.88em;
+  }
+  a{color:var(--accent-2);text-decoration:none;border-bottom:1px solid color-mix(in srgb,var(--accent-2) 40%,transparent)}
+  a:hover{border-bottom-color:var(--accent-2)}
+
+  .card{
+    background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    padding:24px 26px;margin:24px 0;box-shadow:var(--shadow);
+  }
+  .card.tight{padding:18px 22px}
+  .card > h3:first-child,.card > h4:first-child{margin-top:0}
+  .card.accent{border-left:4px solid var(--accent)}
+  .card.teal{border-left:4px solid var(--accent-2)}
+  .card.warn{border-left:4px solid var(--warn);background:var(--warn-soft)}
+
+  .tldr{margin:0 0 24px;padding:0;list-style:none;counter-reset:t}
+  .tldr li{
+    counter-increment:t;position:relative;padding-left:42px;margin-bottom:14px;
+  }
+  .tldr li::before{
+    content:counter(t,decimal-leading-zero);
+    position:absolute;left:0;top:1px;font-size:12px;font-weight:800;
+    color:var(--accent);font-family:ui-monospace,monospace;
+    background:var(--accent-soft);border-radius:5px;padding:3px 7px;line-height:1.1;
+  }
+
+  table{
+    width:100%;border-collapse:collapse;margin:22px 0;font-size:14.5px;
+    background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden;
+  }
+  caption{
+    caption-side:top;text-align:left;font-size:13px;color:var(--faint);
+    padding:0 0 10px;letter-spacing:.02em;
+  }
+  th{
+    background:var(--panel-2);text-align:left;font-weight:700;font-size:13px;
+    letter-spacing:.03em;padding:12px 14px;border-bottom:1px solid var(--line-strong);
+    vertical-align:bottom;
+  }
+  td{padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.65}
+  tbody tr:last-child td{border-bottom:none}
+  tbody tr:hover{background:color-mix(in srgb,var(--accent) 4%,transparent)}
+  td.num,th.num{font-family:ui-monospace,monospace;font-size:13.5px;white-space:nowrap}
+  .tag{
+    display:inline-block;font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:20px;
+    background:var(--accent-soft);color:var(--accent);letter-spacing:.02em;white-space:nowrap;
+  }
+  .tag.t2{background:var(--accent-2-soft);color:var(--accent-2)}
+  .tag.t3{background:var(--warn-soft);color:var(--warn)}
+
+  figure{margin:32px 0;text-align:center}
+  figure svg{max-width:100%;height:auto;display:block;margin:0 auto}
+  figcaption{
+    font-size:13.5px;color:var(--muted);margin-top:14px;line-height:1.65;text-align:left;
+    padding-left:2px;
+  }
+  figcaption b{color:var(--text)}
+  .figframe{
+    background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:22px 18px 6px;
+    box-shadow:var(--shadow);
+  }
+
+  .formula{
+    background:var(--code-bg);border:1px solid var(--line);border-radius:10px;
+    padding:16px 20px;margin:18px 0;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+    font-size:14.5px;line-height:2;overflow-x:auto;
+  }
+  .formula .lbl{display:block;font-family:inherit;font-size:12px;color:var(--faint);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px}
+  .formula .cmt{color:var(--faint);font-size:13px}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:22px 0}
+  @media (max-width:680px){.grid2{grid-template-columns:1fr}}
+  .box{
+    background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 18px;
+  }
+  .box h4{margin:0 0 8px;font-size:14.5px}
+  .box p{margin:0;font-size:14px;color:var(--muted);line-height:1.7}
+  .box ul{margin:0;padding-left:20px;font-size:14px;color:var(--muted)}
+
+  .toc{
+    background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:22px 26px;
+    box-shadow:var(--shadow);
+  }
+  .toc h3{margin:0 0 14px;font-size:15px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint)}
+  .toc ol{margin:0;padding-left:22px;columns:1;font-size:15px}
+  .toc li{margin-bottom:6px}
+  .toc a{color:var(--text);border:none}
+  .toc a:hover{color:var(--accent)}
+
+  .callout{
+    display:flex;gap:14px;align-items:flex-start;padding:16px 18px;border-radius:10px;
+    background:var(--accent-2-soft);border:1px solid color-mix(in srgb,var(--accent-2) 25%,transparent);
+    margin:22px 0;font-size:14.5px;
+  }
+  .callout .ico{font-weight:800;color:var(--accent-2);font-size:13px;letter-spacing:.06em;padding-top:2px;white-space:nowrap}
+  .callout p{margin:0}
+  .callout.warnv{background:var(--warn-soft);border-color:color-mix(in srgb,var(--warn) 30%,transparent)}
+  .callout.warnv .ico{color:var(--warn)}
+
+  hr{border:none;border-top:1px solid var(--line);margin:56px 0}
+  .footnote{font-size:13.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:20px;margin-top:40px}
+  .ref{font-size:13.5px;line-height:1.8;color:var(--muted);padding-left:26px;text-indent:-26px;margin-bottom:12px}
+  .ref b{color:var(--text);font-weight:600}
+  .lvl{
+    display:inline-block;min-width:52px;font-family:ui-monospace,monospace;font-size:11px;
+    font-weight:700;padding:1px 6px;border-radius:4px;margin-right:8px;text-indent:0;text-align:center;
+  }
+  .lvl.a{background:var(--accent-2-soft);color:var(--accent-2)}
+  .lvl.b{background:var(--accent-soft);color:var(--accent)}
+  .lvl.c{background:var(--warn-soft);color:var(--warn)}
+  .axis{fill:var(--faint);font-size:11px;font-family:ui-monospace,monospace}
+  .axisname{fill:var(--muted);font-size:12px;font-weight:600}
+  .gridline{stroke:var(--line);stroke-width:1}
+  .lb{fill:var(--text);font-size:12.5px;font-weight:600}
+  .lbs{fill:var(--muted);font-size:11.5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <div class="kicker">技术研究报告 · 阶段一交付</div>
+  <h1>胶片颗粒的形成机理与视觉特征</h1>
+  <p class="subtitle">面向「数码照片胶片颗粒模拟」Photoshop 插件的设计依据研究——从卤化银潜影形成到屏幕上可见的颗粒感，逐环节拆解物理链路、统计度量与感知规律。</p>
+  <div class="meta">
+    <span>版本 <b>v1.0</b></span>
+    <span>日期 <b>2026-10-03</b></span>
+    <span>状态 <b>调研完成，未涉及插件编码</b></span>
+    <span>范围 <b>颗粒（grain）单因素</b></span>
+  </div>
+</header>
+
+<div class="card warn" style="margin-top:-24px">
+  <h4 style="margin-top:0">勘误 · 2026-10-03（实现阶段实测发现）</h4>
+  <p>本文档已进入实现验证阶段。以下三处结论被实测数据推翻，正文已就地修正；此处保留记录，以免后续引用时误用旧版。</p>
+  <table style="margin:14px 0 0;background:transparent">
+    <thead><tr><th style="width:6%">#</th><th style="width:30%">原文</th><th style="width:32%">实测结论</th><th>证据</th></tr></thead>
+    <tbody>
+      <tr>
+        <td class="num">1</td>
+        <td>颗粒噪声的功率谱是<strong>带通型</strong>，低频被团簇尺寸抑制，峰值在 1/(2r)~1/(r)</td>
+        <td>是<strong>低通型</strong>：DC 处功率最强，在 1/(2d)~1/d 处开始衰减。<br>Selwyn 定律 σ·√a = 常数 <em>本身就等价于低频功率谱平坦</em>，与本报告 §4.2 自洽，与 §4.4 原表述矛盾。</td>
+        <td>实测 −3dB 截止 0.1354 cyc/px，理论 <code>exp(−4π²σ_g²f²)</code> 预测 0.1325（偏差 2.2%）；谱形 RMS 偏差 4.27%</td>
+      </tr>
+      <tr>
+        <td class="num">2</td>
+        <td>在实现层面「颗粒尺寸」等价于<strong>带通</strong>滤波器的截止频率</td>
+        <td>等价于<strong>低通</strong>滤波器的截止频率。结论方向不变（尺寸 ↔ 截止频率），仅滤波器类型需更正。</td>
+        <td>同上</td>
+      </tr>
+      <tr>
+        <td class="num">3</td>
+        <td>（隐含）颗粒频谱可以只看峰值位置来验证</td>
+        <td>不能用「峰值位置」验证，应当比对<strong>整个低通谱形与截止频率</strong>。已改为与理论谱形的 RMS 偏差判据。</td>
+        <td>验收测试第 8 项</td>
+      </tr>
+    </tbody>
+  </table>
+  <p style="margin:14px 0 0;font-size:13.5px;color:var(--muted)">配套设计文档同日的勘误见 <code>design-spec.html</code> 顶部（共两处，涉及相关核设计、幅度曲线映射与通道权重归一化）。</p>
+</div>
+
+
+<div class="toc">
+  <h3>目录</h3>
+  <ol>
+    <li><a href="#s0">摘要与核心结论</a></li>
+    <li><a href="#s1">问题界定：为什么「加噪声」不等于「加颗粒」</a></li>
+    <li><a href="#s2">形成机理：从光子到可见颗粒的六步链路</a></li>
+    <li><a href="#s3">空间统计与度量体系</a></li>
+    <li><a href="#s4">视觉特征：颗粒在图像上到底长什么样</a></li>
+    <li><a href="#s5">胶片颗粒 vs 数码噪声：逐条对照</a></li>
+    <li><a href="#s6">已有建模方法综述与评析</a></li>
+    <li><a href="#s7">从机理推导插件设计约束</a></li>
+    <li><a href="#s8">结论、局限与后续工作</a></li>
+    <li><a href="#sa">附录 A：关键数据表</a></li>
+    <li><a href="#sb">附录 B：参考文献与可信度分级</a></li>
+  </ol>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="s0"><span class="num">01</span>摘要与核心结论</h2>
+
+<p>本报告回答两个问题：<strong>胶片颗粒是怎么产生的</strong>，以及<strong>它在图像上呈现出什么统计与感知特征</strong>。所有结论都指向同一个工程目的——为后续插件定义「什么样的颗粒才算对」。</p>
+
+<p>先给结论。以下十条是本报告全部推理的落脚点，后文逐条给出依据。</p>
+
+<ol class="tldr">
+  <li><strong>颗粒不是噪声，是「成像物质本身」。</strong>胶片图像的每一个像素都是有限个不透明颗粒的局部平均。颗粒是信号载体，不是叠加在信号上的干扰层。这决定了它必须<em>参与成像</em>（改变灰阶的方式）而不是<em>覆盖在成像之上</em>。</li>
+  <li><strong>颗粒的产生链路上有四个独立的随机源，缺一不可。</strong>光子到达的泊松性、晶体尺寸的多分散性、显影过程的团簇与感染显影、以及观察时放大率与人眼的分辨极限。任何只模拟其中一环的方案都会露出破绽。</li>
+  <li><strong>颗粒强度的物理定律是 σ<sub>D</sub> ∝ √D。</strong>由 Nutting 定律（密度 ∝ 单位面积颗粒数）与泊松波动（ΔN = √N）直接推出，再叠加 Selwyn 定律得到完整的尺度变换关系。这是插件的「强度标定」应当遵循的物理骨架。</li>
+  <li><strong>颗粒的空间分布是「团簇」，不是独立点。</strong>布尔模型的天然聚簇效应 + 显影的感染显影现象，共同产生 5–20 个显影晶体聚成的团块。团簇是胶片颗粒最核心的视觉签名，也是它与白噪声最容易分辨的特征。</li>
+  <li><strong>颗粒噪声是「低频平坦、高频带限」的低通型，不是带通。</strong>Selwyn 定律（σ·√a = 常数）本身就等价于「低频功率谱平坦」，因此频谱不可能在中频出现峰值：能量集中在 DC 附近，在约 1/(2d)～1/d（d 为颗粒直径）处开始快速衰减。数码噪声的功率谱同样平坦，但<strong>没有高频截止</strong>——这才是两者的真正分界。（原文写作「带通」，2026-10-03 勘误。）</li>
+  <li><strong>颗粒的感知强度峰值在中间调，两端趋零。</strong>从布尔模型可严格导出：颗粒的覆盖波动方差正比于 p(1−p)（p 为局部覆盖率），在中间调最大、在纯黑与纯白处为零。这解释了「天空、皮肤、中灰背景最脏，死黑和死白干净」这一普遍经验。</li>
+  <li><strong>彩色胶片的颗粒是三层九层叠加的结果，且蓝通道最粗。</strong>实测数据显示 Kodak VISION3 500T 高密度处的 RMS 颗粒度：蓝 ≈ 0.025、绿 ≈ 0.010、红 ≈ 0.009，蓝通道颗粒度约为红通道的 2.8 倍。所以最终正像中<em>蓝通道颗粒最强、红通道最弱</em>，绝不是「三通道等强度的彩色噪点」。</li>
+  <li><strong>颗粒感随放大率急剧增长，且是观看条件的函数而非图像的固有属性。</strong>柯达 PGI 数据：同一 135 底片，4.4× 放大时 PGI = 28（刚过阈值），8.8× 时 50，17.8× 时 79。这是「图片在 100% 视图下看起来比缩略图脏得多」的量化解释，也意味着插件必须提供与输出分辨率解耦的颗粒尺度控制。</li>
+  <li><strong>颗粒应该是画面里最锐利的元素。</strong>真实胶片的图像信息先于颗粒丢失（胶片 MTF 下降快于颗粒对比度下降）。这条推论反直觉但极其重要：<em>「图像略微柔化 + 颗粒保持锐利」= 胶片感；「图像锐利 + 颗粒糊」= 滤镜感</em>。</li>
+  <li><strong>存在一个已被验证的物理随机几何模型可以直接作为算法骨架。</strong>Newson 等人的布尔模型给出了从图像灰度到颗粒密度场的闭式映射，以及保持平均灰度的构造方式，且天然分辨率无关。这是本插件最合理的理论基础。</li>
+</ol>
+
+<div class="callout">
+  <div class="ico">范围说明</div>
+  <p>本报告只研究<strong>颗粒</strong>这一个因素。真实「胶片感」还包含色调曲线（S 形肩部）、色彩耦合、光晕（halation）、冲洗批次差异等，这些不在本报告范围内，但在插件路线图中应作为后续阶段独立处理。原因是：颗粒是唯一需要<strong>物理建模</strong>才能做对的因素，其余多数可以通过曲线/查表近似。</p>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="s1"><span class="num">02</span>问题界定：为什么「加噪声」不等于「加颗粒」</h2>
+
+<h3>2.1 术语先对齐</h3>
+<p>中文与英文在这一领域存在大量混用，先把三个词钉死，后续全部按此使用：</p>
+
+<table>
+  <caption>表 1　颗粒相关术语的精确含义</caption>
+  <thead>
+    <tr><th style="width:20%">术语</th><th style="width:24%">英文</th><th>定义与用法</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>颗粒</strong></td>
+      <td>grain</td>
+      <td>物理实体。黑白片中是显影后的金属银团块；彩色片中是染料云。是「东西」，不是「效果」。</td>
+    </tr>
+    <tr>
+      <td><strong>颗粒度</strong></td>
+      <td>granularity</td>
+      <td><strong>客观物理量</strong>。均匀曝光区域上密度涨落的统计量。可用仪器测量，与人无关。标准形式为 RMS 颗粒度 σ<sub>D</sub>。</td>
+    </tr>
+    <tr>
+      <td><strong>颗粒性</strong></td>
+      <td>graininess</td>
+      <td><strong>主观感知量</strong>。观察者对颗粒度的心理反应。无法用仪器直接测量，只能通过心理物理实验标定。两者关系近似为 G ∝ log σ²（见 §3.5）。</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="card teal">
+  <h4>这个区分为什么对插件设计是决定性的</h4>
+  <p>「颗粒度」是可以在代码里精确控制的量（噪声的方差、功率谱）；「颗粒性」才是用户眼睛看到并评价的东西。二者之间隔着一个<strong>人眼加权滤波器</strong>和一个<strong>放大率缩放</strong>。只优化 σ 而不管加权与缩放，结果就是「数值上对了，看起来不像」。本报告 §3.5–§3.6 专门处理这个断层。</p>
+</div>
+
+<h3>2.2 核心认知：颗粒参与成像，而非叠加于成像</h3>
+<p>模拟颗粒最简单粗暴的做法是「生成一层噪声，用某种混合模式盖上去」。这个做法在原理上就已经错了，原因有三层：</p>
+
+<div class="grid2">
+  <div class="box">
+    <h4>① 颗粒构成图像</h4>
+    <p>在微观尺度上，胶片图像是二值的：某点要么被颗粒覆盖（不透光），要么没有（透光）。我们看到的连续灰阶，是<strong>局部平均密度</strong>。所以颗粒量必须随该处应有的密度变化——亮的区域需要更多颗粒，暗的区域需要更少。这要求颗粒生成是由图像内容<strong>驱动</strong>的。</p>
+  </div>
+  <div class="box">
+    <h4>② 颗粒与内容是同一层</h4>
+    <p>叠加式噪声永远浮在图像「上面」，因为它是独立生成的一层。而真实颗粒是与图像细节纠缠在同一平面（更准确地说，同一<strong>三维乳剂厚度</strong>）上的。这就是为什么叠加式颗粒在放大后总显得「贴上去的」。</p>
+  </div>
+  <div class="box">
+    <h4>③ 颗粒有物理尺寸，噪声没有</h4>
+    <p>颗粒有以微米计的物理直径，因此它在不同输出分辨率下占据的像素数不同。一般的逐像素噪声叠加默认「一个像素=一个噪声单元」，导致同一张图缩放到不同尺寸时颗粒的相对粗细完全错误。</p>
+  </div>
+  <div class="box">
+    <h4>④ 颗粒影响可分辨细节</h4>
+    <p>颗粒作为随机调制，会<strong>降低</strong>颗粒尺度附近的细节可分辨度（相当于一个空间频率相关的干扰源）。真实胶片的分辨率上限部分就是由颗粒尺寸决定的。纯叠加式方案没有这个副作用，因此在高频细节区域看起来「太干净」。</p>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="s2"><span class="num">03</span>形成机理：从光子到可见颗粒的六步链路</h2>
+
+<p>下面按时间顺序拆解。每一环节末尾标出它<strong>注入了什么随机性</strong>——这些随机性正是插件需要复现的对象。</p>
+
+<figure>
+  <div class="figframe">
+    <svg viewBox="0 0 680 250" role="img" aria-label="胶片颗粒形成机理链路图">
+      <defs>
+        <marker id="ar" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L7,3 L0,6 z" fill="var(--line-strong)"/>
+        </marker>
+        <marker id="ar2" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L7,3 L0,6 z" fill="var(--accent)"/>
+        </marker>
+      </defs>
+
+      <!-- 主链 -->
+      <g>
+        <rect x="16" y="52" width="96" height="62" rx="8" fill="var(--panel-2)" stroke="var(--line-strong)"/>
+        <text x="64" y="76" text-anchor="middle" class="lb">乳剂制备</text>
+        <text x="64" y="94" text-anchor="middle" class="lbs">晶体成核生长</text>
+      </g>
+      <line x1="114" y1="83" x2="140" y2="83" stroke="var(--line-strong)" marker-end="url(#ar)"/>
+      <g>
+        <rect x="142" y="52" width="96" height="62" rx="8" fill="var(--panel-2)" stroke="var(--line-strong)"/>
+        <text x="190" y="76" text-anchor="middle" class="lb">曝光</text>
+        <text x="190" y="94" text-anchor="middle" class="lbs">潜影形成</text>
+      </g>
+      <line x1="240" y1="83" x2="266" y2="83" stroke="var(--line-strong)" marker-end="url(#ar)"/>
+      <g>
+        <rect x="268" y="52" width="96" height="62" rx="8" fill="var(--panel-2)" stroke="var(--line-strong)"/>
+        <text x="316" y="76" text-anchor="middle" class="lb">显影</text>
+        <text x="316" y="94" text-anchor="middle" class="lbs">化学放大 10⁹</text>
+      </g>
+      <line x1="366" y1="83" x2="392" y2="83" stroke="var(--line-strong)" marker-end="url(#ar)"/>
+      <g>
+        <rect x="394" y="52" width="96" height="62" rx="8" fill="var(--panel-2)" stroke="var(--line-strong)"/>
+        <text x="442" y="76" text-anchor="middle" class="lb">漂白定影</text>
+        <text x="442" y="94" text-anchor="middle" class="lbs">银/染料云留存</text>
+      </g>
+      <line x1="492" y1="83" x2="518" y2="83" stroke="var(--line-strong)" marker-end="url(#ar)"/>
+      <g>
+        <rect x="520" y="52" width="144" height="62" rx="8" fill="var(--accent-soft)" stroke="var(--accent)"/>
+        <text x="592" y="76" text-anchor="middle" class="lb">放大 / 扫描 / 观看</text>
+        <text x="592" y="94" text-anchor="middle" class="lbs">低通 → 颗粒性</text>
+      </g>
+
+      <!-- 随机性标注 -->
+      <g>
+        <line x1="190" y1="114" x2="190" y2="150" stroke="var(--accent)" stroke-dasharray="3 3"/>
+        <circle cx="190" cy="150" r="3" fill="var(--accent)"/>
+        <line x1="190" y1="150" x2="30" y2="150" stroke="var(--accent)" stroke-dasharray="3 3"/>
+        <circle cx="30" cy="150" r="3" fill="var(--accent)"/>
+        <line x1="30" y1="150" x2="30" y2="186" stroke="var(--accent)" stroke-dasharray="3 3" marker-end="url(#ar2)"/>
+        <text x="34" y="200" class="lbs" fill="var(--accent)">① 光子泊松分布</text>
+
+        <line x1="64" y1="114" x2="64" y2="132" stroke="var(--accent)" stroke-dasharray="3 3"/>
+        <line x1="64" y1="132" x2="220" y2="132" stroke="var(--accent)" stroke-dasharray="3 3"/>
+        <line x1="220" y1="132" x2="220" y2="186" stroke="var(--accent)" stroke-dasharray="3 3" marker-end="url(#ar2)"/>
+        <text x="224" y="200" class="lbs" fill="var(--accent)">② 晶体尺寸多分散性</text>
+
+        <line x1="316" y1="114" x2="316" y2="168" stroke="var(--accent)" stroke-dasharray="3 3"/>
+        <line x1="316" y1="168" x2="410" y2="168" stroke="var(--accent)" stroke-dasharray="3 3"/>
+        <line x1="410" y1="168" x2="410" y2="186" stroke="var(--accent)" stroke-dasharray="3 3" marker-end="url(#ar2)"/>
+        <text x="414" y="200" class="lbs" fill="var(--accent)">③ 感染显影 / 团簇化</text>
+
+        <line x1="592" y1="114" x2="592" y2="168" stroke="var(--accent)" stroke-dasharray="3 3"/>
+        <line x1="592" y1="168" x2="600" y2="168" stroke="var(--accent)" stroke-dasharray="3 3"/>
+        <line x1="600" y1="168" x2="600" y2="186" stroke="var(--accent)" stroke-dasharray="3 3" marker-end="url(#ar2)"/>
+        <text x="510" y="200" class="lbs" fill="var(--accent)">④ 放大率 × 人眼分辨率</text>
+      </g>
+      <text x="16" y="30" class="lbs" style="font-weight:700">随机性注入点（四个独立源，决定最终颗粒的四个可调维度）</text>
+      <line x1="16" y1="40" x2="664" y2="40" stroke="var(--line)"/>
+      <text x="16" y="232" class="lbs">涂层 → 曝光 → 显影 → 定影　为「制作侧」；　放大 / 扫描 / 观看　为「观察侧」。二者共同决定最终看到的颗粒。</text>
+    </svg>
+  </div>
+  <figcaption><b>图 1　胶片颗粒形成的完整链路。</b>上游三个环节决定颗粒的「客观颗粒度」，第四个环节（观察侧）决定「主观颗粒性」。插件的输出对应整条链路的末端——因此必须在正确的位置注入随机性，同时模拟观察侧的滤波。</figcaption>
+</figure>
+
+<h3>3.1 环节一：乳剂制备——晶体尺寸分布是第一个自由度</h3>
+
+<p>胶片乳剂是卤化银微晶分散在明胶中的悬浮体系。制备工艺（成核-生长控制、双注法、pAg 控制）决定晶体的<strong>平均尺寸</strong>与<strong>尺寸分布宽度</strong>。</p>
+
+<table>
+  <caption>表 2　卤化银晶体的尺寸与形态（文献汇总，不同胶片体系数值有差异）</caption>
+  <thead><tr><th style="width:30%">对象</th><th style="width:26%">典型尺寸</th><th>说明</th></tr></thead>
+  <tbody>
+    <tr><td>卤化银微晶直径（通用）</td><td class="num">0.1 – 2 μm</td><td>部分专利文献给到 0.1 – 3 μm。低感光度细颗粒乳剂偏下限，高感光度粗颗粒乳剂偏上限。</td></tr>
+    <tr><td>高速黑白负片乳剂</td><td class="num">0.4 – 1.5 μm</td><td>柯达 H-1 出版物的电子显微图标注值。</td></tr>
+    <tr><td>柯达 T 颗粒（1970s）</td><td class="num">厚度 ≈ 0.2 μm</td><td>片状（平板状）晶体。<strong>投影面积大而厚度极薄</strong>，因此单位体积捕光截面大——用更少的银换更高的感光度，是「高速低颗粒」的关键工艺突破。</td></tr>
+    <tr><td>感光度与尺寸的关系</td><td class="num">正相关</td><td>大晶体捕光截面大、更易形成可显影潜影 → 高 ISO 必然倾向大颗粒。这是 ISO 与颗粒度之间的物理耦合，不是设计懒惰。</td></tr>
+  </tbody>
+</table>
+
+<div class="callout warnv">
+  <div class="ico">易混淆点</div>
+  <p>「晶体尺寸分布」不是泊松分布。泊松性描述的是<strong>空间位置与光子到达</strong>的随机性；晶体尺寸是<strong>制造工艺确定的分布</strong>，现代乳剂刻意做窄（单分散）以抑制团簇与不均匀。文献中把二者混为一谈的情况很多，本报告严格区分。</p>
+</div>
+
+<p><strong>随机性注入 ①的伴侣——尺寸多分散性：</strong>晶体越大越敏感。同一曝光量下，大晶体的潜影形成概率显著高于小晶体。这意味着「哪些晶体被显影」的集合不仅取决于光子数，也取决于尺寸分布。这个机制会放大低照度下的颗粒波动。</p>
+
+<h3>3.2 环节二：曝光——Gurney–Mott 潜影理论</h3>
+
+<p>潜影形成机制由 Gurney 与 Mott 于 1938 年提出，至今仍是标准框架：</p>
+
+<ol>
+  <li>光子被卤化银晶体吸收，从价带激发一个电子到导带，同时产生一个正空穴（电子-空穴对）。</li>
+  <li>光电子在晶格中迁移，被<strong>浅电子陷阱</strong>（敏化中心）捕获。浅陷阱由硫敏化（形成硫化银位点）、金敏化、晶格缺陷（刃型位错）或痕量掺杂引入。</li>
+  <li>被捕获的电子还原邻近的间隙银离子 Ag⁺ → Ag⁰。银原子聚集形成小簇。</li>
+  <li>当银簇达到<strong>约 4 个原子</strong>时即成为有效的潜影中心（文献区间 3–50 原子）。到这一步，晶体变成「可显影」。</li>
+</ol>
+
+<div class="formula">
+  <span class="lbl">化学放大的增益</span>
+  潜影中心：<span class="cmt">4 – 50 个银原子</span><br>
+  显影后颗粒：<span class="cmt">可达 10⁹ 量级银原子</span><br>
+  ⇒ 放大倍数 ≈ <strong>10⁹</strong>（这是摄影史上提升感光度的核心技术）
+</div>
+
+<p>这个巨大的非线性放大正是「少量光子 → 全有或全无的颗粒」这一二值跃变的来源，也是颗粒统计呈泊松性的根源。</p>
+
+<p><strong>随机性注入 ②：光子到达服从泊松分布。</strong>某个微区内落到晶体的光子数是随机变量。曝光量越低，相对波动越大（信噪比 ∝ √N），所以欠曝是颗粒恶化的主因——这一点被实测数据强烈支持（见 §3.7）。</p>
+
+<div class="callout">
+  <div class="ico">工程含义</div>
+  <p>曝光不足 → 颗粒度上升，不是线性的，而是在特性曲线趾部附近<strong>急剧</strong>上升。如果插件要模拟「推冲（push）」，其强度曲线必须是非线性的，且在暗部更陡。</p>
+</div>
+
+<h3>3.3 环节三：显影——团簇在这里诞生</h3>
+
+<p>显影剂在潜影中心处催化还原整个晶体，生成<strong>丝状 / 带状（filamentary, ribbon-like）的金属银缠绕团块</strong>，单个显影颗粒团尺寸约 <strong>0.5 – 2 μm</strong>。未曝光的晶体在定影阶段被溶解洗去。</p>
+
+<p>关键现象是<strong>团簇化（clumping）</strong>，它有两个来源：</p>
+
+<div class="grid2">
+  <div class="box">
+    <h4>来源 A：三维重叠（光学团簇）</h4>
+    <p>乳剂是三维的。乳剂层厚度方向上有多个晶体，视线穿过整层时，不同深度的银颗粒会<strong>在光学上重叠</strong>。两个颗粒不需要物理接触就已经是一个光学实体。这个机制决定了：团簇是必然的，不是工艺缺陷。</p>
+  </div>
+  <div class="box">
+    <h4>来源 B：感染显影（infectious development）</h4>
+    <p>显影具有自催化性质：已显影的颗粒会通过释放的显影产物或局部化学环境，<strong>诱发相邻未曝光晶体也显影</strong>。后果是提高表观感光度，但同时增加灰雾、改变特性曲线，并<strong>使颗粒性恶化</strong>。这是颗粒团簇的化学成因。</p>
+  </div>
+</div>
+
+<p>此外，显影条件（温度、搅拌、药液浓度）会显著改变团簇程度。搅拌不均会带来比手工操作高出一截的团簇率——这意味着<strong>颗粒不仅是胶片型号的函数，也是冲洗的函数</strong>。这是颗粒「有机感」的来源之一。</p>
+
+<p><strong>随机性注入 ③：团簇化。</strong>多个显影晶体（文献给 5–20 个）聚成不规则团块。这是颗粒视觉特征中<em>最重要的一条</em>，因为它产生了「尺寸大于单个颗粒」的低频结构。</p>
+
+<h3>3.4 环节四：漂白定影与彩色胶片<br><span style="font-size:15px;font-weight:400;color:var(--muted)">——染料云替代金属银</span></h3>
+
+<p>彩色胶片用<strong>成色剂（coupler）</strong>成色：显影剂被氧化后（QDI）与成色剂偶合，生成青/品红/黄染料。染料在显影银周围<strong>向外扩散</strong>形成<strong>染料云（dye cloud）</strong>——这种扩散同时向所有方向进行，因此边界柔和、呈团块状，中文文献形容为「奶油状」「云状」。漂白定影后银被移除，只留下染料云构成图像。</p>
+
+<table>
+  <caption>表 3　染料云的尺寸与结构（彩色胶片颗粒的物理基础）</caption>
+  <thead><tr><th style="width:34%">参数</th><th style="width:24%">数值</th><th>来源与说明</th></tr></thead>
+  <tbody>
+    <tr><td>染料云直径（彩色负片，柯达 H-1）</td><td class="num">1.0 – 10 μm</td><td>核心银颗粒（团）0.4 – 2.0 μm，或单个银颗粒 0.4 – 0.8 μm。</td></tr>
+    <tr><td>染料云直径（彩色相纸）</td><td class="num">1.25 – 4 μm</td><td>柯达彩色相纸实测（Weaver 2009）。</td></tr>
+    <tr><td>颜色差异</td><td class="num">黄 &gt; 青、品红</td><td>黄成色层需要高感光度 → 用大晶体 → 大染料云。</td></tr>
+    <tr><td>层结构</td><td class="num">最多 9 层</td><td>三种颜色 × 三层速度（慢 / 中 / 快）。<strong>三层速度意味着三种颗粒尺度叠加在同一通道内</strong>——这是真实胶片颗粒尺寸分布天然多峰的原因。</td></tr>
+    <tr><td>DIR / DIAR 成色剂</td><td class="num">缩小染料云</td><td>释放显影抑制剂，同时（a）抑制卤化银显影进程，（b）限制氧化显影剂 QDI 的扩散距离。两个作用都使染料云变细 → 改善颗粒度；同时产生边缘效应改善锐度。现代乳剂的颗粒控制很大程度上靠这个。</td></tr>
+  </tbody>
+</table>
+
+<div class="card accent">
+  <h4>黑白颗粒与彩色颗粒的形态差异（必须区分建模）</h4>
+  <ul style="margin-bottom:0">
+    <li><strong>黑白：</strong>显影银丝团，边界相对锐利、对比度高，形态不规则、有方向性。</li>
+    <li><strong>彩色：</strong>染料云，<strong>尺度更大（约 2–5 倍）</strong>、边界模糊、浓度梯度平缓。视觉上更「软」，更容易融入图像，造成的锐度损失也更明显。</li>
+  </ul>
+  <p style="margin-top:10px;margin-bottom:0"><strong>结论：</strong>「黑白颗粒」与「彩色颗粒」不能共用同一组参数——彩色颗粒必须更大、更软。这是插件的胶片型号预设必须分黑白/彩色两大族的理由。</p>
+</div>
+
+<h3>3.5 环节五与六：观察侧——放大率与人眼</h3>
+
+<p>到这里，客观的颗粒度已经确定。但从「客观颗粒度」到「主观颗粒性」还要经过两级低通滤波：</p>
+
+<ol>
+  <li><strong>放大 / 扫描：</strong>把底片上的微米级结构投影或采样到输出介质上。放大率 m 越高，单位视角内包含的颗粒数越少，单颗粒所占视角越大 → 颗粒越明显。</li>
+  <li><strong>人眼：</strong>人眼本身是一个有限分辨率的低通滤波器。中科院/影像学界长期使用的工程近似是：在 40 cm 标准观看距离下，人眼等效于一个<strong>宽度约 560 μm 的高斯加权孔径</strong>（投影到相纸/输出介质上）。</li>
+</ol>
+
+<p>这两级滤波共同决定「哪些空间频率的颗粒波动最终能被感知」。§3.5 的加权积分公式正是把二者写进同一个数学表达。</p>
+
+<div class="callout">
+  <div class="ico">这是本项目最容易被忽略的一环</div>
+  <p>绝大多数广告滤镜只处理「制作侧」（生成噪声），完全不处理「观察侧」（滤波与缩放）。所以它们在缩略图尺寸用看起来还行，一放大就原形毕露。插件的设计必须把观察侧纳入参数体系。</p>
+</div>
+
+<hr>
+
+<!-- ============================================================ -->
+<h2 id="s3"><span class="num">04</span>空间统计与度量体系</h2>
+
+<p>上一节解释了颗粒怎么来的，这一节回答「颗粒有多强、有多大、在什么频率上」——即可测量的部分。</p>
+
+<h3>4.1 Nutting 定律与 √D 律（颗粒强度的物理骨架）</h3>
+
+<p>推导链条清晰且经典，从三个事实出发：</p>
+
+<div class="formula">
+  <span class="lbl">① Nutting 定律：密度与颗粒数成正比</span>
+  光穿过乳剂层时的衰减：&nbsp; dI = −a·(N/t)·I(z)·dz<br>
+  积分得透射率：&nbsp; T = I(t)/I(0) = exp(−aN)<br>
+  又因 D = −log₁₀T = −0.434·lnT ⇒ <strong>2.3·D = a·N</strong><br>
+  <span class="cmt">N = 单位面积平均颗粒数，a = 单颗粒平均吸收截面（含颗粒外的时间平均）</span>
+</div>
+
+<div class="formula">
+  <span class="lbl">② 泊松波动：颗粒数的涨落</span>
+  N ± ΔN = N ± √N &nbsp;&nbsp;<span class="cmt">（曝光是光子和晶体的量子力学相互作用，近似泊松过程）</span>
+</div>
+
+<div class="formula">
+  <span class="lbl">③ 合并：√D 律</span>
+  ΔD = (a/2.3)·ΔN = (a/2.3)·√N &nbsp;∝&nbsp; √D<br>
+  ⇒ &nbsp; <strong>σ<sub>D</sub> ∝ √D</strong> &nbsp;&nbsp;<span class="cmt">颗粒度随平均密度的平方根增长</span><br><br>
+  <span class="cmt">直观解释：密度越高，绝对涨落 ΔN = √N 越大，但相对涨落 ΔN/N = 1/√N 越小。所以细颗粒乳剂（同一密度下 N 更大）的统计噪声更低。</span>
+</div>
+
+<h3>4.2 Selwyn 定律（尺度变换）</h3>
+
+<p>Selwyn（1935）的观察：对不太小的测量孔径，<strong>RMS 颗粒度与孔径线度成反比</strong>。与 √D 律合并，得到工程上最常用的统一换算公式：</p>
+
+<div class="formula">
+  <span class="lbl">Selwyn 定律与颗粒度的尺度换算</span>
+  σ(D)·√a ≈ 常数 &nbsp;&nbsp;<span class="cmt">a = 测量孔径面积</span><br>
+  G<sub>Selwyn</sub> = σ<sub>D</sub>·√(2a) &nbsp;&nbsp;<span class="cmt">（部分文献写 σ√a，系数定义不统一，比较时须核对口径）</span><br><br>
+  <span class="lbl">综合换算公式（√D 律 + Selwyn 律）</span>
+  <strong>σ = σ₁ · (d₁/d) · √(D/D₁)</strong><br>
+  <span class="cmt">已知在孔径 d₁、密度 D₁ 处测得 σ₁，可推算任意孔径 d、密度 D 处的 σ。</span>
+</div>
+
+<div class="callout">
+  <div class="ico">这条公式对插件的直接用途</div>
+  <p>它给出了<strong>「颗粒强度 × 颗粒尺度」的联合标定基准</strong>。插件中「颗粒强度」与「颗粒大小」两个滑块不应独立作用——按真实物理，增大颗粒半径会同时改变每个分辨单元内的颗粒数 N，进而按 √N 关系影响 σ。二者耦合，才是物理正确的。</p>
+</div>
+
+<div class="callout warnv">
+  <div class="ico">Selwyn 定律的适用边界</div>
+  <p>当单颗粒面积接近或大于测量孔径时，G 不再恒定（分母上的「平均」失效）。另外，二维随机圆盘模型的理论分析表明：随密度升高，√D 律会<strong>系统性低估</strong>颗粒度，原因是圆盘相互重叠使密度不再单纯由「孔径内圆盘数」决定。实际乳剂中颗粒在厚度方向分布，该效应相对较小，但作为算法设计者应知道这个偏差方向——<strong>高密度端真实颗粒度比 √D 律预测的更高</strong>。</p>
+</div>
+
+<h3>4.3 RMS 颗粒度（标准化的客观指标）</h3>
+
+<table>
+  <caption>表 4　RMS 颗粒度的标准测量条件</caption>
+  <thead><tr><th style="width:28%">项目</th><th>规定</th></tr></thead>
+  <tbody>
+    <tr><td>定义</td><td>σ<sub>D</sub> = √( Σ(Dᵢ − D̄)² / n )，即密度的均方根涨落</td></tr>
+    <tr><td>测量孔径</td><td>直径 <span class="num">0.048 mm (48 μm)</span> 圆形孔径（微密度计）</td></tr>
+    <tr><td>密度条件</td><td>均匀曝光并标准显影至平均密度 <span class="num">D = 1.0</span></td></tr>
+    <tr><td>报告方式</td><td>「漫射 RMS 颗粒度 × 1000」。颗粒度 10 表示在该孔径内 RMS 密度涨落为 0.010</td></tr>
+    <tr><td>标准依据</td><td>ISO 10505</td></tr>
+    <tr><td>负片 / 反转片换算</td><td>两者数值<strong>不可直接比较</strong>；粗略换算为「负片值 × 2.5 ≈ 反转片值」</td></tr>
+    <tr><td>局限</td><td>孔径依赖；只反映高频涨落，<strong>忽略低频斑块（mottle）</strong>；无法反映色调分布</td></tr>
+  </tbody>
+</table>
+
+<h4>实测数据：Kodak VISION3 500T (5219/7219)</h4>
+<figure>
+  <div class="figframe">
+    <svg viewBox="0 0 680 430" role="img" aria-label="柯达 VISION3 500T 漫射 RMS 颗粒度随曝光变化曲线">
+      <text x="60" y="24" class="axisname">漫射 RMS 颗粒度 σ_D × 1000</text>
+      <text x="620" y="410" text-anchor="end" class="axisname">对数相对曝光 →</text>
+      <!-- grid -->
+      <g>
+        <line x1="60" y1="380" x2="620" y2="380" stroke="var(--line-strong)"/>
+        <line x1="60" y1="60" x2="60" y2="380" stroke="var(--line-strong)"/>
+        <line x1="60" y1="318.5" x2="620" y2="318.5" class="gridline"/>
+        <line x1="60" y1="256.9" x2="620" y2="256.9" class="gridline"/>
+        <line x1="60" y1="195.4" x2="620" y2="195.4" class="gridline"/>
+        <line x1="60" y1="133.8" x2="620" y2="133.8" class="gridline"/>
+        <line x1="172" y1="60" x2="172" y2="380" class="gridline"/>
+        <line x1="284" y1="60" x2="284" y2="380" class="gridline"/>
+        <line x1="396" y1="60" x2="396" y2="380" class="gridline"/>
+        <line x1="508" y1="60" x2="508" y2="380" class="gridline"/>
+      </g>
+      <!-- y labels -->
+      <text x="52" y="384" text-anchor="end" class="axis">0</text>
+      <text x="52" y="322" text-anchor="end" class="axis">5</text>
+      <text x="52" y="261" text-anchor="end" class="axis">10</text>
+      <text x="52" y="199" text-anchor="end" class="axis">15</text>
+      <text x="52" y="137" text-anchor="end" class="axis">20</text>
+      <text x="52" y="76" text-anchor="end" class="axis">25</text>
+      <!-- x labels -->
+      <text x="60" y="398" text-anchor="middle" class="axis">0.0</text>
+      <text x="172" y="398" text-anchor="middle" class="axis">1.0</text>
+      <text x="284" y="398" text-anchor="middle" class="axis">2.0</text>
+      <text x="396" y="398" text-anchor="middle" class="axis">3.0</text>
+      <text x="508" y="398" text-anchor="middle" class="axis">4.0</text>
+      <text x="620" y="398" text-anchor="middle" class="axis">5.0</text>
+      <!-- blue -->
+      <polyline fill="none" stroke="#4a90d9" stroke-width="2.6"
+        points="60,306.2 172,293.8 284,256.9 396,195.4 508,133.8 620,72.3"/>
+      <g fill="#4a90d9">
+        <circle cx="60" cy="306.2" r="3.4"/><circle cx="172" cy="293.8" r="3.4"/>
+        <circle cx="284" cy="256.9" r="3.4"/><circle cx="396" cy="195.4" r="3.4"/>
+        <circle cx="508" cy="133.8" r="3.4"/><circle cx="620" cy="72.3" r="3.4"/>
+      </g>
+      <text x="600" y="62" text-anchor="end" class="lb" fill="#4a90d9">蓝 0.025</text>
+      <!-- green -->
+      <polyline fill="none" stroke="#3fa36b" stroke-width="2.6"
+        points="60,318.5 172,306.2 284,293.8 396,281.5 508,269.2 620,256.9"/>
+      <g fill="#3fa36b">
+        <circle cx="60" cy="318.5" r="3.4"/><circle cx="172" cy="306.2" r="3.4"/>
+        <circle cx="284" cy="293.8" r="3.4"/><circle cx="396" cy="281.5" r="3.4"/>
+        <circle cx="508" cy="269.2" r="3.4"/><circle cx="620" cy="256.9" r="3.4"/>
+      </g>
+      <text x="600" y="250" text-anchor="end" class="lb" fill="#3fa36b">绿 0.010</text>
+      <!-- red -->
+      <polyline fill="none" stroke="#c0504d" stroke-width="2.6"
+        points="60,330.8 172,318.5 284,306.2 396,293.8 508,281.5 620,269.2"/>
+      <g fill="#c0504d">
+        <circle cx="60" cy="330.8" r="3.4"/><circle cx="172" cy="318.5" r="3.4"/>
+        <circle cx="284" cy="306.2" r="3.4"/><circle cx="396" cy="293.8" r="3.4"/>
+        <circle cx="508" cy="281.5" r="3.4"/><circle cx="620" cy="269.2" r="3.4"/>
+      </g>
+      <text x="600" y="288" text-anchor="end" class="lb" fill="#c0504d">红 0.009</text>
+      <text x="80" y="70" class="lbs">曲线形态：三通道均随曝光单调上升，蓝通道斜率最陡</text>
+      <text x="80" y="88" class="lbs">蓝/红 比值 ≈ 2.8×（高密度端）</text>
+    </svg>
+  </div>
+  <figcaption><b>图 2　Kodak VISION3 500T（5219）漫射 RMS 颗粒度曲线。</b>横轴为对数相对曝光量，纵轴为 σ<sub>D</sub>×1000（48 μm 孔径）。数据点读自柯达技术资料 H-1-5219 的漫射 RMS 颗粒度曲线。<b>三个关键读数：</b>① 颗粒度随曝光单调上升（对应 √D 律）；② 蓝通道颗粒度远高于绿红（约 2.8 倍）；③ 绿红接近且斜率平缓。</figcaption>
+</figure>
+
+<div class="callout warnv">
+  <div class="ico">数据可信度提示</div>
+  <p>上图的<strong>绝对数值</strong>（0.004–0.025 区间）在柯达不同版本的技术资料中读取结果有差异（另一份公开资料给出 0.001–0.04 的量级范围），这是曲线图目视读取的固有误差。<strong>但三通道之间的相对关系（蓝 ≫ 绿 &gt; 红）和单调上升的趋势在所有资料中一致</strong>，这两点是本报告采用该数据的依据。</p>
+</div>
+
+<h3>4.4 功率谱（Wiener 频谱 / NPS）：颗粒的频率指纹</h3>
+
+<p>RMS 颗粒度把所有空间频率压缩成一个数字，信息损失很大。更完整的描述是噪声功率谱密度（noise power spectrum, NPS，又称 Wiener 频谱），通过密度涨落轨迹的自相关函数的傅里叶变换求得。</p>
+
+<figure>
+  <div class="figframe">
+    <svg viewBox="0 0 680 320" role="img" aria-label="胶片颗粒与数码噪声的功率谱对比">
+      <text x="60" y="24" class="axisname">噪声功率谱密度 NPS（相对）</text>
+      <text x="620" y="300" text-anchor="end" class="axisname">空间频率（对数）→</text>
+      <line x1="60" y1="270" x2="620" y2="270" stroke="var(--line-strong)"/>
+      <line x1="60" y1="50" x2="60" y2="270" stroke="var(--line-strong)"/>
+      <text x="52" y="274" text-anchor="end" class="axis">低</text>
+      <text x="52" y="120" text-anchor="end" class="axis">高</text>
+
+      <!-- 数码白噪声：平坦 -->
+      <line x1="60" y1="150" x2="620" y2="150" stroke="#c0504d" stroke-width="2.4" stroke-dasharray="7 5"/>
+      <text x="618" y="140" text-anchor="end" class="lb" fill="#c0504d">数码噪声：近似白噪声（平坦，功率均布全频段）</text>
+
+      <!-- 胶片颗粒：低通带限（2026-10-03 勘误后重绘） -->
+      <path d="M60,68 L340,70 C400,74 450,92 490,132 C525,168 560,214 620,258"
+            fill="none" stroke="var(--accent)" stroke-width="3"/>
+      <circle cx="470" cy="113" r="4.5" fill="var(--accent)"/>
+      <line x1="470" y1="113" x2="470" y2="270" stroke="var(--accent)" stroke-width="1" stroke-dasharray="3 4"/>
+      <text x="476" y="100" class="lb" fill="var(--accent)">−3dB 截止 ≈ 1/(2d) ~ 1/d</text>
+      <text x="476" y="118" class="lbs" fill="var(--accent)">d = 颗粒直径</text>
+      <text x="150" y="60" class="lbs" fill="var(--accent)">低频平台（= Selwyn 定律）</text>
+      <text x="620" y="150" text-anchor="end" class="lb" fill="var(--accent)">胶片颗粒：低通带限</text>
+      <text x="620" y="168" text-anchor="end" class="lbs" fill="var(--accent)">DC 处最强 → 颗粒尺度处快速衰减 → 观察侧再截止</text>
+
+      <!-- 标注区 -->
+      <line x1="60" y1="286" x2="620" y2="286" stroke="var(--line)"/>
+      <text x="60" y="306" class="lbs">低频端（大尺度）</text>
+      <text x="620" y="306" text-anchor="end" class="lbs">高频端（像素尺度）</text>
+    </svg>
+  </div>
+  <figcaption><b>图 3　胶片颗粒与数码噪声的功率谱差异。</b>胶片颗粒的能量集中在<strong>低频</strong>（DC 处最强，形成平坦平台），在频率约 1/(2d)～1/d 处开始快速衰减——这是<strong>低通带限</strong>而非带通。低频平台的存在正是 Selwyn 定律（σ·√a = 常数）的频域表述。数码噪声的功率同样均匀，但<strong>一直延伸到奈奎斯特频率而不衰减</strong>。两者的真正分界不是「有没有峰」，而是<strong>有没有高频截止</strong>。这一条是判断「某方案是否真的模拟了颗粒」最客观的测试方法。<br><span class="lbs">（本图原画作带通型，2026-10-03 实现阶段实测推翻并重绘。）</span></figcaption>
+</figure>
+
+<p>NPS 与前面指标的关系：</p>
+<div class="formula">
+  σ²(D) = ∫ [E(f)/f]² · NPS(f,D) df &nbsp;/&nbsp; ( A · ∫[E(f)/f]² df ) &nbsp;&nbsp;<span class="cmt">E(f) = 人眼空间频率响应（等效高斯孔径）</span><br>
+  g(D) = 10³ · σ(D)·√A ≈ 10³ · √( NPS(1 cycle/mm, D) ) &nbsp;&nbsp;<span class="cmt">颗粒度系数与 1 cycle/mm 处 NPS 的近似关系</span>
+</div>
+
+<p>注意第一式：<strong>颗粒度本身就是 NPS 经过人眼加权后的积分</strong>。这说明「什么频率的颗粒重要」这个问题的答案，取决于人眼。低频斑块（mottle）虽然积分贡献小，但视觉上极其刺眼——这解释了为什么只用 RMS 颗粒度评价是不够的。</p>
+
+<h3>4.5 从颗粒度到颗粒性：人眼加权与对数律</h3>
+
+<p>心理物理实验给出的关键结论：</p>
+
+<div class="formula">
+  <span class="lbl">颗粒性的心理物理标度</span>
+  <strong>G ∝ log σ²</strong> &nbsp;&nbsp;<span class="cmt">颗粒性正比于颗粒度平方的对数（类别判断法 / Thurstone 定律得出）</span><br><br>
+  <span class="cmt">含义：颗粒性对颗粒度的响应是<strong>压缩</strong>的。σ 从 5 增到 10（翻倍，σ² 增 4 倍），颗粒性的增加量约等于 σ 从 10 增到 20。这正是为什么颗粒度看起来「差不多」的两种胶片，视觉差异可以很大——反之亦然。</span>
+</div>
+
+<p>工程可用的近似是：在不做心理实验的情况下，用「人眼加权的 NPS 积分」作为颗粒性的代理量。上文的人眼等效高斯孔径（560 μm @ 40 cm 观看距离）就是用于这个积分。</p>
+
+<h3>4.6 Kodak Print Grain Index（PGI）：把观看条件写进指标</h3>
+
+<p>柯达在彩负胶片后期弃用 RMS 颗粒度，改用 PGI。原因是 RMS 与视觉感受脱节严重。PGI 的设计非常值得插件借鉴，因为它<strong>显式地把观看条件纳入了定义</strong>：</p>
+
+<table>
+  <caption>表 5　PGI 的定义规则（柯达 E-58 出版物）</caption>
+  <thead><tr><th style="width:26%">规则</th><th>内容</th></tr></thead>
+  <tbody>
+    <tr><td>尺度性质</td><td><strong>等距感知尺度</strong>：变化 4 个单位 = 90% 观察者能刚刚察觉的颗粒性差异（1 JND）</td></tr>
+    <tr><td>视觉阈值</td><td><span class="num">PGI = 25</span> 表示颗粒性的<strong>大致视觉阈值</strong>；高于 25 数字越大越明显</td></tr>
+    <tr><td>标准观看距离</td><td>所有画幅统一为 <span class="num">14 英寸（约 36 cm）</span>——4×6 英寸照片的典型观看距离</td></tr>
+    <tr><td>实际含义</td><td>大画幅通常从更远处观看，因此实际颗粒感低于 PGI 数值暗示的水平</td></tr>
+    <tr><td>适用限制</td><td>基于<strong>漫射放大</strong>照明；不适用于聚光（condenser）式放大机的效果</td></tr>
+    <tr><td>与 RMS 的关系</td><td><strong>不同尺度，不可比较</strong></td></tr>
+  </tbody>
+</table>
+
+<h4>PGI 随放大率的变化（这是本报告最有工程价值的单组数据）</h4>
+
+<table>
+  <caption>表 6　不同胶片、不同画幅、不同输出尺寸下的 PGI（柯达技术资料）</caption>
+  <thead>
+    <tr><th>胶片</th><th>画幅</th><th class="num">输出尺寸</th><th class="num">放大率</th><th class="num">PGI</th></tr>
+  </thead>
+  <tbody>
+    <tr><td rowspan="3">PORTRA 160</td><td rowspan="3">135 (24×36 mm)</td><td class="num">4×6 in</td><td class="num">4.4×</td><td class="num">28</td></tr>
+    <tr><td class="num">8×10 in</td><td class="num">8.8×</td><td class="num">50</td></tr>
+    <tr><td class="num">16×20 in</td><td class="num">17.8×</td><td class="num">79</td></tr>
+    <tr><td rowspan="3">PORTRA 160</td><td rowspan="3">120 (6×6 cm)</td><td class="num">4×6 in</td><td class="num">2.6×</td><td class="num">&lt;25</td></tr>
+    <tr><td class="num">8×10 in</td><td class="num">4.4×</td><td class="num">28</td></tr>
+    <tr><td class="num">16×20 in</td><td class="num">8.8×</td><td class="num">50</td></tr>
+    <tr><td rowspan="3">PORTRA 160</td><td rowspan="3">4×5 in 页片</td><td class="num">4×6 in</td><td class="num">1.2×</td><td class="num">&lt;25</td></tr>
+    <tr><td class="num">8×10 in</td><td class="num">2×</td><td class="num">&lt;25</td></tr>
+    <tr><td class="num">16×20 in</td><td class="num">4×</td><td class="num">26</td></tr>
+    <tr><td rowspan="3">EKTAR 100</td><td rowspan="3">135</td><td class="num">4×6 in</td><td class="num">4.4×</td><td class="num">&lt;25</td></tr>
+    <tr><td class="num">8×10 in</td><td class="num">8.8×</td><td class="num">38</td></tr>
+    <tr><td class="num">16×20 in</td><td class="num">17.8×</td><td class="num">66</td></tr>
+    <tr><td rowspan="3">PRO IMAGE 100</td><td rowspan="3">135</td><td class="num">4×6 in</td><td class="num">4.4×</td><td class="num">43</td></tr>
+    <tr><td class="num">8×10 in</td><td class="num">8.8×</td><td class="num">65</td></tr>
+    <tr><td class="num">16×20 in</td><td class="num">17.8×</td><td class="num">94</td></tr>
+  </tbody>
+</table>
+
+<div class="card accent">
+  <h4>从这组数据能读出的三条设计规则</h4>
+  <ol style="margin-bottom:0">
+    <li><strong>放大率是颗粒感的第一主导变量。</strong>同一底片，放大率从 4.4× 到 17.8×（约 4 倍），PGI 从 28 到 79，跨越了 12 个 JND 单位。这比任何胶片型号之间的差异都大。</li>
+    <li><strong>颗粒感随放大率的增长快于线性。</strong>放大率翻倍（4.4→8.8），PGI 增加 22；再翻倍（8.8→17.8），再增加 29。呈加速增长。<em>这意味着插件不能把颗粒定义为「固定像素尺寸」——固定像素尺寸在放大后颗粒感反而下降，与真实胶片完全相反。</em></li>
+    <li><strong>存在视觉阈值。</strong>PGI 25 是一条硬线。低放大率下（4×5 页片的 4×6 输出，1.2×）颗粒完全不可见。这提示插件的颗粒强度应当有明确的「不可见区」而不是从零连续增长。</li>
+  </ol>
+</div>
+
+<h3>4.7 色调依赖：颗粒强度的纵向分布</h3>
+
+<p>这是颗粒视觉特征中最容易被做错的一条。先看事实：</p>
+
+<div class="box" style="margin:22px 0">
+  <h4>事实 A：负片密度域——颗粒度随密度<strong>单调上升</strong></h4>
+  <p>图 2 已给出：VISION3 500T 的 σ<sub>D</sub> 从 D≈0.8 处的 0.004–0.006 升到 D≈3.0 处的 0.009–0.025，全程单调上升。这就是 √D 律。<strong>在负片上，最密的地方（最亮的高光）颗粒度最高。</strong></p>
+</div>
+
+<div class="box" style="margin:22px 0">
+  <h4>事实 B：打印 / 观看域——颗粒度峰值在<strong>中间调</strong></h4>
+  <p>对胶片类成像系统实测的「颗粒度–密度」曲线显示：颗粒度在 <span class="num">D ≈ 0.75</span> 附近达到峰值，向两端衰减。这是柯达把「中间调颗粒度 g(0.75 OD)」作为标准比较基准的原因。</p>
+</div>
+
+<div class="box" style="margin:22px 0">
+  <h4>事实 C：布尔模型的理论结果——波动幅度 ∝ √(p(1−p))</h4>
+  <p>在随机圆盘布尔模型中，颗粒覆盖率 p 的点态方差为 p(1−p)，<strong>在中间调（p = 0.5）取最大值，在 p → 0 与 p → 1 时趋于零</strong>。物理含义：死黑区域没有颗粒（没有晶体被曝光），死白区域颗粒密到连成一片、波动消失。</p>
+</div>
+
+<div class="callout warnv">
+  <div class="ico">三种说法为什么不矛盾——以及真正的结论</div>
+  <p>「高光最脏」（事实 A）与「中间调最脏」（事实 B、C）描述的是<strong>链路的不同环节</strong>。事实 A 是负片的客观颗粒度；事实 B/C 是最终观看时的感知颗粒性。二者的转换包含两个环节：<strong>① 负片 → 正像的色调反转会改变各密度区间的局部斜率（gamma）；② 感知颗粒性还被人眼频率加权与掩蔽效应调制。</strong></p>
+  <p style="margin-top:10px"><strong>对本插件的结论：</strong>我们的输入是<strong>已经完成的数码正像</strong>，处于事实 B/C 的语境。因此应该采用<em>「中间调最强、两端趋零」</em>的色调响应曲线，而不是「亮度越高颗粒越强」。这是把胶片物理正确映射到数码图像的关键一步，也是本报告与常见广告文案分歧最大的一点。</p>
+</div>
+
+<blockquote style="border-left:3px solid var(--accent-2);margin:22px 0;padding:2px 0 2px 20px;color:var(--muted)">
+  柯达自己的技术资料也在反复强调：「任何胶片的颗粒性<strong>感知</strong>都高度依赖于画面内容、复杂度、色彩与密度。」——这句话本身就说明颗粒性不是单一数值，而是一个多维函数。插件必须把这些维度暴露为参数，而不是塞进一个「强度」滑块。
+</blockquote>
+
+<!-- ============================================================ -->
+<h2 id="s4"><span class="num">05</span>视觉特征：颗粒在图像上到底长什么样</h2>
+
+<p>下面从七个维度描述颗粒的「长相」，每条都给出对插件设计的具体要求。</p>
+
+<h3>5.1 尺寸层级：从晶体到感知颗粒，跨度接近三个数量级</h3>
+
+<figure>
+  <div class="figframe">
+    <svg viewBox="0 0 680 300" role="img" aria-label="胶片颗粒的尺寸层级图">
+      <line x1="70" y1="140" x2="640" y2="140" stroke="var(--line-strong)" stroke-width="1.5"/>
+      <!-- ticks -->
+      <g class="axis">
+        <line x1="100" y1="134" x2="100" y2="146" stroke="var(--line-strong)"/><text x="100" y="162" text-anchor="middle">0.2 μm</text>
+        <line x1="185" y1="134" x2="185" y2="146" stroke="var(--line-strong)"/><text x="185" y="162" text-anchor="middle">1 μm</text>
+        <line x1="270" y1="134" x2="270" y2="146" stroke="var(--line-strong)"/><text x="270" y="162" text-anchor="middle">5 μm</text>
+        <line x1="355" y1="134" x2="355" y2="146" stroke="var(--line-strong)"/><text x="355" y="162" text-anchor="middle">10 μm</text>
+        <line x1="440" y1="134" x2="440" y2="146" stroke="var(--line-strong)"/><text x="440" y="162" text-anchor="middle">30 μm</text>
+        <line x1="525" y1="134" x2="525" y2="146" stroke="var(--line-strong)"/><text x="525" y="162" text-anchor="middle">100 μm</text>
+        <line x1="610" y1="134" x2="610" y2="146" stroke="var(--line-strong)"/><text x="610" y="162" text-anchor="middle">560 μm</text>
+      </g>
+
+      <!-- 上方：物理实体 -->
+      <g>
+        <rect x="70" y="52" width="130" height="26" rx="13" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.2"/>
+        <text x="135" y="70" text-anchor="middle" class="lb" style="font-size:11.5px">卤化银微晶 0.1–2 μm</text>
+        <line x1="135" y1="78" x2="135" y2="140" stroke="var(--accent)" stroke-dasharray="3 3" stroke-width="1.2"/>
+
+        <rect x="190" y="16" width="140" height="26" rx="13" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.2"/>
+        <text x="260" y="34" text-anchor="middle" class="lb" style="font-size:11.5px">显影银团 0.5–2 μm</text>
+        <line x1="260" y1="42" x2="260" y2="140" stroke="var(--accent)" stroke-dasharray="3 3" stroke-width="1.2"/>
+
+        <rect x="330" y="52" width="150" height="26" rx="13" fill="var(--accent-2-soft)" stroke="var(--accent-2)" stroke-width="1.2"/>
+        <text x="405" y="70" text-anchor="middle" class="lb" style="font-size:11.5px">染料云 1–10 μm</text>
+        <line x1="405" y1="78" x2="405" y2="140" stroke="var(--accent-2)" stroke-dasharray="3 3" stroke-width="1.2"/>
+      </g>
+
+      <!-- 下方：感知实体 -->
+      <g>
+        <rect x="330" y="196" width="170" height="26" rx="13" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.2"/>
+        <text x="415" y="214" text-anchor="middle" class="lb" style="font-size:11.5px">颗粒簇（视觉）10–30 μm</text>
+        <line x1="415" y1="192" x2="415" y2="140" stroke="var(--warn)" stroke-dasharray="3 3" stroke-width="1.2"/>
+
+        <rect x="500" y="232" width="150" height="26" rx="13" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.2"/>
+        <text x="575" y="250" text-anchor="middle" class="lb" style="font-size:11.5px">人眼分辨极限</text>
+        <line x1="575" y1="232" x2="575" y2="140" stroke="var(--warn)" stroke-dasharray="3 3" stroke-width="1.2"/>
+      </g>
+
+      <text x="70" y="106" class="lbs">物理实体（客观）</text>
+      <text x="70" y="180" class="lbs">感知实体（主观）</text>
+      <text x="70" y="286" class="lbs">↓ 亮度越高 = 尺度越大。注意「感知颗粒」比任何单个物理颗粒都大，它是团簇在人眼低通后的表现。</text>
+    </svg>
+  </div>
+  <figcaption><b>图 4　颗粒的尺寸层级。</b>真正被眼睛认作「颗粒」的东西（10–30 μm 的颗粒簇）比构成图像的物理颗粒（0.1–2 μm 的晶体、0.5–2 μm 的银团）大了一个数量级以上。多个来源都把「胶片颗粒」定义为一种<strong>感知现象</strong>——「刚刚超出人眼分辨能力的模糊颗粒」，而非某个具体粒子。插件模拟的对象应当是<strong>团簇尺度</strong>，而不是晶体尺度。</figcaption>
+</figure>
+
+<div class="formula">
+  <span class="lbl">尺度换算示例（把微米翻译成像素）</span>
+  35 mm 画幅宽 36 mm，4000 dpi 扫描 → 5669 px → <strong>157.5 px/mm</strong><br>
+  10 μm 的颗粒簇 → <strong>1.6 px</strong>；　　30 μm 的颗粒簇 → <strong>4.7 px</strong><br>
+  <span class="cmt">经验参考：高质量扫描的 35 mm 胶片，可见颗粒簇通常表现为 2–5 像素尺度。这个量级可作为插件默认值的起点。</span>
+</div>
+
+<h3>5.2 团簇性：最核心的视觉签名</h3>
+
+<p>颗粒不是均匀撒开的独立点，而是成团出现，团与团之间留有空隙。这个特征来自三个叠加的机制：</p>
+
+<ol>
+  <li><strong>布尔模型的聚簇倾向：</strong>随机圆盘叠加时，两个圆盘偶然重叠的概率远高于均匀分布，产生的视觉印象是「clumping」，这是该模型的固有性质，也是它比白噪声更「有机」的根本原因。</li>
+  <li><strong>感染显影：</strong>化学上的正反馈使相邻晶体一起显影。</li>
+  <li><strong>乳剂三维厚度：</strong>视线穿过多个亚层，不同深度的颗粒被投影叠加。</li>
+</ol>
+
+<div class="callout">
+  <div class="ico">判别测试</div>
+  <p>把图像局部放大 400%，问：颗粒之间有「空档」吗？团块尺寸是否明显大于单个颗粒？如果看到的是大小均匀、分布均匀的散点，那它就是白噪声，不是颗粒。</p>
+</div>
+
+<h3>5.3 色调依赖性</h3>
+
+<p>已在 §4.7 详述。核心结论汇总：</p>
+<table>
+  <caption>表 7　颗粒强度随亮度的分布（数码正像语境）</caption>
+  <thead><tr><th style="width:22%">区域</th><th style="width:22%">颗粒强度</th><th>机理</th></tr></thead>
+  <tbody>
+    <tr><td>纯黑（近 0）</td><td class="num">≈ 0</td><td>无晶体被曝光，没有颗粒存在。展宽到数码图像即「不做任何处理」。</td></tr>
+    <tr><td>暗部（0–25%）</td><td class="num">弱 → 中</td><td>覆盖率低，绝对波动小。但此处信噪比最差，恢复/提亮会放大颗粒——这是扫描件暗部显脏的原因，不是颗粒本身多。</td></tr>
+    <tr><td><strong>中间调（35–70%）</strong></td><td class="num"><strong>最强</strong></td><td>覆盖率接近 0.5，p(1−p) 取最大；打印体颗粒度亦在 D≈0.75 附近峰值。</td></tr>
+    <tr><td>亮部（70–95%）</td><td class="num">中 → 弱</td><td>覆盖率接近饱和，颗粒开始连片，波动下降。</td></tr>
+    <tr><td>纯白（近 1.0）</td><td class="num">≈ 0</td><td>覆盖率饱和，无波动。且人眼对高亮端差异不敏感。</td></tr>
+  </tbody>
+</table>
+
+<h3>5.4 色彩维度</h3>
+
+<figure>
+  <div class="figframe">
+    <svg viewBox="0 0 680 290" role="img" aria-label="彩色胶片的三色层结构与染料云示意图">
+      <!-- 层结构 -->
+      <g>
+        <rect x="40" y="40" width="240" height="30" rx="4" fill="#f2e08a" stroke="#c9b04a"/>
+        <text x="52" y="60" class="lb" style="font-size:12px">蓝感光层 → 黄染料　（颗粒最粗）</text>
+
+        <rect x="40" y="72" width="240" height="30" rx="4" fill="#8fbf9f" stroke="#4f8a63"/>
+        <text x="52" y="92" class="lb" style="font-size:12px">绿感光层 → 品红染料</text>
+
+        <rect x="40" y="104" width="240" height="30" rx="4" fill="#c98f8f" stroke="#a05a5a"/>
+        <text x="52" y="124" class="lb" style="font-size:12px">红感光层 → 青染料　（颗粒最细）</text>
+
+        <rect x="40" y="136" width="240" height="14" rx="3" fill="var(--panel-2)" stroke="var(--line-strong)"/>
+        <text x="52" y="147" class="lbs" style="font-size:10.5px">片基</text>
+      </g>
+      <text x="40" y="176" class="lbs">每色又分慢/中/快三层 → 最多 9 个染料云层</text>
+
+      <!-- 染料云示意 -->
+      <g>
+        <circle cx="380" cy="80" r="26" fill="#f2e08a" opacity="0.75"/>
+        <circle cx="418" cy="66" r="20" fill="#f2e08a" opacity="0.75"/>
+        <circle cx="404" cy="104" r="22" fill="#f2e08a" opacity="0.75"/>
+        <circle cx="470" cy="82" r="14" fill="#f2e08a" opacity="0.75"/>
+        <circle cx="386" cy="88" r="8" fill="#5a5a5a"/>
+        <circle cx="416" cy="70" r="6" fill="#5a5a5a"/>
+        <circle cx="470" cy="82" r="5" fill="#5a5a5a"/>
+        <text x="470" y="136" class="lbs" style="font-size:11px"></text>
+      </g>
+      <text x="360" y="152" class="lbs" style="font-size:11.5px">染料云（柔边、团块状）　深色内核 = 显影银（后经漂白去除）</text>
+
+      <!-- 通道强度条 -->
+      <g>
+        <text x="40" y="216" class="lb" style="font-size:12px">最终正像的通道颗粒强度（相对）</text>
+        <rect x="40" y="228" width="180" height="16" rx="3" fill="#4a90d9"/>
+        <text x="230" y="241" class="lbs">蓝通道 ≈ 1.00（最粗）</text>
+        <rect x="40" y="250" width="72" height="16" rx="3" fill="#3fa36b"/>
+        <text x="122" y="263" class="lbs">绿通道 ≈ 0.40</text>
+        <rect x="40" y="272" width="65" height="16" rx="3" fill="#c0504d"/>
+        <text x="115" y="285" class="lbs">红通道 ≈ 0.36（最细）</text>
+      </g>
+    </svg>
+  </div>
+  <figcaption><b>图 5　彩色胶片的三层结构与通道颗粒强度。</b>三色层相互独立，各自有独立的颗粒分布，因此彩色颗粒天然带色度成分。但由于三种染料的染料云尺寸不同（黄最大、青/品红较小），<strong>亮度差异远大于色度差异</strong>。相对强度按 VISION3 500T 高密度实测值换算（蓝 0.025 : 绿 0.010 : 红 0.009）。</figcaption>
+</figure>
+
+<table>
+  <caption>表 8　颗粒的色彩特征（插件参数化的直接依据）</caption>
+  <thead><tr><th style="width:26%">特征</th><th>内容与设计含义</th></tr></thead>
+  <tbody>
+    <tr><td>亮度颗粒 vs 色度颗粒</td><td>真实胶片以<strong>亮度颗粒为主</strong>（三通道变化高度正相关），色度颗粒为辅（三通道的差异部分）。工程经验配比约为<strong>亮度 80% / 色度 20%</strong>。三通道完全独立的随机噪声会产生「彩虹噪点」，一眼即假。</td></tr>
+    <tr><td>通道权重</td><td>蓝 &gt; 绿 &gt; 红。蓝通道约为红通道的 2.5–2.8 倍。这是本报告实测数据支持的、必须做进预设的一条。</td></tr>
+    <tr><td>色度颗粒的尺度</td><td>染料云比银团大且边界更软，因此<strong>色度颗粒应当比亮度颗粒更大尺度、更模糊</strong>。这与数码相机色度噪声「更粗糙、更斑块化」的观感方向一致，但成因完全不同。</td></tr>
+    <tr><td>色度颗粒的下限</td><td>超过一定强度后，色度颗粒会迅速显得「数字味」。因此色度分量应有独立的、较低的上限。</td></tr>
+  </tbody>
+</table>
+
+<h3>5.5 空间频率与锐度</h3>
+
+<ul>
+  <li><strong>低通带限频谱</strong>（§4.4）：低频平坦、在颗粒尺度处截止。这要求插件的噪声生成必须做<strong>高频截止</strong>，而不是白噪声。</li>
+  <li><strong>颗粒是画面中最锐利的元素。</strong>真实胶片中，光学系统的 MTF 下降使图像细节先模糊，而颗粒作为「后产生的对比度调制」，其对比度下降得更慢。推论（非常重要）：
+    <ul>
+      <li>「图像略柔 + 颗粒锐利」→ 胶片感 ✓</li>
+      <li>「图像锐利 + 颗粒模糊」→ 滤镜感 ✗</li>
+    </ul>
+  </li>
+  <li><strong>颗粒降低细节可分辨度。</strong>颗粒在对数尺度上作为随机调制叠加，会在颗粒尺度附近掩盖细节。这解释了为什么真实胶片即使 MTF 很高，观感上仍不「锐利干净」。</li>
+  <li><strong>低频斑块（mottle）。</strong>颗粒功率谱的低频尾巴虽然能量小，但视觉上非常刺眼（大面积不均匀）。这是 RMS 颗粒度无法反映的维度，也是「看起来脏」的常见来源。</li>
+</ul>
+
+<h3>5.6 时间维度（对视频/动图相关功能有意义）</h3>
+
+<p>胶片的每一帧都有**独立的**颗粒分布（因为每帧曝光独立）。因此运动画面中颗粒会「沸腾 / 蠕动」（boil / dancing grain）。这是胶片运动影像最有辨识度的特征之一。</p>
+
+<p>插件即便只处理静态照片，也应提供「更换随机种子」的能力，以便在批量处理组图时获得独立颗粒（组照中每张颗粒位置相同是明显的破绽）。</p>
+
+<h3>5.7 观看条件决定论与掩蔽效应</h3>
+
+<div class="grid2">
+  <div class="box">
+    <h4>观看条件决定颗粒感（§4.6）</h4>
+    <ul>
+      <li>放大率 / 输出尺寸：主导变量，PGI 4.4×→17.8× 时从 28 升到 79</li>
+      <li>观看距离：14 英寸为标准；距离增倍 → 颗粒感显著下降</li>
+      <li>介质：屏幕 100% 视图 ≈ 极端放大，颗粒感远强于打印</li>
+    </ul>
+    <p style="margin-top:8px"><strong>含义：</strong>插件不能只有一个「强度」参数，需要一个<strong>尺度/观看尺度</strong>参数来对应输出条件。</p>
+  </div>
+  <div class="box">
+    <h4>掩蔽效应（masking）</h4>
+    <ul>
+      <li>平坦区域（天空、皮肤、背景虚化）颗粒最显眼</li>
+      <li>高细节区域（树叶、织物、头发）颗粒被细节掩蔽</li>
+      <li>在同一张图上颗粒是均匀的，但<strong>可见度</strong>是极不均匀的</li>
+    </ul>
+    <p style="margin-top:8px"><strong>含义（谨慎使用）：</strong>可以考虑按局部对比度轻微调制颗粒可见度，但要小心——真实胶片的颗粒量并不随内容变化，过度调制会引入「智能滤镜」的假感。建议作为高级选项而非默认行为。</p>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="s5"><span class="num">06</span>胶片颗粒 vs 数码噪声：逐条对照</h2>
+
+<p>这张表是插件所有「不能做什么」的清单来源。每一行都对应一个必须避免的实现错误。</p>
+
+<table>
+  <caption>表 9　胶片颗粒与数码噪声的系统性差异</caption>
+  <thead><tr><th style="width:18%">维度</th><th style="width:41%">胶片颗粒</th><th>数码噪声</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>物理来源</strong></td>
+      <td>化学：显影后金属银颗粒 / 染料云的随机分布</td>
+      <td>电子：热噪声（暗电流）、读出噪声（高斯）、光子散粒噪声（泊松）</td>
+    </tr>
+    <tr>
+      <td><strong>空间相关性</strong></td>
+      <td><strong>强相关</strong>。团簇导致空间自相关，颗粒成团出现</td>
+      <td><strong>不相关</strong>。像素之间独立，呈椒盐式随机</td>
+    </tr>
+    <tr>
+      <td><strong>分布形态</strong></td>
+      <td>非高斯，源于随机几何（布尔模型）与重叠效应</td>
+      <td>近高斯或泊松，源于独立事件的统计</td>
+    </tr>
+    <tr>
+      <td><strong>功率谱</strong></td>
+      <td><strong>低通带限</strong>：DC 处最强，在 1/(2d)~1/d 处截止</td>
+      <td><strong>白噪声</strong>，平坦，无频率偏好</td>
+    </tr>
+    <tr>
+      <td><strong>尺度可变性</strong></td>
+      <td>物理尺寸固定，<strong>随放大率改变视觉粗细</strong>，分辨率无关</td>
+      <td>与像素网格绑定，缩放图像时噪声尺度随之改变</td>
+    </tr>
+    <tr>
+      <td><strong>色调依赖</strong></td>
+      <td>中间调最强，两端趋零（波动 ∝ √(p(1−p))）</td>
+      <td>阴影/暗部最重（信号弱、增益高），高光相对干净</td>
+    </tr>
+    <tr>
+      <td><strong>色彩特征</strong></td>
+      <td>三层独立但耦合，亮度为主、<strong>蓝通道最粗</strong>，色度柔和</td>
+      <td>亮度与色度分离，<strong>色度噪声在暗部呈现色斑</strong>，更刺眼</td>
+    </tr>
+    <tr>
+      <td><strong>时间行为</strong></td>
+      <td>每帧独立 → 颗粒沸腾（boil），被视为「生动」</td>
+      <td>相对固定（固定模式噪声），被视为「干扰」</td>
+    </tr>
+    <tr>
+      <td><strong>与内容的关系</strong></td>
+      <td>参与成像：颗粒本身就是图像载体，与细节共存于同一平面</td>
+      <td>叠加在成像结果上，浮于图像表面</td>
+    </tr>
+    <tr>
+      <td><strong>感知评价</strong></td>
+      <td>「画布的织纹」——被大脑接受为材质，增加真实感与质感</td>
+      <td>「图像的劣化」——被大脑判定为缺陷</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="callout">
+  <div class="ico">心理学维度值得单独强调</div>
+  <p>不规则、有机的纹理与规则、网格对齐的纹理，在大脑中的处理路径不同。前者被当作<strong>材质（texture）</strong>接受，后者被当作<strong>瑕疵（degradation）</strong>拒绝。这是「为什么颗粒可以是一种审美，而噪声不行」的根本原因，也是为什么「看起来像颗粒」在商业上比「数值上正确」更重要。同时这也意味着：<em>任何网格化、周期性、平铺可见的方案都会瞬间破功</em>。</p>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="s6"><span class="num">07</span>已有建模方法综述与评析</h2>
+
+<p>梳理现有五类技术路线，评价其在本项目中的可用性。</p>
+
+<h3>6.1 方法一：扫描颗粒叠加（Film Grain Overlay, FGO）</h3>
+<p><strong>做法：</strong>预先拍摄标准灰卡并冲洗，扫描得到真实颗粒素材，作为多层素材以叠加/柔光模式合成到数字图像上。</p>
+<div class="grid2">
+  <div class="box">
+    <h4>优点</h4>
+    <ul>
+      <li>纹理 100% 真实，无需建模</li>
+      <li>实时性好（视频流程中广泛使用）</li>
+      <li>专业工具（如 LiveGrain）在好莱坞级制作中被采用</li>
+    </ul>
+  </div>
+  <div class="box">
+    <h4>致命缺陷（用于本项目的理由）</h4>
+    <ul>
+      <li><strong>分辨率绑定</strong>：素材的颗粒尺度是固定的，图像缩放后完全错误</li>
+      <li><strong>不随色调变化</strong>：一层素材均匀覆盖全图，阴影与高光受到同样的「纱」</li>
+      <li><strong>会平铺循环</strong>：大面积平坦区域出现可见图案</li>
+      <li>需要额外素材包，体积大</li>
+    </ul>
+  </div>
+</div>
+<p><strong>结论：不采用。</strong>但「按密度分层的多套素材」这一思路有借鉴价值：LiveGrain 的做法是按不同曝光拍摄灰卡得到多套素材，按亮度区间分别合成。这与 SMPTE RDD-5 的「强度区间」思想一致，可以作为我们参数体系的参考。</p>
+
+<h3>6.2 方法二：参数化噪声叠加</h3>
+<p><strong>做法：</strong>生成高斯/均匀噪声，按强度混合。典型代表：Photoshop 的「添加杂色」与「胶片颗粒」滤镜、ffmpeg 的 <code>noise</code> 滤镜、大量在线工具。</p>
+<ul>
+  <li>Photoshop 胶片颗粒滤镜暴露三个参数：<strong>数量（Amount）、大小（Size）、粗糙度（Roughness）</strong>——分别对应强度、颗粒尺度、颗粒形态的聚簇程度。这基本是正确的参数骨架，值得沿用其命名逻辑。</li>
+  <li>ffmpeg 的 <code>noise</code> 滤镜工作在逐像素级，<strong>无法控制颗粒尺寸</strong>（工具文档自己承认这一点），只有单色/彩色开关。这是典型的「噪声不是颗粒」实现。</li>
+</ul>
+<p><strong>结论：作为交互参考，不作为算法基础。</strong>其最大缺陷是：噪声尺度绑定像素网格、频谱为白噪声、无团簇结构。</p>
+
+<h3>6.3 方法三：频率域模型（SMPTE RDD-5 / H.264 Film Grain Technology）</h3>
+
+<p>这是目前唯一有<strong>国际标准级别的比特精确规范</strong>的颗粒合成方案，出自 Thomson（后为 Dolby/InterDigital）在 H.264 高清 DVD 时代的工程实践。</p>
+
+<table>
+  <caption>表 10　SMPTE RDD-5 胶片颗粒模拟的参数体系</caption>
+  <thead><tr><th style="width:32%">参数</th><th style="width:24%">取值范围</th><th>含义</th></tr></thead>
+  <tbody>
+    <tr><td><code>intensity_interval_lower/upper_bound[c][i]</code></td><td class="num">0–255</td><td>按亮度区间分段建模。<strong>强度区间不重叠</strong>，每个 8×8 块根据块平均值落入唯一区间</td></tr>
+    <tr><td><code>comp_model_value[c][i][0]</code></td><td class="num">0–255</td><td>颗粒强度</td></tr>
+    <tr><td>水平/垂直高频截止频率</td><td class="num">2–14</td><td>刻画颗粒形状的二维滤波器截止频率。<strong>这就是「颗粒尺寸」的频域表达</strong></td></tr>
+    <tr><td>颗粒图案数据库</td><td class="num">169 种</td><td>截止频率组合 (h,v) ∈ [0,12]² 的预生成图案，用查找表 + 伪随机数选取</td></tr>
+    <tr><td>伪随机种子</td><td>—</td><td>均匀伪随机数发生器决定图案选择，保证比特精确可复现</td></tr>
+    <tr><td>去块滤波</td><td>—</td><td>对相邻 8×8 块的垂直边界施加 3 抽头去块滤波，消除块效应</td></tr>
+    <tr><td>混合模式</td><td>—</td><td>加法混合（additive blending），在解码帧上、裁剪之前进行</td></tr>
+  </tbody>
+</table>
+
+<div class="card teal">
+  <h4>这套规范给我们的三条直接启示</h4>
+  <ol style="margin-bottom:0">
+    <li><strong>「颗粒尺寸」在实现层面等价于「二维低通滤波器的截止频率」</strong>——这是把物理尺寸参数化最干净的方式。</li>
+    <li><strong>按亮度分段建模是标准做法</strong>。不是一条连续曲线，而是若干强度区间各自的参数组。这种结构实现简单、查表高效。</li>
+    <li><strong>块效应的处理被写进了规范</strong>（去块滤波）。说明「分块处理会产生可见接缝」是一个必须正面解决的问题，而非可以忽略的细节。</li>
+  </ol>
+</div>
+
+<p><strong>结论：采用其参数体系思想，但不采用其图案库方案。</strong>原因：RDD-5 的 169 种图案库是为视频编码的比特精确性服务的，对 Photoshop 插件而言，其分辨率绑定（8×8 块）与固定图案库是负担。但我们应当沿用「强度区间 + 截止频率 + 种子」这个三元参数结构。</p>
+
+<h3>6.4 方法四：自回归模型（AV1 Film Grain Synthesis）</h3>
+<p><strong>做法：</strong>用自回归（AR）模型生成噪声，参数包括 lag（0–3）与二维 AR 系数、颗粒强度、缩放函数。相比频率滤波模型更紧凑，能更好地表达各向异性与相关性。AV1 中颗粒合成是<strong>规范性</strong>过程。</p>
+<p><strong>结论：作为备选算法。</strong>AR 模型在「相关性」这一点上比白噪声好得多，且计算量可控。但它的参数与物理量（颗粒半径、染料云尺寸）没有直接映射关系，调参依赖标定数据。</p>
+
+<h3>6.5 方法五：物理随机几何模型（Newson-Delon-Galerne 布尔模型）★</h3>
+
+<p>这是本报告推荐的算法骨架。它从「胶片颗粒的物理现实」出发，用随机几何建模，并且——这是关键——<strong>有闭式公式把图像灰度映射到颗粒密度场</strong>。</p>
+
+<div class="formula">
+  <span class="lbl">模型的三个组成</span>
+  <strong>① 布尔模型（Boolean model）</strong><br>
+  Z = ∪ᵢ 𝓑(xᵢ, rᵢ) &nbsp;&nbsp;<span class="cmt">随机圆盘的并集</span><br>
+  中心 {xᵢ}：强度为 λ 的<strong>泊松点过程</strong>（均匀分布）<br>
+  半径 {rᵢ}：独立同分布，可为常数或<strong>对数正态分布</strong>（均值 μᵣ、方差 σᵣ²）<br><br>
+  <strong>② 覆盖率公式</strong><br>
+  P(𝟙_Z(y) = 1) = 1 − exp(−λ·E[πr²])<br><br>
+  <strong>③ 灰度保持的 λ 选取（核心公式）</strong><br>
+  λ(y) = ( 1 / E[πr²] ) · log( 1 / (1 − ũ(⌊y⌋)) )<br>
+  <span class="cmt">ũ = 归一化到 [0,1) 的输入灰度。这个 λ 的选取保证模型的期望值等于输入灰度——即「颗粒重构图像」而非「颗粒叠加于图像」。</span>
+</div>
+
+<div class="formula">
+  <span class="lbl">渲染：滤波布尔模型</span>
+  ṽ(y) = φ ∗ 𝟙_Z (y) = ∫ φ(t)·𝟙_Z(y − t) dt<br>
+  <span class="cmt">φ = 高斯核，模拟「放大 + 人眼」这一观察侧低通。<strong>这一步是产生「颗粒感」的关键</strong>——没有它，输出只是二值散点。</span><br><br>
+  工程实现（蒙特卡洛）：ṽ(y) = (1/N)·Σₖ 𝟙_Z( (y − ξₖ)/s )，&nbsp;ξₖ ~ 𝒩(0, σ²I₂)<br>
+  <span class="cmt">s = 缩放因子（分辨率无关性的来源）。N 增大时按大数定律收敛到真值。</span>
+</div>
+
+<div class="card accent">
+  <h4>为什么这个模型对本项目是「恰好合适」</h4>
+  <ul style="margin-bottom:0">
+    <li><strong>物理正确：</strong>建模对象正是银颗粒的随机几何，而非拟合出来的经验噪声。</li>
+    <li><strong>天然团簇：</strong>布尔模型的固有聚簇效应直接产出胶片特有的团块结构，无需外加规则。</li>
+    <li><strong>灰度保持有数学保证：</strong>λ 的选取来自覆盖率公式的反解，不会改变图像的整体明暗。</li>
+    <li><strong>色调依赖自动正确：</strong>由 ũ → λ 的映射与后续高斯滤波共同产生「中间调最强、两端趋零」的颗粒波动，不需要人为拼一条曲线。</li>
+    <li><strong>分辨率无关：</strong>颗粒半径以连续空间坐标定义，缩放因子 s 独立。可以在任意分辨率下渲染，甚至放大到能看见单个颗粒。</li>
+    <li><strong>可用参数少而语义清晰：</strong>μᵣ（颗粒平均半径）、σᵣ（半径离散度）、σ（观察侧滤波宽度）、s（缩放）。四个参数就能覆盖很宽的胶片风格空间。</li>
+  </ul>
+</div>
+
+<h4>工程性能问题及其解法</h4>
+<p>纯蒙特卡洛实现的计算量很大（原论文的 C 参考实现在典型工作负载下较慢；有报告称 GPU 实现相对 CPU 提速两个数量级，重实现报告称在特定配置下可达 160× 以上的加速）。对 Photoshop 插件而言需要注意：</p>
+
+<div class="callout warnv">
+  <div class="ico">关键解法：用二阶统计量替代蒙特卡洛</div>
+  <p>有专利文献指出：在特定条件下，可以<strong>基于物理模型推导出颗粒噪声的一阶与二阶统计量</strong>（期望、方差、协方差），直接用「信号相关的相关噪声」合成，而不必做逐点蒙特卡洛模拟。该文献给出的重要结论是：</p>
+  <ul style="margin-top:8px;margin-bottom:0">
+    <li>滤波后布尔模型的<strong>方差只依赖于</strong>：输入像素值 u、高斯滤波标准差 σ、颗粒半径分布 f_R(r)；</li>
+    <li>滤波后布尔模型的<strong>相关性不依赖信号</strong>——这意味着<em>可以先用固定的相关滤波器建模相关性，再按像素亮度调制幅度</em>。</li>
+  </ul>
+  <p style="margin-top:8px;margin-bottom:0">这两条结论把「物理模型」与「实时实现」之间的鸿沟填上了：<strong>用物理模型确定「幅度曲线」与「相关核」，用滤波合成实际噪声。</strong>这正是本项目算法架构的核心思路。</p>
+</div>
+
+<h3>6.6 方法对照总表</h3>
+
+<table>
+  <caption>表 11　五类方法在插件场景下的评价（★ = 优，○ = 中，× = 差）</caption>
+  <thead>
+    <tr>
+      <th style="width:20%">评价维度</th>
+      <th style="width:16%">扫描叠加</th>
+      <th style="width:16%">参数化噪声</th>
+      <th style="width:16%">频率域(RDD-5)</th>
+      <th style="width:16%">自回归(AV1)</th>
+      <th style="width:16%">布尔模型</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>物理真实性</td><td>★</td><td>×</td><td>○</td><td>○</td><td>★</td></tr>
+    <tr><td>团簇结构</td><td>★</td><td>×</td><td>○</td><td>○</td><td>★</td></tr>
+    <tr><td>分辨率无关</td><td>×</td><td>×</td><td>×</td><td>×</td><td>★</td></tr>
+    <tr><td>色调自适应</td><td>×</td><td>×</td><td>★</td><td>○</td><td>★</td></tr>
+    <tr><td>参数语义清晰</td><td>○</td><td>★</td><td>○</td><td>×</td><td>★</td></tr>
+    <tr><td>计算成本</td><td>★</td><td>★</td><td>★</td><td>★</td><td>×→○<span class="lbs">（可用二阶统计近似改善）</span></td></tr>
+    <tr><td>无平铺/块效应</td><td>×</td><td>★</td><td>○<span class="lbs">（需去块滤波）</span></td><td>○</td><td>★</td></tr>
+    <tr><td>参数可标定到真实胶片</td><td>★</td><td>×</td><td>○</td><td>×</td><td>★</td></tr>
+    <tr><td><strong>综合</strong></td><td>参考</td><td>参考</td><td>借鉴</td><td>备选</td><td><strong>采用</strong></td></tr>
+  </tbody>
+</table>
+
+<!-- ============================================================ -->
+<h2 id="s7"><span class="num">08</span>从机理推导插件设计约束</h2>
+
+<p>把前面所有研究结论压成可执行的工程约束。每条都标注来源章节，保证「设计决策可追溯到物理事实」。</p>
+
+<h3>7.1 十六条硬约束</h3>
+
+<table>
+  <caption>表 12　设计约束清单（每条均由研究报告的具体结论推出）</caption>
+  <thead>
+    <tr><th style="width:5%">#</th><th style="width:26%">约束</th><th style="width:24%">来源</th><th>验收标准</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="num">1</td>
+      <td><strong>分辨率无关</strong>：颗粒以连续空间尺寸定义，不绑定像素</td>
+      <td>§5.1 / §6.5</td>
+      <td>同一图在不同分辨率渲染后归一化到同尺寸，颗粒统计量一致</td>
+    </tr>
+    <tr>
+      <td class="num">2</td>
+      <td><strong>由图像驱动</strong>：颗粒量随局部灰度变化，而非均匀覆盖</td>
+      <td>§4.7 / §6.5 公式③</td>
+      <td>纯黑/纯白区域输出与输入无差异；中间调可见颗粒</td>
+    </tr>
+    <tr>
+      <td class="num">3</td>
+      <td><strong>团簇结构</strong>：必须使用具备空间相关性的生成机制</td>
+      <td>§3.3 / §5.2</td>
+      <td>放大 400% 时可见成团空档，非均匀散点</td>
+    </tr>
+    <tr>
+      <td class="num">4</td>
+      <td><strong>低通带限频谱</strong>：噪声功率谱在低频平坦、在高频有明确截止</td>
+      <td>§4.4 / §6.3</td>
+      <td>计算输出的 NPS 曲线，与理论低通谱形吻合（RMS 偏差 &lt; 30%）</td>
+    </tr>
+    <tr>
+      <td class="num">5</td>
+      <td><strong>灰度保持</strong>：颗粒不改变图像平均亮度</td>
+      <td>§6.5 公式③</td>
+      <td>处理前后全图及分区域均值差 &lt; 0.2/255</td>
+    </tr>
+    <tr>
+      <td class="num">6</td>
+      <td><strong>色调响应曲线可调</strong>：默认「中间调最强、两端趋零」</td>
+      <td>§4.7 表 7</td>
+      <td>曲线可视化控件可编辑；默认曲线在 0 与 1 端点取 0</td>
+    </tr>
+    <tr>
+      <td class="num">7</td>
+      <td><strong>亮度/色度分离</strong>：默认约 80/20，色度分量独立上限</td>
+      <td>§5.4 表 8</td>
+      <td>关闭色度分量时输出保持中性灰纯色彩；开启后不出现彩虹噪点</td>
+    </tr>
+    <tr>
+      <td class="num">8</td>
+      <td><strong>通道权重</strong>：蓝 &gt; 绿 &gt; 红，默认比例约 1.00 : 0.40 : 0.36</td>
+      <td>§4.3 图 2 / 表 8</td>
+      <td>预设参数可查；三个通道可单独微调</td>
+    </tr>
+    <tr>
+      <td class="num">9</td>
+      <td><strong>色度颗粒尺度大于亮度颗粒</strong>，且更柔</td>
+      <td>§3.4 表 3</td>
+      <td>色度分量使用更大的核半径与更强的低通</td>
+    </tr>
+    <tr>
+      <td class="num">10</td>
+      <td><strong>颗粒锐利度 &gt; 图像锐利度</strong>：颗粒不做额外模糊，必要时提供下游柔化</td>
+      <td>§5.5</td>
+      <td>颗粒对比度在目标频率上不衰减；可选「图像柔化」联动项</td>
+    </tr>
+    <tr>
+      <td class="num">11</td>
+      <td><strong>无平铺、无块效应、无网格</strong>：使用大周期确定性哈希 PRNG + 边界处理</td>
+      <td>§6.3 / §5.7 心理学维度</td>
+      <td>在纯色大平面上放大检查无重复图案、无接缝</td>
+    </tr>
+    <tr>
+      <td class="num">12</td>
+      <td><strong>在线性光/密度域注入</strong>：在 gamma 编码前处理，避免暗部被 gamma 曲线放大</td>
+      <td>§4.1（D 是光学量）</td>
+      <td>在深灰阶上加不同强度颗粒，暗部不出现异常放大；与线性域实现的统计一致</td>
+    </tr>
+    <tr>
+      <td class="num">13</td>
+      <td><strong>位深与抖动</strong>：内部至少 16 位处理，8 位输出前抖动</td>
+      <td>§4.3（σ 达 0.004 量级）</td>
+      <td>8 位输出不出现色阶断层；颗粒不因量化而丢失</td>
+    </tr>
+    <tr>
+      <td class="num">14</td>
+      <td><strong>强度可标定</strong>：强度以等效 RMS 颗粒度或等效 PGI 表达，而非无量纲滑块</td>
+      <td>§4.3 / §4.6</td>
+      <td>参数面板显示等效 σ_D 或 PGI 估值；胶片预设附真实数据来源</td>
+    </tr>
+    <tr>
+      <td class="num">15</td>
+      <td><strong>观看尺度参数</strong>：独立的「放大率/输出尺度」维度，与强度解耦</td>
+      <td>§4.6 表 6</td>
+      <td>调整该参数时颗粒粗细变化，但颗粒统计强度不变</td>
+    </tr>
+    <tr>
+      <td class="num">16</td>
+      <td><strong>种子可控</strong>：随机种子可见、可固定、可随机化</td>
+      <td>§5.6</td>
+      <td>固定种子结果可复现；批量处理组图可逐张换种子</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>7.2 建议的参数体系</h3>
+
+<div class="grid2">
+  <div class="box">
+    <h4>主控层（面向普通用户）</h4>
+    <ul>
+      <li><strong>胶片型号预设</strong>：分黑白 / 彩色两大族，按 ISO 与画幅组织</li>
+      <li><strong>颗粒强度</strong>：以等效 PGI 或 σ_D 定标</li>
+      <li><strong>颗粒尺寸 / 画幅</strong>：对应物理颗粒簇半径与等效放大率</li>
+      <li><strong>随机种子</strong>：含「随机化」按钮</li>
+    </ul>
+  </div>
+  <div class="box">
+    <h4>进阶层（面向专业用户）</h4>
+    <ul>
+      <li><strong>颗粒半径分布</strong>：均值 μᵣ、离散度 σᵣ（对数正态）</li>
+      <li><strong>团簇度</strong>：控制颗粒中心的相关性强度</li>
+      <li><strong>色调响应曲线</strong>：可编辑的「亮度 → 强度」曲线</li>
+      <li><strong>亮度/色度配比</strong>及三通道权重</li>
+      <li><strong>观察侧柔化</strong>：模拟放大+人眼的等效低通宽度</li>
+      <li><strong>图像柔化联动</strong>：按真实胶片 MTF 关系轻微柔化底层图像</li>
+    </ul>
+  </div>
+</div>
+
+<div class="callout warnv">
+  <div class="ico">参数命名建议</div>
+  <p>避免使用「噪声」「Noise」「静态」这类词——它们在用户心里已经等同于数码噪声，会引导错误的心理预期。使用「颗粒 / Grain」「颗粒度 / Granularity」「团簇 / Clumping」「画幅 / Gauge」「ISO」这类来自摄影本身的词汇，用户能凭直觉调对。</p>
+</div>
+
+<h3>7.3 建议的算法架构（分四层）</h3>
+
+<figure>
+  <div class="figframe">
+    <svg viewBox="0 0 680 400" role="img" aria-label="插件算法架构分层图">
+      <defs>
+        <marker id="dn" markerWidth="8" markerHeight="8" refX="6" refY="2.5" orient="auto">
+          <path d="M0,0 L6,2.5 L0,5 z" fill="var(--line-strong)"/>
+        </marker>
+      </defs>
+
+      <rect x="40" y="20" width="600" height="52" rx="9" fill="var(--panel-2)" stroke="var(--line-strong)"/>
+      <text x="58" y="42" class="lb">L0　输入与色彩管理</text>
+      <text x="58" y="60" class="lbs">输入图像 → 转线性光域 → 分离亮度 / 色度（YCbCr 或 Lab）　｜　保持至少 16 位精度</text>
+      <line x1="340" y1="72" x2="340" y2="92" stroke="var(--line-strong)" marker-end="url(#dn)"/>
+
+      <rect x="40" y="94" width="600" height="72" rx="9" fill="var(--accent-2-soft)" stroke="var(--accent-2)"/>
+      <text x="58" y="116" class="lb" fill="var(--accent-2)">L1　物理模型层（不产生像素，只产生参数）</text>
+      <text x="58" y="134" class="lbs">布尔模型解析解 ⇒ 幅度曲线 A(u) = f(像素值, μᵣ, σᵣ, 观察侧 σ)</text>
+      <text x="58" y="152" class="lbs">相关核 K = g(颗粒半径分布)　｜　输出：两张查表 + 一个卷积核</text>
+      <line x1="340" y1="166" x2="340" y2="186" stroke="var(--line-strong)" marker-end="url(#dn)"/>
+
+      <rect x="40" y="188" width="600" height="72" rx="9" fill="var(--accent-soft)" stroke="var(--accent)"/>
+      <text x="58" y="210" class="lb" fill="var(--accent)">L2　噪声合成层</text>
+      <text x="58" y="228" class="lbs">确定性哈希 PRNG（像素坐标 + 种子） ⇒ 单位高斯场 ⇒ 与相关核 K 卷积（或频域滤波）</text>
+      <text x="58" y="246" class="lbs">⇒ 得到单位方差的、具备团簇与高频截止特征的「基础颗粒场」　｜　亮度一路 + 色度一路</text>
+      <line x1="340" y1="260" x2="340" y2="280" stroke="var(--line-strong)" marker-end="url(#dn)"/>
+
+      <rect x="40" y="282" width="600" height="72" rx="9" fill="var(--panel-2)" stroke="var(--line-strong)"/>
+      <text x="58" y="304" class="lb">L3　合成与输出层</text>
+      <text x="58" y="322" class="lbs">颗粒场 × A(u)（按亮度调制） → 按通道权重分配 → 与线性域图像相加/乘性合成</text>
+      <text x="58" y="340" class="lbs">→ 回 gamma 编码 → 抖动 → 写出　｜　全程分块处理并做块间重叠以消除接缝</text>
+
+      <line x1="340" y1="354" x2="340" y2="374" stroke="var(--line-strong)" marker-end="url(#dn)"/>
+      <rect x="180" y="376" width="320" height="4" rx="2" fill="var(--line-strong)"/>
+      <text x="340" y="392" text-anchor="middle" class="lbs">关键：L1 只算参数（快），L3 只做逐像素运算（快）；昂贵的物理推导被压缩成一次预计算</text>
+    </svg>
+  </div>
+  <figcaption><b>图 6　建议的四层架构。</b>核心设计决策是把<strong>物理模型与像素生成解耦</strong>：物理模型只在参数变化时运行一次，输出「幅度曲线」与「相关核」；像素级运算完全是无状态、可并行的滤波与查表。这样既保住了物理正确性，又拿到了实时性能。分块处理需要在块边界做重叠（halo），否则会出现可见接缝——这正是 RDD-5 规范里必须加去块滤波的原因。</figcaption>
+</figure>
+
+<h3>7.4 反模式清单（明确不做的事）</h3>
+
+<table>
+  <caption>表 13　必须避免的实现方式及其后果</caption>
+  <thead><tr><th style="width:38%">反模式</th><th>为什么错 / 症状</th></tr></thead>
+  <tbody>
+    <tr><td>逐像素独立随机数（白噪声）</td><td>无空间相关性，无团簇。放大后是均匀散点，一眼看出是噪声。§5.2</td></tr>
+    <tr><td>固定像素尺寸的颗粒</td><td>图像缩放后颗粒相对粗细变化方向与真实胶片<strong>相反</strong>。§4.6 规则 2</td></tr>
+    <tr><td>均匀强度覆盖全图（不随亮度变化）</td><td>死黑处出现颗粒（真实胶片此处没有），高光被「蒙纱」。§4.7</td></tr>
+    <tr><td>三通道独立等强度噪声</td><td>产生彩虹色噪点，是「数码噪声」而非「彩色颗粒」的典型外观。§5.4</td></tr>
+    <tr><td>在 sRGB gamma 域直接加颗粒</td><td>同样数值的颗粒在暗部被 gamma 曲线放大、亮部被压缩，色调响应失真。§4.1</td></tr>
+    <tr><td>使用小尺寸噪声纹理平铺</td><td>平坦大区域出现可见重复图案。§5.7 心理学维度</td></tr>
+    <tr><td>对颗粒做高斯模糊「让它更自然」</td><td>使颗粒比图像更糊，直接违反「颗粒是画面最锐利元素」这一铁律。§5.5</td></tr>
+    <tr><td>8 位内部精度</td><td>σ 量级仅 0.004–0.025，8 位量化会把细颗粒直接吃掉。§4.3</td></tr>
+    <tr><td>分块处理不做边界重叠</td><td>出现网格状接缝，是最刺眼的失败模式。§6.3</td></tr>
+    <tr><td>用「噪声强度」这类词做文案</td><td>引导用户用数码噪声的心理模型去调参，必然调出错误结果。§7.2</td></tr>
+  </tbody>
+</table>
+
+<h3>7.5 客观验证方法</h3>
+
+<div class="card teal">
+  <h4>五道验收测试</h4>
+  <ol style="margin-bottom:0">
+    <li><strong>频谱测试：</strong>对输出图的平坦中灰区域计算 NPS，与理论低通谱形 exp(−4π²σ_g²f²) 比对（RMS 偏差 &lt; 30%），并检查 −3dB 截止频率是否与设定的颗粒半径成反比。这是最硬的客观测试。</li>
+    <li><strong>均值保持测试：</strong>在均匀灰阶块上运行不同强度，检查均值漂移与方差是否符合目标曲线。</li>
+    <li><strong>尺度不变性测试：</strong>同一图在 1× 与 2× 分辨率下渲染，各自归一化到相同物理尺寸后比较颗粒统计量，应一致。</li>
+    <li><strong>色调响应测试：</strong>在 0–100% 的灰阶阶梯上运行，测量各阶梯的输出方差，应呈现中间高两端趋零的曲线。</li>
+    <li><strong>盲测：</strong>把插件输出与真实胶片扫描件混在一起，让有胶片经验的观察者判断。感知层面的最终判据只有人。</li>
+  </ol>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="s8"><span class="num">09</span>结论、局限与后续工作</h2>
+
+<h3>8.1 研究结论</h3>
+<ol>
+  <li><strong>颗粒是可以被物理建模的。</strong>它的统计来源清晰（光子泊松性 + 晶体尺寸分布 + 感染显影 + 观察侧滤波），并且存在已经过学术界与工业界双重验证的数学框架（布尔模型 + 灰度保持的 λ 反解）。本项目不需要发明新理论，只需要正确地应用既有理论。</li>
+  <li><strong>颗粒与噪声的差异是结构性的，不是强度性的。</strong>五条硬差异：空间相关性（团簇）、功率谱形状（低通带限 vs 无截止的平坦）、尺度可变性（物理尺寸 vs 像素绑定）、色调依赖方向（中间调 vs 暗部）、色彩构成（耦合的三层 vs 分离的亮度色度）。任何一条做错，用户都能看出来。</li>
+  <li><strong>「看起来对」的关键在观察侧，而不是制作侧。</strong>PGI 数据表明放大率的影响大于胶片型号差异。制作侧只负责生成正确的客观颗粒度；观察侧的低通与缩放才是感知颗粒性的决定环节。</li>
+  <li><strong>把物理量正确映射到数码图像是最大的设计风险点。</strong>负片的「颗粒度随密度单调上升」与观看时的「中间调颗粒最强」是两个不同环节的事实，把它们混淆会得到一个「越亮越脏」的错误结果。</li>
+</ol>
+
+<h3>8.2 研究中未能解决或数据不足的部分</h3>
+<div class="callout warnv">
+  <div class="ico">诚实说明</div>
+  <ul style="margin:0">
+    <li><strong>团簇的精确统计分布数据不足。</strong>文献给出「5–20 个晶体成团」「染料云 1–10 μm」「可视颗粒簇 10–30 μm」这样的区间，但缺少可直接用作算法参数的、按胶片型号分类的团簇尺寸分布数据。这部分需要通过实测（见 8.3）来标定。</li>
+    <li><strong>公开的绝对颗粒度数据有限且一致性一般。</strong>柯达是少数公开数据的厂商，但其曲线图目视读取存在误差；不同资料给出的 VISION3 500T 数值范围差别明显。相对关系（通道之间、随曝光变化）可信度高，绝对标定需实测。</li>
+    <li><strong>数码照片与胶片的「密度」没有天然对应关系。</strong>胶片颗粒度是定义在光学密度上的；数码图像的「亮度」是显示量。二者的映射关系（是否需要模拟一条特性曲线）需要专门设计，本报告只能给出方向（§7.1 约束 12），不能给出唯一解。</li>
+    <li><strong>掩蔽效应的量化模型缺失。</strong>「颗粒可见度随内容不均匀」被普遍观察到，但缺少可直接用的量化模型。因此本报告建议此项只作为高级选项，不进入默认行为。</li>
+  </ul>
+</div>
+
+<h3>8.3 建议的下一步（按优先级）</h3>
+<table>
+  <caption>表 14　后续工作路线</caption>
+  <thead><tr><th style="width:8%">优先级</th><th style="width:34%">工作项</th><th>目的</th></tr></thead>
+  <tbody>
+    <tr><td class="num">P0</td><td>建立颗粒统计分析工具链</td><td>能对任意图像计算 NPS 与局部方差曲线。这是后续所有标定与验收的基础设施。</td></tr>
+    <tr><td class="num">P0</td><td>采集并分析真实胶片扫描样本</td><td>取得多型号（黑白/彩色、低 ISO/高 ISO）的高分辨率扫描件，实测其 NPS 截止频率与幅度曲线，形成可用的预设参数表。</td></tr>
+    <tr><td class="num">P1</td><td>实现布尔模型的参数预计算</td><td>把 §7.3 的 L1 层做出来并可视化——目视确认幅度曲线形态符合「中间调最强」。</td></tr>
+    <tr><td class="num">P1</td><td>实现 L2 + L3 的噪声合成与输出</td><td>完成最小可用版本，跑通 §7.5 的五道验收测试。</td></tr>
+    <tr><td class="num">P2</td><td>性能优化（分块、GPU、缓存）</td><td>满足 Photoshop 交互式预览的性能要求。</td></tr>
+    <tr><td class="num">P2</td><td>预设体系与参数标定</td><td>把实测数据转化为面向用户的胶片型号预设。</td></tr>
+    <tr><td class="num">P3</td><td>相邻因素（色调曲线、halation）</td><td>本报告范围外。颗粒做对之后，「胶片感」的剩余部分主要靠色调。</td></tr>
+  </tbody>
+</table>
+
+<hr>
+
+<!-- ============================================================ -->
+<h2 id="sa"><span class="num">A</span>附录 A：关键数据表</h2>
+
+<h3>A.1 尺寸速查</h3>
+<table>
+  <thead><tr><th style="width:44%">对象</th><th class="num" style="width:20%">尺寸</th><th>备注</th></tr></thead>
+  <tbody>
+    <tr><td>卤化银微晶直径</td><td class="num">0.1 – 2 μm</td><td>部分文献 0.1 – 3 μm</td></tr>
+    <tr><td>T 颗粒厚度</td><td class="num">≈ 0.2 μm</td><td>片状，投影面积大</td></tr>
+    <tr><td>潜影中心</td><td class="num">4 – 50 银原子</td><td>≥ 4 原子方可显影；约 3–4 光子即可</td></tr>
+    <tr><td>显影银团（单个）</td><td class="num">0.5 – 2 μm</td><td>丝状/带状缠绕</td></tr>
+    <tr><td>染料云（彩色负片）</td><td class="num">1.0 – 10 μm</td><td>柯达 H-1</td></tr>
+    <tr><td>染料云（彩色相纸）</td><td class="num">1.25 – 4 μm</td><td>黄 &gt; 青/品红</td></tr>
+    <tr><td>团簇所含晶体数</td><td class="num">5 – 20 个</td><td>文献区间</td></tr>
+    <tr><td>可视颗粒簇</td><td class="num">10 – 30 μm</td><td>感知层面，非物理实体</td></tr>
+    <tr><td>人眼等效孔径</td><td class="num">≈ 560 μm</td><td>40 cm 观看距离下投影到输出介质</td></tr>
+    <tr><td>4000 dpi 扫描的分辨率</td><td class="num">157.5 px/mm</td><td>→ 10 μm ≈ 1.6 px；30 μm ≈ 4.7 px</td></tr>
+  </tbody>
+</table>
+
+<h3>A.2 关键公式汇总</h3>
+<div class="formula">
+  <span class="lbl">统计与度量</span>
+  Nutting 定律：&nbsp; 2.3·D = a·N<br>
+  √D 律：&nbsp; σ<sub>D</sub> ∝ √D<br>
+  Selwyn 定律：&nbsp; σ<sub>D</sub>·√a = 常数；&nbsp; G = σ<sub>D</sub>·√(2a)<br>
+  综合换算：&nbsp; σ = σ₁ · (d₁/d) · √(D/D₁)<br>
+  RMS 颗粒度：&nbsp; σ<sub>D</sub> = √( Σ(Dᵢ − D̄)² / n )，48 μm 孔径，D = 1.0，×1000<br>
+</div>
+
+<div class="formula">
+  <span class="lbl">感知</span>
+  颗粒性标度：&nbsp; G ∝ log σ²<br>
+  颗粒度（人眼加权）：&nbsp; σ²(D) = ∫ [E(f)/f]² · NPS(f,D) df &nbsp;/&nbsp; ( A · ∫[E(f)/f]² df )<br>
+  颗粒度系数：&nbsp; g(D) = 10³ · σ(D)·√A ≈ 10³ · √( NPS(1 cycle/mm, D) )<br>
+  PGI：&nbsp; 25 = 视觉阈值；Δ4 = 1 JND（90% 观察者）；标准观看距离 14 in
+</div>
+
+<div class="formula">
+  <span class="lbl">布尔颗粒模型（Newson et al.）</span>
+  布尔模型：&nbsp; Z = ∪ᵢ 𝓑(xᵢ, rᵢ)，&nbsp; {xᵢ} ~ Poisson(λ)，&nbsp; rᵢ ~ 常数 或 对数正态(μᵣ, σᵣ²)<br>
+  覆盖率：&nbsp; P(𝟙_Z = 1) = 1 − exp( −λ·E[πr²] )<br>
+  灰度保持：&nbsp; <strong>λ(y) = ( 1 / E[πr²] ) · log( 1 / (1 − ũ(⌊y⌋)) )</strong><br>
+  滤波模型：&nbsp; ṽ = φ ∗ 𝟙_Z，&nbsp; φ ~ 𝒩(0, σ²)（模拟放大 + 人眼）<br>
+  蒙特卡洛：&nbsp; ṽ(y) = (1/N)·Σₖ 𝟙_Z( (y − ξₖ)/s )，&nbsp; ξₖ ~ 𝒩(0, σ²I₂)
+</div>
+
+<h3>A.3 术语中英对照</h3>
+<table>
+  <thead><tr><th style="width:22%">中文</th><th style="width:26%">英文</th><th>说明</th></tr></thead>
+  <tbody>
+    <tr><td>颗粒</td><td>grain</td><td>物理实体：显影银团 / 染料云</td></tr>
+    <tr><td>颗粒度</td><td>granularity</td><td>客观量，σ<sub>D</sub></td></tr>
+    <tr><td>颗粒性</td><td>graininess</td><td>主观感知量</td></tr>
+    <tr><td>团簇 / 聚簇</td><td>clumping / clustering</td><td>颗粒成团的现象</td></tr>
+    <tr><td>染料云</td><td>dye cloud</td><td>彩色胶片的成像单元</td></tr>
+    <tr><td>潜影</td><td>latent image</td><td>曝光后不可见的银原子簇</td></tr>
+    <tr><td>感染显影</td><td>infectious development</td><td>相邻晶体被诱发显影，加剧团簇</td></tr>
+    <tr><td>显影抑制剂释放成色剂</td><td>DIR coupler</td><td>缩小染料云、改善颗粒度与锐度</td></tr>
+    <tr><td>噪声功率谱</td><td>NPS / Wiener spectrum</td><td>颗粒的频率域描述</td></tr>
+    <tr><td>低频斑块</td><td>mottle</td><td>大尺度不均匀，RMS 无法反映</td></tr>
+    <tr><td>画幅</td><td>gauge / format</td><td>135、120、16mm、Super 8 等</td></tr>
+    <tr><td>推冲 / 增感显影</td><td>push processing</td><td>延长显影提升有效感光度，颗粒显著恶化</td></tr>
+    <tr><td>颗粒沸腾</td><td>grain boil / dancing grain</td><td>运动画面中颗粒逐帧变化</td></tr>
+    <tr><td>胶片颗粒叠加</td><td>FGO (film grain overlay)</td><td>用扫描的颗粒素材合成</td></tr>
+  </tbody>
+</table>
+
+<h3>A.4 与本项目目标（数码相机照片）的映射关系</h3>
+<table>
+  <thead><tr><th style="width:32%">胶片概念</th><th>数码图像中的对应物与处理方式</th></tr></thead>
+  <tbody>
+    <tr><td>曝光量 / log H</td><td>数码图像的线性亮度值（需先线性化）</td></tr>
+    <tr><td>光学密度 D</td><td>无直接对应。<strong>不引入密度域</strong>，直接在「感知颗粒性」层面建模（§4.7 结论）</td></tr>
+    <tr><td>胶片 ISO</td><td>预设标签，映射为「颗粒半径 μᵣ + 幅度曲线尺度」</td></tr>
+    <tr><td>画幅 135 / 120 / 16mm</td><td>映射为「等效放大率」，即颗粒相对图像的尺度参数（§4.6）</td></tr>
+    <tr><td>放大率 m</td><td>用户可见的「颗粒尺寸 / 输出尺度」参数</td></tr>
+    <tr><td>RMS 颗粒度 σ<sub>D</sub></td><td>映射为「等效 σ」显示单位，用于标定强度滑块</td></tr>
+    <tr><td>PGI</td><td>更适合作为面向用户的效果强度语汇（有阈值、有 JND 语义）</td></tr>
+    <tr><td>三层染料云</td><td>RGB 三通道的颗粒权重（蓝 &gt; 绿 &gt; 红）</td></tr>
+    <tr><td>扫描 → 数字</td><td>在插件中体现为「观察侧低通」参数（φ 的 σ）</td></tr>
+  </tbody>
+</table>
+
+<h3>A.5 需要实测补齐的数据（研究缺口清单）</h3>
+<ol>
+  <li>各目标胶片型号的 <strong>NPS 截止频率</strong>（决定颗粒半径参数）</li>
+  <li>各型号的 <strong>幅度–亮度曲线</strong>（在「观看域」而非密度域测量）</li>
+  <li>黑白 / 彩色两大族的 <strong>团簇尺度分布</strong>实测值</li>
+  <li>三通道颗粒权重的<strong>更多型号实测值</strong>（目前只有 VISION3 500T 的公开曲线）</li>
+  <li>不同推冲程度下的颗粒恶化曲线（用于非线性强度建模）</li>
+</ol>
+
+<hr>
+
+<!-- ============================================================ -->
+<h2 id="sb"><span class="num">B</span>附录 B：参考文献与可信度分级</h2>
+
+<p style="font-size:14px;color:var(--muted)">分级标准：<span class="lvl a">A 级</span>厂商技术资料、国际标准、同行评议论文，可直接作为参数依据；<span class="lvl b">B 级</span>专业书籍、行业论文、专利文献，可用于机理与方向判断；<span class="lvl c">C 级</span>行业媒体、教程、厂商产品文档，仅作交叉验证与工程惯例参考，<strong>不单独作为数据来源</strong>。</p>
+
+<h3>B.1 机理与理论（A / B 级）</h3>
+<div class="ref"><span class="lvl a">A</span><b>Gurney, R. W. &amp; Mott, N. F. (1938).</b> The theory of the photolysis of silver bromide and the photographic latent image. <em>Proc. R. Soc. A</em>, 164(917), 151–167. —— 潜影形成机制的原典。</div>
+<div class="ref"><span class="lvl a">A</span><b>Mees, C. E. K. (1941).</b> Recent Advances in the Theory of the Photographic Process. <em>Journal of the SMPE</em>. DOI: 10.5594/J16545. —— 银溴晶体中潜影与显影银丝状生长的早期权威描述。</div>
+<div class="ref"><span class="lvl a">A</span><b>James, T. H. (ed.) (1977).</b> <em>The Theory of the Photographic Process</em>, 4th ed. Macmillan. —— 摄影过程的权威教科书。RMS 颗粒度（p.619）、Wiener 频谱（p.621）的定义出处。</div>
+<div class="ref"><span class="lvl b">B</span><b>Nutting, P. G. (1913).</b> On the absorption of light in heterogeneous media. <em>Phil. Mag.</em> —— Nutting 定律（D ∝ N）原始文献。</div>
+<div class="ref"><span class="lvl b">B</span><b>Selwyn, E. W. H. (1935).</b> <em>The Photographic Journal</em>. —— Selwyn 颗粒度与 σ√a = 常数关系的原始提出。</div>
+<div class="ref"><span class="lvl b">B</span><b>Falconer, D. G.</b> Grain noise. In <em>IBM Journal of Research and Development</em>, 14(5). —— 给出 Nutting 定律、√D 律与 Selwyn 定律的完整推导与综合换算公式 σ = σ₁(d₁/d)√(D/D₀)。本报告 §4.1–4.2 的推导依据。</div>
+<div class="ref"><span class="lvl b">B</span><b>Webb, J. H. (1955).</b> Some Theoretical Considerations on Photographic Graininess and Granularity. <em>JOSA</em>. —— 颗粒性与颗粒度理论关系。</div>
+<div class="ref"><span class="lvl b">B</span><b>随机圆盘模型与颗粒度–密度关系（随机点模型）.</b> —— 论证 √D 律在高密度端系统性低估颗粒度，以及乳剂中颗粒深度分布如何减弱该效应。本报告 §4.2 边界条件的依据。</div>
+<div class="ref"><span class="lvl b">B</span><b>Trinder, J. C. (1980).</b> Aerial Film Granularity and Its Influence on Visual Performance. <em>14th Congress of ISP, Hamburg</em>. —— 明确提出 granularity（客观）与 graininess（主观）的定义区分，以及 Selwyn 关系的适用性讨论。</div>
+
+<h3>B.2 测量标准与厂商技术资料（A 级）</h3>
+<div class="ref"><span class="lvl a">A</span><b>ISO 10505</b> —— 摄影胶片 RMS 颗粒度的测量标准。</div>
+<div class="ref"><span class="lvl a">A</span><b>KODAK VISION3 500T Color Negative Film 5219 / 7219 — Technical Information (H-1-5219).</b> —— 漫射 RMS 颗粒度曲线的主要来源。48 μm 孔径，三通道 σ<sub>D</sub> 随对数曝光变化。本报告图 2 的数据出处。</div>
+<div class="ref"><span class="lvl a">A</span><b>Kodak Publication No. E-58,</b> <em>Print Grain Index — An Assessment of Print Graininess from Color Negative Films.</em> —— PGI 的定义来源：4 单位 = 1 JND、25 = 视觉阈值、14 英寸标准观看距离。</div>
+<div class="ref"><span class="lvl a">A</span><b>KODAK PORTRA 160 / EKTAR 100 / PRO IMAGE 100 彩色负片技术数据表.</b> —— PGI 数值表（不同画幅 × 不同输出尺寸）。本报告表 6 的数据出处。</div>
+<div class="ref"><span class="lvl b">B</span><b>Kodak Publication H-1 系列显微图（Mees &amp; James 1967, pp.35–39 转载）.</b> —— 黑白乳剂银颗粒 0.4–1.5 μm、染料云 1.0–10 μm、核心银团 0.4–2.0 μm 的显微测量出处。</div>
+<div class="ref"><span class="lvl b">B</span><b>Fujifilm,</b> <em>The Fundamentals of Industrial Radiography.</em> —— RMS 颗粒度、Selwyn 颗粒度 G = σ<sub>D</sub>√a 的定义与适用边界（当单颗粒面积大于孔径时 G 不再恒定）。</div>
+
+<h3>B.3 计算建模与工程标准（A / B 级）</h3>
+<div class="ref"><span class="lvl a">A</span><b>Newson, A., Delon, J., Galerne, B. (2017).</b> A Stochastic Film Grain Model for Resolution-Independent Rendering. <em>Computer Graphics Forum</em>. HAL: hal-01520260. —— 布尔颗粒模型的原始论文。</div>
+<div class="ref"><span class="lvl a">A</span><b>Newson, A., Faraj, N., Galerne, B., Delon, J. (2017).</b> Realistic Film Grain Rendering. <em>Image Processing On Line (IPOL)</em>, 7, 165–183. DOI: 10.5201/ipol.2017.192. —— 提供了可复现的完整实现细节，本报告 §6.5 的公式③（λ 的反解）与蒙特卡洛求值式均出自此文。附开源参考实现。</div>
+<div class="ref"><span class="lvl a">A</span><b>Newson, A. et al. (2017).</b> Analysis of a Physically Realistic Film Grain Model, and a Gaussian Film Grain Synthesis Algorithm. —— 推导布尔模型颗粒纹理的期望与协方差闭式解，并提出基于高斯纹理的合成算法。这是「用统计量替代蒙特卡洛」的理论基础。</div>
+<div class="ref"><span class="lvl a">A</span><b>SMPTE RDD 5-2006,</b> <em>Film Grain Technology — Specifications for H.264 | MPEG-4 AVC Bitstreams.</em> —— 比特精确的颗粒模拟规范：强度区间、cut frequency（2–14）、169 种图案库、3 抽头去块滤波、加法混合。本报告 §6.3 与表 10 的出处。</div>
+<div class="ref"><span class="lvl b">B</span><b>Thomson Licensing / InterDigital 专利族（H.264 film grain SEI 相关）.</b> —— <code>intensity_interval_lower/upper_bound</code>、<code>comp_model_value</code>、<code>blending_mode_id</code> 等参数的约束条件与取值范围说明。</div>
+<div class="ref"><span class="lvl b">B</span><b>US 2024/0312091 A1,</b> Real time film grain rendering and parameter estimation. —— 给出滤波后布尔模型的方差与协方差表达式，证明「方差仅依赖 u、滤波 σ 与颗粒半径分布」且「相关性不依赖信号」。这是实时化路线的关键依据。</div>
+<div class="ref"><span class="lvl b">B</span><b>AV1 Film Grain Synthesis（AOM 规范）.</b> —— 自回归（AR）颗粒模型：lag 0–3、二维 AR 系数、颗粒强度与缩放函数。作为备选算法路线的参考。</div>
+<div class="ref"><span class="lvl b">B</span><b>Dolby Laboratories,</b> Metadata signaling and conversion for film grain encoding (WO 2022/212792 A1). —— 对 RDD-5 参数体系与 AV1/AVI FG 方案的对比综述，SMPTE RDD-5 参数约束的整理来源。</div>
+
+<h3>B.4 感知与心理物理（A / B 级）</h3>
+<div class="ref"><span class="lvl a">A</span><b>PICS 2003,</b> One-Step Measurement of Granularity versus Density, Graininess, and Micro-Uniformity. <em>IS&amp;T</em>. —— 提供三条关键结果：① 颗粒性与颗粒度关系 G ∝ log σ²（类别判断法/Thurstone 定律）；② 人眼等效高斯加权孔径约 560 μm（40 cm 观看距离投影到反射相纸）；③ 胶片类成像系统的颗粒度峰值在 D ≈ 0.75，以及「中间调颗粒度 g(0.75 OD)」作为标准比较基准的由来。</div>
+<div class="ref"><span class="lvl b">B</span><b>Bartleson, C. J.</b> 关于颗粒性的心理物理标度推广研究。 —— 颗粒性–颗粒度对数关系的推广形式。</div>
+<div class="ref"><span class="lvl b">B</span><b>Keelan, B. W. (2002).</b> <em>Handbook of Image Quality: Characterization and Prediction.</em> CRC Press. —— RMS 颗粒度在图像质量模型中的位置。</div>
+
+<h3>B.5 染料云与彩色乳剂（A / B 级）</h3>
+<div class="ref"><span class="lvl a">A</span><b>Weaver, G. (2009).</b> Chromogenic Characterization: A Study of Kodak Color Prints, 1942–2008. <em>PMG Topics in Photographic Preservation</em>, Vol. 13. —— 染料云尺寸的实测数据（彩色相纸 1.25–4 μm）、黄染料云大于青/品红、染料云尺寸的三个历史分期。本报告表 3 的出处。</div>
+<div class="ref"><span class="lvl a">A</span><b>Resolution and Fundamental Film Particles / Film Grain, Resolution and Perception</b>（国际影像保护领域技术文档）. —— 黑白乳剂银颗粒尺寸（0.4–1.5 μm）、染料云 1.0–10 μm、核心银颗粒（0.4–2.0 μm 团簇 / 0.4–0.8 μm 单颗粒）、现代彩色胶片最多 9 个染料云层的层结构，以及「胶片颗粒是一种感知现象」的明确定义。</div>
+<div class="ref"><span class="lvl b">B</span><b>Fuji Photo Film 专利 US 4,524,130 / US 4,567,135 / US 4,476,219 / US 4,789,624.</b> —— DIR / 扩散型 DIR 成色剂对高感光度层低密度区颗粒度的改善机理；高反应速率成色剂与扩散型成色剂对 RMS 颗粒度与 Wiener 频谱不同频率段的影响（重要结论：扩散型成色剂只改善 RMS 数值，却增大低频 Wiener 频谱分量，视觉上反而更差——这正是「只看 RMS 会被误导」的经典案例）。</div>
+<div class="ref"><span class="lvl b">B</span><b>《释放显影抑制剂型成色剂在彩色影像形成过程中的动力学研究 II》(CNKI).</b> —— DIR / DIAR 成色剂通过竞争 QDI 与抑制显影速率两条途径缩小染料云尺寸的动力学证据。</div>
+<div class="ref"><span class="lvl b">B</span><b>Fuji Photo Film 专利 US 4,588,678.</b> —— 感染显影（infectious development）的定义与后果：提高表观感光度但增加灰雾、改变特性曲线、<strong>恶化颗粒性</strong>。</div>
+
+<h3>B.6 行业资料与工程惯例（C 级，仅作交叉验证）</h3>
+<div class="ref"><span class="lvl c">C</span>Norman Koren, <em>Grain and sharpness in scans and enlarger prints</em> —— 颗粒可见度与观看放大率的关系、颗粒在空间频率域的宽带特性与峰值位置、颗粒混叠（grain aliasing）问题。该文中「颗粒的空间频率能量峰值位于 1/(2×平均颗粒尺寸) 到 1/(平均颗粒尺寸) 之间」是图 3 曲线形态的来源。</div>
+<div class="ref"><span class="lvl c">C</span>各类商业颗粒插件的产品文档（FilmConvert、Dehancer、LiveGrain、DaVinci Resolve Film Grain、Vindral/Modulate 等）—— 用于提取<strong>行业参数惯例</strong>：亮度/色度约 80/20 的默认配比、中间调峰值 + 两端保护的色调响应设计、颗粒「尺寸/柔和度/强度」三参数结构、以及「色度颗粒必须比亮度颗粒更弱」的共识。这些惯例与 A/B 级文献的结论一致，故予采纳，但不作为原始数据来源。</div>
+<div class="ref"><span class="lvl c">C</span>各类工程教程与百科条目（用于术语交叉核对）。凡与 A/B 级来源冲突者，一律以 A/B 级为准。</div>
+
+<div class="callout warnv">
+  <div class="ico">数据使用声明</div>
+  <p>本报告在正文中明确标注了每一处数值的来源等级。凡属于 C 级来源或存在分歧的数值（典型如「可视颗粒簇 10–30 μm」「不同资料给出的 VISION3 500T 绝对颗粒度量级差异」），已在正文或附录 A.5 中标注为待实测确认。后续插件开发中的<strong>所有默认参数必须经实测标定后才能写死</strong>，不得直接采用本报告的区间中值。</p>
+</div>
+
+<div class="footnote">
+  <p><b>报告结束。</b>本报告为阶段一交付物，只完成调研与设计依据论证，<strong>不包含插件代码</strong>。下一阶段（插件设计文档与实现）应在确认本报告结论后启动，并优先完成附录 A.5 列出的实测数据补齐工作。</p>
+  <p style="margin-top:12px;color:var(--faint);font-size:13px">胶片颗粒形成机理与视觉特征研究报告 · v1.0 · 2026-10-03</p>
+</div>
+
+</div>
+</body>
+</html>

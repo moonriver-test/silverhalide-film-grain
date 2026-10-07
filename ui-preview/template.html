@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>银盐 · UI 预览稿 v0.5（方案 B 结构）</title>
+<style>
+  /* ============================================================
+     本版的两处调整
+     ① 主色由朱红 #ff3b12 压到 #a82f24 —— 介于朱红与勃艮第红之间的深红。
+        取这个值的理由：亮度从 L*≈63 降到 L*≈38，对白字仍有 6.8:1 对比度（AAA 级），
+        对暖灰底 3.3:1 足以撑起身为「唯一强调色」的分量，但不再抢画面。
+     ② 暗盒换成写实 3D 渲染（真实 135 暗盒：黑塑料筒身 + 金属卷轴孔 + 伸出的片头带齿孔），
+        并放在统一的「承台」上、加投影，让它像摆在台面上而不是贴上去。
+     ============================================================ */
+  :root {
+    --bg:      #b9b4ac;
+    --paper:   #ece8e0;
+    --stage:   #f4f1e9;
+    --card:    #cac5bc;
+    --ink:     #14120f;
+    --mut:     #7c776e;
+    --faint:   #9a958c;
+    --accent:  #a82f24;
+    --accentd: #8d2318;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #6f6a63;
+    font-family: "Inter", system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    padding: 40px 28px 64px;
+    display: flex; flex-direction: column; align-items: center; gap: 32px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .pagehead { color: #efeae2; text-align: center; max-width: 1000px; }
+  .pagehead h1 { font-size: 30px; font-weight: 800; letter-spacing: -.5px; }
+  .pagehead h1 span { color: #b0aaa0; }
+  .pagehead p { margin-top: 11px; font-size: 13.5px; line-height: 1.8; color: #cdc7bd; }
+  .pagehead p b { color: #fff; }
+
+  .row { display: flex; gap: 34px; flex-wrap: wrap; justify-content: center; align-items: flex-start; }
+  .col { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .caption { font-size: 11.5px; color: #d8d2c8; letter-spacing: .04em; }
+  .caption b { color: #fff; font-weight: 600; }
+
+  .panel {
+    width: 348px; background: var(--bg); color: var(--ink);
+    border-radius: 26px; padding: 18px 16px 20px;
+    box-shadow: 0 18px 44px rgba(0,0,0,.32);
+  }
+
+  .brand { font-size: 25px; font-weight: 800; line-height: 1.08; letter-spacing: -.6px; }
+  .brand em { display: block; font-style: normal; color: var(--faint); }
+
+  /* ---- 预览 ---- */
+  .view { position: relative; margin-top: 16px; height: 150px; border-radius: 18px;
+          overflow: hidden; background: #2a2823; }
+  .view .sky  { position: absolute; inset: 0;
+                background: linear-gradient(180deg, #a8a49a 0%, #7c7871 46%, #565349 74%, #3c3a34 100%); }
+  .view .sun  { position: absolute; left: 62%; top: 16%; width: 52px; height: 52px;
+                border-radius: 50%; background: rgba(255,252,244,.52); }
+  .view .hill { position: absolute; left: -14%; right: -14%; bottom: -44%; height: 74%;
+                border-radius: 50% 50% 0 0 / 62% 62% 0 0; background: #35322c; }
+  .view .h2   { left: -46%; right: 18%; bottom: -58%; height: 70%; background: #211f1b; }
+  .view .tone { position: absolute; inset: 0;
+                background-image: radial-gradient(rgba(18,16,14,.30) 1px, transparent 1.25px);
+                background-size: 3.2px 3.2px; }
+  .view .tag { position: absolute; left: 10px; bottom: 9px; font-family: ui-monospace, Consolas, monospace;
+               font-size: 9.5px; letter-spacing: .04em; color: rgba(255,255,255,.78); }
+  .viewcap { display: flex; justify-content: space-between; align-items: center; margin-top: 9px; }
+  .chip { border: 1.5px solid var(--mut); border-radius: 999px; padding: 3px 11px;
+          font-size: 10.5px; font-weight: 600; }
+  .mono { font-family: ui-monospace, Consolas, monospace; font-variant-numeric: tabular-nums; }
+  .viewcap .mono { font-size: 9.5px; color: var(--faint); }
+
+  .lab { display: flex; justify-content: space-between; align-items: baseline;
+         margin: 17px 2px 8px; }
+  .lab b { font-size: 11px; font-weight: 700; letter-spacing: .16em; color: var(--mut); }
+  .lab i { font-style: normal; font-size: 11px; color: var(--faint); }
+
+  /* ---- 胶片：写实暗盒的「承台」处理 ----
+     写实物体直接贴在平面色上会像贴纸。给它一块微凹的承台 + 落地投影，
+     再统一压一点饱和度，四款不同配色才会落在同一个色调体系里。 */
+  .film { display: flex; align-items: center; gap: 14px; background: var(--paper);
+          border-radius: 18px; padding: 11px 14px 11px 11px; }
+  .stage { width: 62px; height: 74px; flex: 0 0 62px; border-radius: 14px;
+           background: radial-gradient(ellipse 74% 52% at 50% 82%, var(--stage) 0%, #ded9d0 62%, #cfc9bf 100%);
+           display: flex; align-items: flex-end; justify-content: center;
+           box-shadow: inset 0 1px 2px rgba(255,255,255,.9), inset 0 -2px 5px rgba(90,80,70,.14); }
+  .stage img { width: 58px; height: 72px; object-fit: contain; display: block;
+               filter: saturate(.9) contrast(1.03) drop-shadow(0 5px 5px rgba(60,50,42,.34)); }
+  .film .txt { flex: 1 1 auto; min-width: 0; }
+  .film .brandline { font-size: 10px; font-weight: 700; letter-spacing: .14em; color: var(--mut); }
+  .film .name { font-size: 20px; font-weight: 800; letter-spacing: -.3px; line-height: 1.16; }
+  .film .meta { font-size: 10.5px; color: var(--mut); margin-top: 2px; }
+  .caret { font-size: 10px; color: var(--mut); }
+
+  /* ---- 感光度：全稿唯一的强调色块 ---- */
+  .hero { margin-top: 17px; background: var(--accent); border-radius: 18px;
+          padding: 13px 14px 12px; color: #fff; }
+  .hero .top { display: flex; justify-content: space-between; align-items: baseline;
+               font-size: 10.5px; font-weight: 700; letter-spacing: .16em; }
+  .hero .big { font-size: 46px; font-weight: 800; letter-spacing: -2px; line-height: 1;
+               font-variant-numeric: tabular-nums; margin: 5px 0 2px; }
+  .hero .big small { font-size: 15px; font-weight: 700; letter-spacing: 0; margin-right: 6px;
+                     vertical-align: 13px; opacity: .82; }
+  .hero .sub { font-size: 11px; font-weight: 600; opacity: .88; }
+  .seg { display: flex; gap: 6px; margin-top: 11px; }
+  .seg span { flex: 1 1 0; text-align: center; font-size: 10.5px; font-weight: 700;
+              padding: 6px 0; border-radius: 999px;
+              background: rgba(255,255,255,.17); color: #fff; }
+  .seg span.on { background: #fff; color: var(--accentd); }
+  .seg.plain span { background: var(--paper); color: var(--mut); }
+  .seg.plain span.on { background: var(--ink); color: var(--paper); }
+
+  .amt { display: flex; justify-content: space-between; align-items: baseline; }
+  .amt .v { font-size: 19px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .track { position: relative; height: 22px; margin-top: 4px; }
+  .track .rail { position: absolute; left: 0; right: 0; top: 10px; height: 3px;
+                 border-radius: 2px; background: var(--card); }
+  .track .fill { position: absolute; left: 0; top: 10px; height: 3px; border-radius: 2px;
+                 background: var(--accent); }
+  .track .knob { position: absolute; top: 3px; width: 16px; height: 16px; border-radius: 50%;
+                 background: var(--accent); border: 3px solid var(--bg); }
+
+  .actions { display: flex; gap: 9px; margin-top: 19px; }
+  .btn { flex: 1 1 auto; text-align: center; padding: 13px; border-radius: 999px;
+         font-size: 13.5px; font-weight: 800; background: var(--ink); color: var(--paper); }
+  .btn.ghost { flex: 0 0 78px; background: transparent; color: var(--ink);
+               border: 1.5px solid var(--mut); font-weight: 600; font-size: 11.5px; }
+
+  .foot { display: flex; justify-content: space-between; margin-top: 15px;
+          padding-top: 11px; border-top: 1.5px solid var(--card);
+          font-size: 9.5px; color: var(--faint); }
+  .foot b { color: var(--mut); font-weight: 700; }
+
+  /* ---- 展开的胶片列表 ---- */
+  .film.open { border-radius: 18px 18px 0 0; }
+  .list { background: var(--paper); border-radius: 0 0 18px 18px; padding-bottom: 6px; }
+  .grp { font-size: 9.5px; font-weight: 700; letter-spacing: .16em; color: var(--faint);
+         padding: 10px 14px 3px; }
+  .opt { display: flex; align-items: center; gap: 11px; padding: 6px 14px; }
+  .opt .mini { width: 34px; height: 34px; flex: 0 0 34px; display: flex;
+               align-items: flex-end; justify-content: center; }
+  .opt .mini img { width: 32px; height: 32px; object-fit: contain;
+                   filter: saturate(.9) contrast(1.03) drop-shadow(0 2px 2px rgba(60,50,42,.30)); }
+  .opt .n { flex: 1 1 auto; font-size: 13px; font-weight: 600; }
+  .opt .iso { font-size: 10px; color: var(--faint); }
+  .opt.on { background: var(--accent); color: #fff; border-radius: 10px;
+            margin: 0 6px; padding-left: 8px; padding-right: 8px; }
+  .opt.on .iso { color: rgba(255,255,255,.72); }
+  .scrollhint { text-align: center; font-size: 9.5px; color: var(--faint); padding: 6px 0 2px;
+                letter-spacing: .1em; }
+
+  /* ---- 说明区 ---- */
+  .gallery { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+  .gcard { width: 150px; border-radius: 18px; padding: 16px 10px 10px; text-align: center;
+           background: radial-gradient(ellipse 74% 52% at 50% 78%, #f4f1e9 0%, #ded9d0 62%, #cfc9bf 100%); }
+  .gcard img { width: 104px; height: 104px; object-fit: contain;
+               filter: saturate(.9) contrast(1.03) drop-shadow(0 6px 6px rgba(60,50,42,.34)); }
+  .gcard p { font-size: 10.5px; font-weight: 700; letter-spacing: .04em; margin-top: 8px; color: #5c574f; }
+
+  .spec { color: #cdc7bd; font-size: 12.5px; line-height: 1.9; max-width: 960px; }
+  .spec h2 { font-size: 16px; color: #fff; margin-bottom: 10px; font-weight: 700; }
+  .spec ul { list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px,1fr)); gap: 2px 30px; }
+  .spec li::before { content: "— "; color: #8b857c; }
+  .spec code { font-family: ui-monospace, Consolas, monospace; font-size: 11.5px;
+               background: rgba(255,255,255,.10); padding: 1px 6px; border-radius: 5px; color: #fff; }
+  .swatch { display: inline-block; width: 11px; height: 11px; border-radius: 3px;
+            vertical-align: -1px; margin-right: 5px; border: 1px solid rgba(255,255,255,.25); }
+</style>
+</head>
+<body>
+
+<div class="pagehead">
+  <h1>银盐 <span>UI 预览稿 · 方案 B 结构</span></h1>
+  <p>按方案 B 的展开式结构做的<b>一版</b>视觉稿，仅预览，<b>未改动插件本体</b>。<br>
+     两处调整：主色由朱红压到<b>朱红与勃艮第红之间的深红</b>；暗盒换成<b>写实 3D 渲染</b>，按真实 135 暗盒还原。</p>
+</div>
+
+<div class="gallery">
+  <div class="gcard"><img data-a="kodak" alt=""><p>柯达彩负</p></div>
+  <div class="gcard"><img data-a="fuji" alt=""><p>富士彩负</p></div>
+  <div class="gcard"><img data-a="bw" alt=""><p>黑白负片</p></div>
+  <div class="gcard"><img data-a="slide" alt=""><p>反转片</p></div>
+</div>
+
+<div class="row">
+
+  <!-- ================= 方案 B：胶片列表展开 ================= -->
+  <div class="col">
+    <div class="panel">
+      <div class="brand">银盐<em>Silver Halide</em></div>
+
+      <div class="view">
+        <div class="sky"></div><div class="sun"></div><div class="hill"></div><div class="hill h2"></div><div class="tone"></div>
+        <div class="tag">1:1 · 336×180</div>
+      </div>
+      <div class="viewcap"><span class="chip">看原图</span><span class="mono">@ 2000,3000</span></div>
+
+      <div class="lab"><b>胶片</b><i>点击收起</i></div>
+      <div class="film open">
+        <div class="stage"><img data-a="kodak" alt=""></div>
+        <div class="txt">
+          <div class="brandline">KODAK</div>
+          <div class="name">Portra 400</div>
+          <div class="meta">彩色负片 · 细颗粒</div>
+        </div>
+        <div class="caret">▲</div>
+      </div>
+      <div class="list">
+        <div class="grp">彩色负片</div>
+        <div class="opt"><span class="mini"><img data-a="kodak" alt=""></span><span class="n">Ektar 100</span><span class="iso">100</span></div>
+        <div class="opt"><span class="mini"><img data-a="kodak" alt=""></span><span class="n">Portra 160</span><span class="iso">160</span></div>
+        <div class="opt on"><span class="mini"><img data-a="kodak" alt=""></span><span class="n">Portra 400</span><span class="iso">400</span></div>
+        <div class="opt"><span class="mini"><img data-a="kodak" alt=""></span><span class="n">Portra 800</span><span class="iso">800</span></div>
+        <div class="opt"><span class="mini"><img data-a="fuji" alt=""></span><span class="n">Superia X-TRA 400</span><span class="iso">400</span></div>
+        <div class="grp">黑白负片</div>
+        <div class="opt"><span class="mini"><img data-a="bw" alt=""></span><span class="n">T-Max 400</span><span class="iso">400</span></div>
+        <div class="opt"><span class="mini"><img data-a="bw" alt=""></span><span class="n">Tri-X 400</span><span class="iso">400</span></div>
+        <div class="opt"><span class="mini"><img data-a="bw" alt=""></span><span class="n">HP5 Plus 400</span><span class="iso">400</span></div>
+        <div class="grp">反转片</div>
+        <div class="opt"><span class="mini"><img data-a="slide" alt=""></span><span class="n">Velvia 50</span><span class="iso">50</span></div>
+        <div class="opt"><span class="mini"><img data-a="slide" alt=""></span><span class="n">Ektachrome E100</span><span class="iso">100</span></div>
+        <div class="scrollhint">· 共 23 款 ·</div>
+      </div>
+
+      <div class="hero">
+        <div class="top"><span>感光度</span><span>箱速</span></div>
+        <div class="big"><small>ISO</small>400</div>
+        <div class="sub">Portra 400 · 未推冲</div>
+        <div class="seg">
+          <span>−1</span><span class="on">箱速</span><span>+1</span><span>+2</span><span>+3</span>
+        </div>
+      </div>
+
+      <div class="lab"><b>画幅</b><i>36 × 24 mm · 全画幅</i></div>
+      <div class="seg plain">
+        <span class="on">135</span><span>120</span><span>4×5</span><span>16mm</span>
+      </div>
+
+      <div class="lab"><b>颗粒量</b></div>
+      <div class="amt"><span class="v">100<small style="font-size:12px">%</small></span></div>
+      <div class="track">
+        <div class="rail"></div><div class="fill" style="width:50%"></div>
+        <div class="knob" style="left:calc(50% - 8px)"></div>
+      </div>
+
+      <div class="actions">
+        <div class="btn">应用颗粒</div>
+        <div class="btn ghost">移除</div>
+      </div>
+
+      <div class="foot mono">
+        <span><b>μr</b> 2.00px</span><span><b>σc</b> 6.8px</span><span><b>S</b> .0140</span>
+      </div>
+    </div>
+    <div class="caption"><b>方案 B</b>　胶片列表展开态（本版采用的结构）</div>
+  </div>
+
+  <!-- ================= 同版设计：收起态 ================= -->
+  <div class="col">
+    <div class="panel">
+      <div class="brand">银盐<em>Silver Halide</em></div>
+
+      <div class="view">
+        <div class="sky"></div><div class="sun"></div><div class="hill"></div><div class="hill h2"></div><div class="tone"></div>
+        <div class="tag">1:1 · 336×180</div>
+      </div>
+      <div class="viewcap"><span class="chip">看原图</span><span class="mono">@ 2000,3000</span></div>
+
+      <div class="lab"><b>胶片</b><i>彩色负片 · 细颗粒</i></div>
+      <div class="film">
+        <div class="stage"><img data-a="kodak" alt=""></div>
+        <div class="txt">
+          <div class="brandline">KODAK</div>
+          <div class="name">Portra 400</div>
+          <div class="meta">彩色负片 · 细颗粒</div>
+        </div>
+        <div class="caret">▼</div>
+      </div>
+
+      <div class="hero">
+        <div class="top"><span>感光度</span><span>推一档</span></div>
+        <div class="big"><small>ISO</small>800</div>
+        <div class="sub">Portra 400 · +1 EV · 颗粒略变粗</div>
+        <div class="seg">
+          <span>−1</span><span>箱速</span><span class="on">+1</span><span>+2</span><span>+3</span>
+        </div>
+      </div>
+
+      <div class="lab"><b>画幅</b><i>120 · 6 × 6 cm</i></div>
+      <div class="seg plain">
+        <span>135</span><span class="on">120</span><span>4×5</span><span>16mm</span>
+      </div>
+
+      <div class="lab"><b>颗粒量</b></div>
+      <div class="amt"><span class="v">75<small style="font-size:12px">%</small></span></div>
+      <div class="track">
+        <div class="rail"></div><div class="fill" style="width:37.5%"></div>
+        <div class="knob" style="left:calc(37.5% - 8px)"></div>
+      </div>
+
+      <div class="actions">
+        <div class="btn">应用颗粒</div>
+        <div class="btn ghost">移除</div>
+      </div>
+
+      <div class="foot mono">
+        <span><b>μr</b> 1.65px</span><span><b>σc</b> 5.6px</span><span><b>S</b> .0105</span>
+      </div>
+    </div>
+    <div class="caption"><b>同一版</b>　收起态（日常使用时的样子）</div>
+  </div>
+
+</div>
+
+<div class="spec">
+  <h2>这一版改了什么</h2>
+  <ul>
+    <li>结构沿用方案 B：<b>展开式胶片列表</b>，按彩负 / 黑白 / 反转三组分段</li>
+    <li>主色 <span class="swatch" style="background:#a82f24"></span><code>#a82f24</code> 取代 <code>#ff3b12</code> —— 亮度 L* 由 63 降到 38</li>
+    <li>白字对比度仍 <b>6.8:1</b>（AAA），对暖灰底 3.3:1 —— 仍能撑起强调色，但不抢画面</li>
+    <li>暗盒换成<b>写实 3D 渲染</b>：黑塑料筒身、金属卷轴孔、右侧伸出的片头带齿孔</li>
+    <li>四款用<b>同一母本换色</b>生成，机位 / 光照 / 片头完全一致</li>
+    <li>每个暗盒放在统一「承台」上并加落地投影，避免像贴纸</li>
+    <li>图像统一 <code>saturate(.9)</code> 轻压饱和，四款配色才落在同一色调里</li>
+    <li>胶片卡不再堆乳剂术语，只留「彩色负片 · 细颗粒」这类可读信息</li>
+  </ul>
+  <h2 style="margin-top:24px">设计 token</h2>
+  <ul>
+    <li>底 <code>#b9b4ac</code> 暖灰 · 卡片 <code>#ece8e0</code> 米白 · 承台 <code>#f4f1e9</code></li>
+    <li>强调 <code>#a82f24</code>（按下 <code>#8d2318</code>）—— <b>全稿只三处</b>：ISO 块 / 选中行 / 滑块</li>
+    <li>正文 <code>#14120f</code> · 次要 <code>#7c776e</code> · 极淡 <code>#9a958c</code></li>
+    <li>圆角：面板 26 / 卡片 18 / 承台 14 / 胶囊 999</li>
+    <li>字重只用 600 / 700 / 800，数字一律等宽</li>
+  </ul>
+</div>
+
+<script>
+var ASSETS = {{assets-json}};
+document.querySelectorAll("img[data-a]").forEach(function (el) { el.src = ASSETS[el.dataset.a]; });
+</script>
+</body>
+</html>

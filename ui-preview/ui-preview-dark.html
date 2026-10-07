@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>银盐 · UI 预览稿 v0.6（深色主题）</title>
+<style>
+  /* ============================================================
+     本版
+     ① 整体转深色主题：页面底取参考图那块牛仔布的蓝黑，面板取 PS 深色主题的
+        中性灰（真实面板会跟随 PS 主题，这里只是把深色态画出来）。
+     ② 胶片素材换成「珐琅徽章」：扁平高饱和色块 + 匀黑描边 + 右侧带齿孔的
+        片头条 + 树脂高光，形制与配色对照参考图。素材是内联 SVG，不是位图。
+     ============================================================ */
+  :root {
+    --page:    #0f141b;   /* 牛仔布底 */
+    --bg:      #232323;   /* 面板 */
+    --card:    #2c2c2c;   /* 卡片（凸起） */
+    --well:    #191919;   /* 承台（内凹） */
+    --line:    #383838;
+    --ink:     #eeeeee;
+    --mut:     #9e9e9e;
+    --faint:   #6e6e6e;
+    --accent:  #c1382a;   /* 深红：全稿唯一的强调色 */
+    --accentd: #96291f;
+    --accentl: #e0705f;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background-color: var(--page);
+    background-image:
+      repeating-linear-gradient(90deg, rgba(150,190,225,.048) 0 1px, transparent 1px 3px),
+      repeating-linear-gradient(0deg,  rgba(150,190,225,.034) 0 1px, transparent 1px 3px),
+      radial-gradient(ellipse 130% 80% at 50% -8%, #1c2634 0%, #0d1117 72%);
+    font-family: "Inter", system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    padding: 42px 28px 70px;
+    display: flex; flex-direction: column; align-items: center; gap: 34px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .pagehead { text-align: center; max-width: 1000px; }
+  .pagehead h1 { font-size: 30px; font-weight: 800; letter-spacing: -.6px; color: #f2f2f0; }
+  .pagehead h1 span { color: #7f8b9a; font-weight: 600; }
+  .pagehead p { margin-top: 12px; font-size: 13.5px; line-height: 1.85; color: #9aa6b4; }
+  .pagehead p b { color: #e8e8e4; font-weight: 700; }
+
+  .row { display: flex; gap: 34px; flex-wrap: wrap; justify-content: center; align-items: flex-start; }
+  .col { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .caption { font-size: 11.5px; color: #8b96a4; letter-spacing: .04em; }
+  .caption b { color: #d9d9d4; font-weight: 600; }
+
+  /* ---- 徽章 ---- */
+  .pin { display: block; filter: drop-shadow(0 3px 4px rgba(0,0,0,.62)); }
+  .pin.card { width: 56px; height: 56px; }
+  .pin.mini { width: 30px; height: 30px; filter: drop-shadow(0 1px 2px rgba(0,0,0,.7)); }
+
+  /* ---- 参考图风格的散落陈列 ---- */
+  .scatter { position: relative; width: 760px; height: 236px; max-width: 100%;
+             border-radius: 22px; overflow: hidden;
+             background-color: #0d1420;
+             background-image:
+               repeating-linear-gradient(90deg, rgba(150,190,225,.055) 0 1px, transparent 1px 3px),
+               repeating-linear-gradient(0deg,  rgba(150,190,225,.04) 0 1px, transparent 1px 3px),
+               radial-gradient(ellipse 90% 120% at 30% 10%, #1a2532 0%, #0b1119 78%);
+             box-shadow: inset 0 0 60px rgba(0,0,0,.6); }
+  .scatter .label { position: absolute; left: 18px; top: 15px; z-index: 2;
+                    font-size: 10px; font-weight: 700; letter-spacing: .2em; color: #6f7e8f; }
+  .scatter b { position: absolute; z-index: 2; left: 18px; bottom: 14px;
+               font-size: 11px; color: #8b96a4; font-weight: 500; }
+  .scatter b u { color: #d9d9d4; text-decoration: none; font-weight: 700; }
+  .scatter svg { position: absolute; width: 76px; height: 76px;
+                 filter: drop-shadow(0 9px 14px rgba(0,0,0,.62)); }
+  .p1 { left: 76px;  top: 26px;  transform: rotate(-13deg); }
+  .p2 { left: 176px; top: 62px;  transform: rotate(6deg); }
+  .p3 { left: 268px; top: 22px;  transform: rotate(-6deg); }
+  .p4 { left: 356px; top: 78px;  transform: rotate(11deg); }
+  .p5 { left: 452px; top: 30px;  transform: rotate(-9deg); }
+  .p6 { left: 552px; top: 70px;  transform: rotate(7deg); }
+  .p7 { left: 640px; top: 132px; transform: rotate(-16deg); width: 66px; height: 66px; }
+  .p8 { left: 130px; top: 132px; transform: rotate(14deg);  width: 66px; height: 66px; }
+  .p9 { left: 300px; top: 150px; transform: rotate(-8deg);  width: 62px; height: 62px; }
+  .p10 { left: 470px; top: 152px; transform: rotate(17deg); width: 62px; height: 62px; }
+
+  /* ---- 面板 ---- */
+  .panel {
+    width: 348px; background: var(--bg); color: var(--ink);
+    border-radius: 26px; padding: 18px 16px 20px;
+    box-shadow: 0 22px 50px rgba(0,0,0,.62), inset 0 1px 0 rgba(255,255,255,.045);
+  }
+
+  .brand { font-size: 25px; font-weight: 800; line-height: 1.08; letter-spacing: -.6px; }
+  .brand em { display: block; font-style: normal; color: var(--faint); }
+
+  /* ---- 预览（半调网点本身就是「颗粒」的视觉隐喻）---- */
+  .view { position: relative; margin-top: 16px; height: 150px; border-radius: 18px;
+          overflow: hidden; background: #151515; }
+  .view .sky  { position: absolute; inset: 0;
+                background: linear-gradient(180deg, #8e8d86 0%, #6a6961 44%, #494840 72%, #2f2e29 100%); }
+  .view .sun  { position: absolute; left: 62%; top: 15%; width: 50px; height: 50px;
+                border-radius: 50%; background: rgba(255,252,244,.60); }
+  .view .hill { position: absolute; left: -14%; right: -14%; bottom: -44%; height: 74%;
+                border-radius: 50% 50% 0 0 / 62% 62% 0 0; background: #2b2925; }
+  .view .h2   { left: -46%; right: 18%; bottom: -58%; height: 70%; background: #1a1815; }
+  .view .tone { position: absolute; inset: 0;
+                background-image: radial-gradient(rgba(14,12,10,.26) 0.9px, transparent 1.1px);
+                background-size: 3px 3px; }
+  .view .tag { position: absolute; left: 10px; bottom: 9px; font-family: ui-monospace, Consolas, monospace;
+               font-size: 9.5px; letter-spacing: .04em; color: rgba(255,255,255,.8); }
+  .viewcap { display: flex; justify-content: space-between; align-items: center; margin-top: 9px; }
+  .chip { border: 1.5px solid var(--mut); border-radius: 999px; padding: 3px 11px;
+          font-size: 10.5px; font-weight: 600; color: var(--ink); }
+  .mono { font-family: ui-monospace, Consolas, monospace; font-variant-numeric: tabular-nums; }
+  .viewcap .mono { font-size: 9.5px; color: var(--faint); }
+
+  .lab { display: flex; justify-content: space-between; align-items: baseline;
+         margin: 17px 2px 8px; }
+  .lab b { font-size: 11px; font-weight: 700; letter-spacing: .16em; color: var(--mut); }
+  .lab i { font-style: normal; font-size: 11px; color: var(--faint); }
+
+  /* ---- 胶片卡片：徽章放在一块内凹的承台上 ---- */
+  .film { display: flex; align-items: center; gap: 13px; background: var(--card);
+          border-radius: 18px; padding: 10px 14px 10px 10px; }
+  .stage { width: 62px; height: 62px; flex: 0 0 62px; border-radius: 14px;
+           background: radial-gradient(ellipse 76% 56% at 50% 74%, #171717 0%, #1e1e1e 62%, #272727 100%);
+           display: flex; align-items: center; justify-content: center;
+           box-shadow: inset 0 2px 4px rgba(0,0,0,.72), inset 0 -1px 0 rgba(255,255,255,.05); }
+  .film .txt { flex: 1 1 auto; min-width: 0; }
+  .film .brandline { font-size: 10px; font-weight: 700; letter-spacing: .14em; color: var(--mut); }
+  .film .name { font-size: 20px; font-weight: 800; letter-spacing: -.3px; line-height: 1.16; }
+  .film .meta { font-size: 10.5px; color: var(--mut); margin-top: 2px; }
+  .caret { font-size: 10px; color: var(--mut); }
+
+  /* ---- 感光度：全稿唯一的强调色块 ---- */
+  .hero { margin-top: 17px; background: var(--accent); border-radius: 18px;
+          padding: 13px 14px 12px; color: #fff;
+          box-shadow: inset 0 1px 0 rgba(255,255,255,.16); }
+  .hero .top { display: flex; justify-content: space-between; align-items: baseline;
+               font-size: 10.5px; font-weight: 700; letter-spacing: .16em; }
+  .hero .big { font-size: 46px; font-weight: 800; letter-spacing: -2px; line-height: 1;
+               font-variant-numeric: tabular-nums; margin: 5px 0 2px; }
+  .hero .big small { font-size: 15px; font-weight: 700; letter-spacing: 0; margin-right: 6px;
+                     vertical-align: 13px; opacity: .82; }
+  .hero .sub { font-size: 11px; font-weight: 600; opacity: .88; }
+  .seg { display: flex; gap: 6px; margin-top: 11px; }
+  .seg span { flex: 1 1 0; text-align: center; font-size: 10.5px; font-weight: 700;
+              padding: 6px 0; border-radius: 999px;
+              background: rgba(0,0,0,.22); color: #fff; }
+  .seg span.on { background: #fff; color: var(--accentd); }
+  .seg.plain span { background: var(--card); color: var(--mut); }
+  .seg.plain span.on { background: var(--accent); color: #fff; }
+
+  .amt { display: flex; justify-content: space-between; align-items: baseline; }
+  .amt .v { font-size: 19px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .track { position: relative; height: 22px; margin-top: 4px; }
+  .track .rail { position: absolute; left: 0; right: 0; top: 10px; height: 3px;
+                 border-radius: 2px; background: #3d3d3d; }
+  .track .fill { position: absolute; left: 0; top: 10px; height: 3px; border-radius: 2px;
+                 background: var(--accent); }
+  .track .knob { position: absolute; top: 3px; width: 16px; height: 16px; border-radius: 50%;
+                 background: var(--accent); border: 3px solid var(--bg);
+                 box-shadow: 0 1px 3px rgba(0,0,0,.6); }
+
+  .actions { display: flex; gap: 9px; margin-top: 19px; }
+  .btn { flex: 1 1 auto; text-align: center; padding: 13px; border-radius: 999px;
+         font-size: 13.5px; font-weight: 800; background: var(--accent); color: #fff; }
+  .btn.ghost { flex: 0 0 78px; background: transparent; color: var(--mut);
+               border: 1.5px solid #4a4a4a; font-weight: 600; font-size: 11.5px; }
+
+  .foot { display: flex; justify-content: space-between; margin-top: 15px;
+          padding-top: 11px; border-top: 1.5px solid var(--line);
+          font-size: 9.5px; color: var(--faint); }
+  .foot b { color: var(--mut); font-weight: 700; }
+
+  /* ---- 展开的胶片列表 ---- */
+  .film.open { border-radius: 18px 18px 0 0; }
+  .list { background: var(--card); border-radius: 0 0 18px 18px; padding-bottom: 6px; }
+  .grp { font-size: 9.5px; font-weight: 700; letter-spacing: .16em; color: var(--faint);
+         padding: 10px 14px 3px; }
+  .opt { display: flex; align-items: center; gap: 11px; padding: 6px 14px; }
+  .opt .mini { width: 32px; height: 32px; flex: 0 0 32px; display: flex;
+               align-items: center; justify-content: center; }
+  .opt .n { flex: 1 1 auto; font-size: 13px; font-weight: 600; }
+  .opt .iso { font-size: 10px; color: var(--faint); font-variant-numeric: tabular-nums; }
+  .opt.on { background: var(--accent); color: #fff; border-radius: 10px;
+            margin: 0 6px; padding-left: 8px; padding-right: 8px; }
+  .opt.on .iso { color: rgba(255,255,255,.76); }
+  .scrollhint { text-align: center; font-size: 9.5px; color: var(--faint); padding: 6px 0 2px;
+                letter-spacing: .1em; }
+
+  /* ---- 说明区 ---- */
+  .spec { color: #98a4b2; font-size: 12.5px; line-height: 1.9; max-width: 980px; }
+  .spec h2 { font-size: 16px; color: #f0f0ec; margin-bottom: 10px; font-weight: 700; }
+  .spec ul { list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(320px,1fr)); gap: 2px 30px; }
+  .spec li::before { content: "— "; color: #57636f; }
+  .spec code { font-family: ui-monospace, Consolas, monospace; font-size: 11.5px;
+               background: rgba(255,255,255,.08); padding: 1px 6px; border-radius: 5px; color: #e8e8e4; }
+  .swatch { display: inline-block; width: 11px; height: 11px; border-radius: 3px;
+            vertical-align: -1px; margin-right: 5px; border: 1px solid rgba(255,255,255,.22); }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<linearGradient id="pinGloss" x1="0" y1="0" x2="0.42" y2="1">
+<stop offset="0" stop-color="#ffffff" stop-opacity=".40"/>
+<stop offset=".30" stop-color="#ffffff" stop-opacity=".12"/>
+<stop offset=".52" stop-color="#ffffff" stop-opacity="0"/>
+<stop offset=".82" stop-color="#000000" stop-opacity=".07"/>
+<stop offset="1" stop-color="#000000" stop-opacity=".22"/>
+</linearGradient>
+</defs><symbol id="pin-ektar100" viewBox="0 0 120 120">
+<defs>
+<clipPath id="cl-pin-ektar100">
+<rect x="4" y="10" width="74" height="100" rx="9"/>
+<rect x="52" y="16" width="64" height="62" rx="8"/>
+</clipPath>
+</defs>
+<g stroke="#0c0c0c" stroke-width="3.6" stroke-linejoin="round" stroke-linecap="round">
+<rect x="52" y="16" width="64" height="62" rx="8" fill="#7d5a2e"/>
+<rect x="4" y="10" width="74" height="100" rx="9" fill="#e8a72a"/>
+</g>
+<g fill="#fbf3e2"><rect x="82" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="88.4" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="94.8" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="101.2" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="107.6" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="82" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="88.4" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="94.8" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="101.2" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="107.6" y="68" width="4.4" height="4.5" rx="1.2"/></g>
+<g font-family="'Arial Narrow','Helvetica Neue',Impact,'PingFang SC',sans-serif" font-weight="700" fill="#211604">
+<text x="13" y="37" font-size="11.5" letter-spacing="1">KODAK</text>
+<text x="13" y="84" font-size="35.0" font-weight="800" letter-spacing="-1.2">100</text>
+<text x="13" y="99" font-size="9.5" letter-spacing=".8" opacity=".82">EKTAR</text>
+</g>
+<rect x="13" y="43" width="30" height="2.2" rx="1.1" fill="#211604" opacity=".62"/>
+<g clip-path="url(#cl-pin-ektar100)">
+<rect x="0" y="0" width="120" height="120" fill="url(#pinGloss)"/>
+</g>
+</symbol>
+<symbol id="pin-portra160" viewBox="0 0 120 120">
+<defs>
+<clipPath id="cl-pin-portra160">
+<rect x="4" y="10" width="74" height="100" rx="9"/>
+<rect x="52" y="16" width="64" height="62" rx="8"/>
+</clipPath>
+</defs>
+<g stroke="#0c0c0c" stroke-width="3.6" stroke-linejoin="round" stroke-linecap="round">
+<rect x="52" y="16" width="64" height="62" rx="8" fill="#7d5a2e"/>
+<rect x="4" y="10" width="74" height="100" rx="9" fill="#e8a72a"/>
+</g>
+<g fill="#fbf3e2"><rect x="82" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="88.4" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="94.8" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="101.2" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="107.6" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="82" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="88.4" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="94.8" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="101.2" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="107.6" y="68" width="4.4" height="4.5" rx="1.2"/></g>
+<g font-family="'Arial Narrow','Helvetica Neue',Impact,'PingFang SC',sans-serif" font-weight="700" fill="#211604">
+<text x="13" y="37" font-size="11.5" letter-spacing="1">KODAK</text>
+<text x="13" y="84" font-size="35.0" font-weight="800" letter-spacing="-1.2">160</text>
+<text x="13" y="99" font-size="9.5" letter-spacing=".8" opacity=".82">PORTRA</text>
+</g>
+<rect x="13" y="43" width="30" height="2.2" rx="1.1" fill="#211604" opacity=".62"/>
+<g clip-path="url(#cl-pin-portra160)">
+<rect x="0" y="0" width="120" height="120" fill="url(#pinGloss)"/>
+</g>
+</symbol>
+<symbol id="pin-portra400" viewBox="0 0 120 120">
+<defs>
+<clipPath id="cl-pin-portra400">
+<rect x="4" y="10" width="74" height="100" rx="9"/>
+<rect x="52" y="16" width="64" height="62" rx="8"/>
+</clipPath>
+</defs>
+<g stroke="#0c0c0c" stroke-width="3.6" stroke-linejoin="round" stroke-linecap="round">
+<rect x="52" y="16" width="64" height="62" rx="8" fill="#7d5a2e"/>
+<rect x="4" y="10" width="74" height="100" rx="9" fill="#e8a72a"/>
+</g>
+<g fill="#fbf3e2"><rect x="82" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="88.4" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="94.8" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="101.2" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="107.6" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="82" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="88.4" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="94.8" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="101.2" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="107.6" y="68" width="4.4" height="4.5" rx="1.2"/></g>
+<g font-family="'Arial Narrow','Helvetica Neue',Impact,'PingFang SC',sans-serif" font-weight="700" fill="#211604">
+<text x="13" y="37" font-size="11.5" letter-spacing="1">KODAK</text>
+<text x="13" y="84" font-size="35.0" font-weight="800" letter-spacing="-1.2">400</text>
+<text x="13" y="99" font-size="9.5" letter-spacing=".8" opacity=".82">PORTRA</text>
+</g>
+<rect x="13" y="43" width="30" height="2.2" rx="1.1" fill="#211604" opacity=".62"/>
+<g clip-path="url(#cl-pin-portra400)">
+<rect x="0" y="0" width="120" height="120" fill="url(#pinGloss)"/>
+</g>
+</symbol>
+<symbol id="pin-portra800" viewBox="0 0 120 120">
+<defs>
+<clipPath id="cl-pin-portra800">
+<rect x="4" y="10" width="74" height="100" rx="9"/>
+<rect x="52" y="16" width="64" height="62" rx="8"/>
+</clipPath>
+</defs>
+<g stroke="#0c0c0c" stroke-width="3.6" stroke-linejoin="round" stroke-linecap="round">
+<rect x="52" y="16" width="64" height="62" rx="8" fill="#7d5a2e"/>
+<rect x="4" y="10" width="74" height="100" rx="9" fill="#e8a72a"/>
+</g>
+<g fill="#fbf3e2"><rect x="82" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="88.4" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="94.8" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="101.2" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="107.6" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="82" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="88.4" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="94.8" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="101.2" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="107.6" y="68" width="4.4" height="4.5" rx="1.2"/></g>
+<g font-family="'Arial Narrow','Helvetica Neue',Impact,'PingFang SC',sans-serif" font-weight="700" fill="#211604">
+<text x="13" y="37" font-size="11.5" letter-spacing="1">KODAK</text>
+<text x="13" y="84" font-size="35.0" font-weight="800" letter-spacing="-1.2">800</text>
+<text x="13" y="99" font-size="9.5" letter-spacing=".8" opacity=".82">PORTRA</text>
+</g>
+<rect x="13" y="43" width="30" height="2.2" rx="1.1" fill="#211604" opacity=".62"/>
+<g clip-path="url(#cl-pin-portra800)">
+<rect x="0" y="0" width="120" height="120" fill="url(#pinGloss)"/>
+</g>
+</symbol>
+<symbol id="pin-gold200" viewBox="0 0 120 120">
+<defs>
+<clipPath id="cl-pin-gold200">
+<rect x="4" y="10" width="74" height="100" rx="9"/>
+<rect x="52" y="16" width="64" height="62" rx="8"/>
+</clipPath>
+</defs>
+<g stroke="#0c0c0c" stroke-width="3.6" stroke-linejoin="round" stroke-linecap="round">
+<rect x="52" y="16" width="64" height="62" rx="8" fill="#7d5a2e"/>
+<rect x="4" y="10" width="74" height="100" rx="9" fill="#e8a72a"/>
+</g>
+<g fill="#fbf3e2"><rect x="82" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="88.4" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="94.8" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="101.2" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="107.6" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="82" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="88.4" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="94.8" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="101.2" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="107.6" y="68" width="4.4" height="4.5" rx="1.2"/></g>
+<g font-family="'Arial Narrow','Helvetica Neue',Impact,'PingFang SC',sans-serif" font-weight="700" fill="#211604">
+<text x="13" y="37" font-size="11.5" letter-spacing="1">KODAK</text>
+<text x="13" y="84" font-size="35.0" font-weight="800" letter-spacing="-1.2">200</text>
+<text x="13" y="99" font-size="9.5" letter-spacing=".8" opacity=".82">GOLD</text>
+</g>
+<rect x="13" y="43" width="30" height="2.2" rx="1.1" fill="#211604" opacity=".62"/>
+<g clip-path="url(#cl-pin-gold200)">
+<rect x="0" y="0" width="120" height="120" fill="url(#pinGloss)"/>
+</g>
+</symbol>
+<symbol id="pin-ultramax400" viewBox="0 0 120 120">
+<defs>
+<clipPath id="cl-pin-ultramax400">
+<rect x="4" y="10" width="74" height="100" rx="9"/>
+<rect x="52" y="16" width="64" height="62" rx="8"/>
+</clipPath>
+</defs>
+<g stroke="#0c0c0c" stroke-width="3.6" stroke-linejoin="round" stroke-linecap="round">
+<rect x="52" y="16" width="64" height="62" rx="8" fill="#7d5a2e"/>
+<rect x="4" y="10" width="74" height="100" rx="9" fill="#e8a72a"/>
+</g>
+<g fill="#fbf3e2"><rect x="82" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="88.4" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="94.8" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="101.2" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="107.6" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="82" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="88.4" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="94.8" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="101.2" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="107.6" y="68" width="4.4" height="4.5" rx="1.2"/></g>
+<g font-family="'Arial Narrow','Helvetica Neue',Impact,'PingFang SC',sans-serif" font-weight="700" fill="#211604">
+<text x="13" y="37" font-size="11.5" letter-spacing="1">KODAK</text>
+<text x="13" y="84" font-size="35.0" font-weight="800" letter-spacing="-1.2">400</text>
+<text x="13" y="99" font-size="9.5" letter-spacing=".8" opacity=".82">ULTRA</text>
+</g>
+<rect x="13" y="43" width="30" height="2.2" rx="1.1" fill="#211604" opacity=".62"/>
+<g clip-path="url(#cl-pin-ultramax400)">
+<rect x="0" y="0" width="120" height="120" fill="url(#pinGloss)"/>
+</g>
+</symbol>
+<symbol id="pin-proimage100" viewBox="0 0 120 120">
+<defs>
+<clipPath id="cl-pin-proimage100">
+<rect x="4" y="10" width="74" height="100" rx="9"/>
+<rect x="52" y="16" width="64" height="62" rx="8"/>
+</clipPath>
+</defs>
+<g stroke="#0c0c0c" stroke-width="3.6" stroke-linejoin="round" stroke-linecap="round">
+<rect x="52" y="16" width="64" height="62" rx="8" fill="#7d5a2e"/>
+<rect x="4" y="10" width="74" height="100" rx="9" fill="#e8a72a"/>
+</g>
+<g fill="#fbf3e2"><rect x="82" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="88.4" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="94.8" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="101.2" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="107.6" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="82" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="88.4" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="94.8" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="101.2" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="107.6" y="68" width="4.4" height="4.5" rx="1.2"/></g>
+<g font-family="'Arial Narrow','Helvetica Neue',Impact,'PingFang SC',sans-serif" font-weight="700" fill="#211604">
+<text x="13" y="37" font-size="11.5" letter-spacing="1">KODAK</text>
+<text x="13" y="84" font-size="35.0" font-weight="800" letter-spacing="-1.2">100</text>
+<text x="13" y="99" font-size="9.5" letter-spacing=".8" opacity=".82">PRO</text>
+</g>
+<rect x="13" y="43" width="30" height="2.2" rx="1.1" fill="#211604" opacity=".62"/>
+<g clip-path="url(#cl-pin-proimage100)">
+<rect x="0" y="0" width="120" height="120" fill="url(#pinGloss)"/>
+</g>
+</symbol>
+<symbol id="pin-superia400" viewBox="0 0 120 120">
+<defs>
+<clipPath id="cl-pin-superia400">
+<rect x="4" y="10" width="74" height="100" rx="9"/>
+<rect x="52" y="16" width="64" height="62" rx="8"/>
+</clipPath>
+</defs>
+<g stroke="#0c0c0c" stroke-width="3.6" stroke-linejoin="round" stroke-linecap="round">
+<rect x="52" y="16" width="64" height="62" rx="8" fill="#8a9c2a"/>
+<rect x="4" y="10" width="74" height="100" rx="9" fill="#0f9c4c"/>
+</g>
+<g fill="#eefbe8"><rect x="82" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="88.4" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="94.8" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="101.2" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="107.6" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="82" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="88.4" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="94.8" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="101.2" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="107.6" y="68" width="4.4" height="4.5" rx="1.2"/></g>
+<g font-family="'Arial Narrow','Helvetica Neue',Impact,'PingFang SC',sans-serif" font-weight="700" fill="#04210f">
+<text x="13" y="37" font-size="10.5" letter-spacing="1">FUJIFILM</text>
+<text x="13" y="84" font-size="35.0" font-weight="800" letter-spacing="-1.2">400</text>
+<text x="13" y="99" font-size="9.5" letter-spacing=".8" opacity=".82">SUPERIA</text>
+</g>
+<rect x="13" y="43" width="30" height="2.2" rx="1.1" fill="#04210f" opacity=".62"/>
+<g clip-path="url(#cl-pin-superia400)">
+<rect x="0" y="0" width="120" height="120" fill="url(#pinGloss)"/>
+</g>
+</symbol>
+<symbol id="pin-c200" viewBox="0 0 120 120">
+<defs>
+<clipPath id="cl-pin-c200">
+<rect x="4" y="10" width="74" height="100" rx="9"/>
+<rect x="52" y="16" width="64" height="62" rx="8"/>
+</clipPath>
+</defs>
+<g stroke="#0c0c0c" stroke-width="3.6" stroke-linejoin="round" stroke-linecap="round">
+<rect x="52" y="16" width="64" height="62" rx="8" fill="#8a9c2a"/>
+<rect x="4" y="10" width="74" height="100" rx="9" fill="#0f9c4c"/>
+</g>
+<g fill="#eefbe8"><rect x="82" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="88.4" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="94.8" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="101.2" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="107.6" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="82" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="88.4" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="94.8" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="101.2" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="107.6" y="68" width="4.4" height="4.5" rx="1.2"/></g>
+<g font-family="'Arial Narrow','Helvetica Neue',Impact,'PingFang SC',sans-serif" font-weight="700" fill="#04210f">
+<text x="13" y="37" font-size="10.5" letter-spacing="1">FUJIFILM</text>
+<text x="13" y="84" font-size="35.0" font-weight="800" letter-spacing="-1.2">200</text>
+<text x="13" y="99" font-size="9.5" letter-spacing=".8" opacity=".82">C200</text>
+</g>
+<rect x="13" y="43" width="30" height="2.2" rx="1.1" fill="#04210f" opacity=".62"/>
+<g clip-path="url(#cl-pin-c200)">
+<rect x="0" y="0" width="120" height="120" fill="url(#pinGloss)"/>
+</g>
+</symbol>
+<symbol id="pin-panf50" viewBox="0 0 120 120">
+<defs>
+<clipPath id="cl-pin-panf50">
+<rect x="4" y="10" width="74" height="100" rx="9"/>
+<rect x="52" y="16" width="64" height="62" rx="8"/>
+</clipPath>
+</defs>
+<g stroke="#0c0c0c" stroke-width="3.6" stroke-linejoin="round" stroke-linecap="round">
+<rect x="52" y="16" width="64" height="62" rx="8" fill="#9a9a94"/>
+<rect x="4" y="10" width="74" height="100" rx="9" fill="#f0efe9"/>
+</g>
+<g fill="#ffffff"><rect x="82" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="88.4" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="94.8" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="101.2" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="107.6" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="82" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="88.4" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="94.8" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="101.2" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="107.6" y="68" width="4.4" height="4.5" rx="1.2"/></g>
+<g font-family="'Arial Narrow','Helvetica Neue',Impact,'PingFang SC',sans-serif" font-weight="700" fill="#131313">
+<text x="13" y="37" font-size="11.5" letter-spacing="1">ILFORD</text>
+<text x="13" y="84" font-size="40.0" font-weight="800" letter-spacing="-1.2">50</text>
+<text x="13" y="99" font-size="9.5" letter-spacing=".8" opacity=".82">PAN F</text>
+</g>
+<rect x="13" y="43" width="30" height="2.2" rx="1.1" fill="#131313" opacity=".62"/>
+<g clip-path="url(#cl-pin-panf50)">
+<rect x="0" y="0" width="120" height="120" fill="url(#pinGloss)"/>
+</g>
+</symbol>
+<symbol id="pin-d100" viewBox="0 0 120 120">
+<defs>
+<clipPath id="cl-pin-d100">
+<rect x="4" y="10" width="74" height="100" rx="9"/>
+<rect x="52" y="16" width="64" height="62" rx="8"/>
+</clipPath>
+</defs>
+<g stroke="#0c0c0c" stroke-width="3.6" stroke-linejoin="round" stroke-linecap="round">
+<rect x="52" y="16" width="64" height="62" rx="8" fill="#9a9a94"/>
+<rect x="4" y="10" width="74" height="100" rx="9" fill="#f0efe9"/>
+</g>
+<g fill="#ffffff"><rect x="82" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="88.4" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="94.8" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="101.2" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="107.6" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="82" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="88.4" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="94.8" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="101.2" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="107.6" y="68" width="4.4" height="4.5" rx="1.2"/></g>
+<g font-family="'Arial Narrow','Helvetica Neue',Impact,'PingFang SC',sans-serif" font-weight="700" fill="#131313">
+<text x="13" y="37" font-size="11.5" letter-spacing="1">ILFORD</text>
+<text x="13" y="84" font-size="35.0" font-weight="800" letter-spacing="-1.2">100</text>
+<text x="13" y="99" font-size="9.5" letter-spacing=".8" opacity=".82">DELTA</text>
+</g>
+<rect x="13" y="43" width="30" height="2.2" rx="1.1" fill="#131313" opacity=".62"/>
+<g clip-path="url(#cl-pin-d100)">
+<rect x="0" y="0" width="120" height="120" fill="url(#pinGloss)"/>
+</g>
+</symbol>
+<symbol id="pin-tmax100" viewBox="0 0 120 120">
+<defs>
+<clipPath id="cl-pin-tmax100">
+<rect x="4" y="10" width="74" height="100" rx="9"/>
+<rect x="52" y="16" width="64" height="62" rx="8"/>
+</clipPath>
+</defs>
+<g stroke="#0c0c0c" stroke-width="3.6" stroke-linejoin="round" stroke-linecap="round">
+<rect x="52" y="16" width="64" height="62" rx="8" fill="#5a5a60"/>
+<rect x="4" y="10" width="74" height="100" rx="9" fill="#1c1c20"/>
+</g>
+<g fill="#e8e8e4"><rect x="82" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="88.4" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="94.8" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="101.2" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="107.6" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="82" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="88.4" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="94.8" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="101.2" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="107.6" y="68" width="4.4" height="4.5" rx="1.2"/></g>
+<g font-family="'Arial Narrow','Helvetica Neue',Impact,'PingFang SC',sans-serif" font-weight="700" fill="#f0f0ec">
+<text x="13" y="37" font-size="11.5" letter-spacing="1">KODAK</text>
+<text x="13" y="84" font-size="35.0" font-weight="800" letter-spacing="-1.2">100</text>
+<text x="13" y="99" font-size="9.5" letter-spacing=".8" opacity=".82">T-MAX</text>
+</g>
+<rect x="13" y="43" width="30" height="2.2" rx="1.1" fill="#f0f0ec" opacity=".62"/>
+<g clip-path="url(#cl-pin-tmax100)">
+<rect x="0" y="0" width="120" height="120" fill="url(#pinGloss)"/>
+</g>
+</symbol>
+<symbol id="pin-fp4" viewBox="0 0 120 120">
+<defs>
+<clipPath id="cl-pin-fp4">
+<rect x="4" y="10" width="74" height="100" rx="9"/>
+<rect x="52" y="16" width="64" height="62" rx="8"/>
+</clipPath>
+</defs>
+<g stroke="#0c0c0c" stroke-width="3.6" stroke-linejoin="round" stroke-linecap="round">
+<rect x="52" y="16" width="64" height="62" rx="8" fill="#9a9a94"/>
+<rect x="4" y="10" width="74" height="100" rx="9" fill="#f0efe9"/>
+</g>
+<g fill="#ffffff"><rect x="82" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="88.4" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="94.8" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="101.2" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="107.6" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="82" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="88.4" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="94.8" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="101.2" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="107.6" y="68" width="4.4" height="4.5" rx="1.2"/></g>
+<g font-family="'Arial Narrow','Helvetica Neue',Impact,'PingFang SC',sans-serif" font-weight="700" fill="#131313">
+<text x="13" y="37" font-size="11.5" letter-spacing="1">ILFORD</text>
+<text x="13" y="84" font-size="35.0" font-weight="800" letter-spacing="-1.2">125</text>
+<text x="13" y="99" font-size="9.5" letter-spacing=".8" opacity=".82">FP4</text>
+</g>
+<rect x="13" y="43" width="30" height="2.2" rx="1.1" fill="#131313" opacity=".62"/>
+<g clip-path="url(#cl-pin-fp4)">
+<rect x="0" y="0" width="120" height="120" fill="url(#pinGloss)"/>
+</g>
+</symbol>
+<symbol id="pin-acros100" viewBox="0 0 120 120">
+<defs>
+<clipPath id="cl-pin-acros100">
+<rect x="4" y="10" width="74" height="100" rx="9"/>
+<rect x="52" y="16" width="64" height="62" rx="8"/>
+</clipPath>
+</defs>
+<g stroke="#0c0c0c" stroke-width="3.6" stroke-linejoin="round" stroke-linecap="round">
+<rect x="52" y="16" width="64" height="62" rx="8" fill="#8d99a6"/>
+<rect x="4" y="10" width="74" height="100" rx="9" fill="#46505c"/>
+</g>
+<g fill="#eef1f4"><rect x="82" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="88.4" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="94.8" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="101.2" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="107.6" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="82" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="88.4" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="94.8" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="101.2" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="107.6" y="68" width="4.4" height="4.5" rx="1.2"/></g>
+<g font-family="'Arial Narrow','Helvetica Neue',Impact,'PingFang SC',sans-serif" font-weight="700" fill="#f2f4f6">
+<text x="13" y="37" font-size="10.5" letter-spacing="1">FUJIFILM</text>
+<text x="13" y="84" font-size="35.0" font-weight="800" letter-spacing="-1.2">100</text>
+<text x="13" y="99" font-size="9.5" letter-spacing=".8" opacity=".82">ACROS</text>
+</g>
+<rect x="13" y="43" width="30" height="2.2" rx="1.1" fill="#f2f4f6" opacity=".62"/>
+<g clip-path="url(#cl-pin-acros100)">
+<rect x="0" y="0" width="120" height="120" fill="url(#pinGloss)"/>
+</g>
+</symbol>
+<symbol id="pin-tmax400" viewBox="0 0 120 120">
+<defs>
+<clipPath id="cl-pin-tmax400">
+<rect x="4" y="10" width="74" height="100" rx="9"/>
+<rect x="52" y="16" width="64" height="62" rx="8"/>
+</clipPath>
+</defs>
+<g stroke="#0c0c0c" stroke-width="3.6" stroke-linejoin="round" stroke-linecap="round">
+<rect x="52" y="16" width="64" height="62" rx="8" fill="#5a5a60"/>
+<rect x="4" y="10" width="74" height="100" rx="9" fill="#1c1c20"/>
+</g>
+<g fill="#e8e8e4"><rect x="82" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="88.4" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="94.8" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="101.2" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="107.6" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="82" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="88.4" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="94.8" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="101.2" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="107.6" y="68" width="4.4" height="4.5" rx="1.2"/></g>
+<g font-family="'Arial Narrow','Helvetica Neue',Impact,'PingFang SC',sans-serif" font-weight="700" fill="#f0f0ec">
+<text x="13" y="37" font-size="11.5" letter-spacing="1">KODAK</text>
+<text x="13" y="84" font-size="35.0" font-weight="800" letter-spacing="-1.2">400</text>
+<text x="13" y="99" font-size="9.5" letter-spacing=".8" opacity=".82">T-MAX</text>
+</g>
+<rect x="13" y="43" width="30" height="2.2" rx="1.1" fill="#f0f0ec" opacity=".62"/>
+<g clip-path="url(#cl-pin-tmax400)">
+<rect x="0" y="0" width="120" height="120" fill="url(#pinGloss)"/>
+</g>
+</symbol>
+<symbol id="pin-xp2" viewBox="0 0 120 120">
+<defs>
+<clipPath id="cl-pin-xp2">
+<rect x="4" y="10" width="74" height="100" rx="9"/>
+<rect x="52" y="16" width="64" height="62" rx="8"/>
+</clipPath>
+</defs>
+<g stroke="#0c0c0c" stroke-width="3.6" stroke-linejoin="round" stroke-linecap="round">
+<rect x="52" y="16" width="64" height="62" rx="8" fill="#9a9a94"/>
+<rect x="4" y="10" width="74" height="100" rx="9" fill="#f0efe9"/>
+</g>
+<g fill="#ffffff"><rect x="82" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="88.4" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="94.8" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="101.2" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="107.6" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="82" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="88.4" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="94.8" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="101.2" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="107.6" y="68" width="4.4" height="4.5" rx="1.2"/></g>
+<g font-family="'Arial Narrow','Helvetica Neue',Impact,'PingFang SC',sans-serif" font-weight="700" fill="#131313">
+<text x="13" y="37" font-size="11.5" letter-spacing="1">ILFORD</text>
+<text x="13" y="84" font-size="35.0" font-weight="800" letter-spacing="-1.2">400</text>
+<text x="13" y="99" font-size="9.5" letter-spacing=".8" opacity=".82">XP2</text>
+</g>
+<rect x="13" y="43" width="30" height="2.2" rx="1.1" fill="#131313" opacity=".62"/>
+<g clip-path="url(#cl-pin-xp2)">
+<rect x="0" y="0" width="120" height="120" fill="url(#pinGloss)"/>
+</g>
+</symbol>
+<symbol id="pin-d400" viewBox="0 0 120 120">
+<defs>
+<clipPath id="cl-pin-d400">
+<rect x="4" y="10" width="74" height="100" rx="9"/>
+<rect x="52" y="16" width="64" height="62" rx="8"/>
+</clipPath>
+</defs>
+<g stroke="#0c0c0c" stroke-width="3.6" stroke-linejoin="round" stroke-linecap="round">
+<rect x="52" y="16" width="64" height="62" rx="8" fill="#9a9a94"/>
+<rect x="4" y="10" width="74" height="100" rx="9" fill="#f0efe9"/>
+</g>
+<g fill="#ffffff"><rect x="82" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="88.4" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="94.8" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="101.2" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="107.6" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="82" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="88.4" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="94.8" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="101.2" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="107.6" y="68" width="4.4" height="4.5" rx="1.2"/></g>
+<g font-family="'Arial Narrow','Helvetica Neue',Impact,'PingFang SC',sans-serif" font-weight="700" fill="#131313">
+<text x="13" y="37" font-size="11.5" letter-spacing="1">ILFORD</text>
+<text x="13" y="84" font-size="35.0" font-weight="800" letter-spacing="-1.2">400</text>
+<text x="13" y="99" font-size="9.5" letter-spacing=".8" opacity=".82">DELTA</text>
+</g>
+<rect x="13" y="43" width="30" height="2.2" rx="1.1" fill="#131313" opacity=".62"/>
+<g clip-path="url(#cl-pin-d400)">
+<rect x="0" y="0" width="120" height="120" fill="url(#pinGloss)"/>
+</g>
+</symbol>
+<symbol id="pin-trix400" viewBox="0 0 120 120">
+<defs>
+<clipPath id="cl-pin-trix400">
+<rect x="4" y="10" width="74" height="100" rx="9"/>
+<rect x="52" y="16" width="64" height="62" rx="8"/>
+</clipPath>
+</defs>
+<g stroke="#0c0c0c" stroke-width="3.6" stroke-linejoin="round" stroke-linecap="round">
+<rect x="52" y="16" width="64" height="62" rx="8" fill="#5a5a60"/>
+<rect x="4" y="10" width="74" height="100" rx="9" fill="#1c1c20"/>
+</g>
+<g fill="#e8e8e4"><rect x="82" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="88.4" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="94.8" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="101.2" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="107.6" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="82" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="88.4" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="94.8" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="101.2" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="107.6" y="68" width="4.4" height="4.5" rx="1.2"/></g>
+<g font-family="'Arial Narrow','Helvetica Neue',Impact,'PingFang SC',sans-serif" font-weight="700" fill="#f0f0ec">
+<text x="13" y="37" font-size="11.5" letter-spacing="1">KODAK</text>
+<text x="13" y="84" font-size="35.0" font-weight="800" letter-spacing="-1.2">400</text>
+<text x="13" y="99" font-size="9.5" letter-spacing=".8" opacity=".82">TRI-X</text>
+</g>
+<rect x="13" y="43" width="30" height="2.2" rx="1.1" fill="#f0f0ec" opacity=".62"/>
+<g clip-path="url(#cl-pin-trix400)">
+<rect x="0" y="0" width="120" height="120" fill="url(#pinGloss)"/>
+</g>
+</symbol>
+<symbol id="pin-hp5" viewBox="0 0 120 120">
+<defs>
+<clipPath id="cl-pin-hp5">
+<rect x="4" y="10" width="74" height="100" rx="9"/>
+<rect x="52" y="16" width="64" height="62" rx="8"/>
+</clipPath>
+</defs>
+<g stroke="#0c0c0c" stroke-width="3.6" stroke-linejoin="round" stroke-linecap="round">
+<rect x="52" y="16" width="64" height="62" rx="8" fill="#9a9a94"/>
+<rect x="4" y="10" width="74" height="100" rx="9" fill="#f0efe9"/>
+</g>
+<g fill="#ffffff"><rect x="82" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="88.4" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="94.8" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="101.2" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="107.6" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="82" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="88.4" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="94.8" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="101.2" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="107.6" y="68" width="4.4" height="4.5" rx="1.2"/></g>
+<g font-family="'Arial Narrow','Helvetica Neue',Impact,'PingFang SC',sans-serif" font-weight="700" fill="#131313">
+<text x="13" y="37" font-size="11.5" letter-spacing="1">ILFORD</text>
+<text x="13" y="84" font-size="35.0" font-weight="800" letter-spacing="-1.2">400</text>
+<text x="13" y="99" font-size="9.5" letter-spacing=".8" opacity=".82">HP5</text>
+</g>
+<rect x="13" y="43" width="30" height="2.2" rx="1.1" fill="#131313" opacity=".62"/>
+<g clip-path="url(#cl-pin-hp5)">
+<rect x="0" y="0" width="120" height="120" fill="url(#pinGloss)"/>
+</g>
+</symbol>
+<symbol id="pin-d3200" viewBox="0 0 120 120">
+<defs>
+<clipPath id="cl-pin-d3200">
+<rect x="4" y="10" width="74" height="100" rx="9"/>
+<rect x="52" y="16" width="64" height="62" rx="8"/>
+</clipPath>
+</defs>
+<g stroke="#0c0c0c" stroke-width="3.6" stroke-linejoin="round" stroke-linecap="round">
+<rect x="52" y="16" width="64" height="62" rx="8" fill="#9a9a94"/>
+<rect x="4" y="10" width="74" height="100" rx="9" fill="#f0efe9"/>
+</g>
+<g fill="#ffffff"><rect x="82" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="88.4" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="94.8" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="101.2" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="107.6" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="82" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="88.4" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="94.8" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="101.2" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="107.6" y="68" width="4.4" height="4.5" rx="1.2"/></g>
+<g font-family="'Arial Narrow','Helvetica Neue',Impact,'PingFang SC',sans-serif" font-weight="700" fill="#131313">
+<text x="13" y="37" font-size="11.5" letter-spacing="1">ILFORD</text>
+<text x="13" y="84" font-size="27.0" font-weight="800" letter-spacing="-1.2">3200</text>
+<text x="13" y="99" font-size="9.5" letter-spacing=".8" opacity=".82">DELTA</text>
+</g>
+<rect x="13" y="43" width="30" height="2.2" rx="1.1" fill="#131313" opacity=".62"/>
+<g clip-path="url(#cl-pin-d3200)">
+<rect x="0" y="0" width="120" height="120" fill="url(#pinGloss)"/>
+</g>
+</symbol>
+<symbol id="pin-velvia50" viewBox="0 0 120 120">
+<defs>
+<clipPath id="cl-pin-velvia50">
+<rect x="4" y="10" width="74" height="100" rx="9"/>
+<rect x="52" y="16" width="64" height="62" rx="8"/>
+</clipPath>
+</defs>
+<g stroke="#0c0c0c" stroke-width="3.6" stroke-linejoin="round" stroke-linecap="round">
+<rect x="52" y="16" width="64" height="62" rx="8" fill="#c8403a"/>
+<rect x="4" y="10" width="74" height="100" rx="9" fill="#3d3aa0"/>
+</g>
+<g fill="#e8e8ff"><rect x="82" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="88.4" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="94.8" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="101.2" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="107.6" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="82" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="88.4" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="94.8" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="101.2" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="107.6" y="68" width="4.4" height="4.5" rx="1.2"/></g>
+<g font-family="'Arial Narrow','Helvetica Neue',Impact,'PingFang SC',sans-serif" font-weight="700" fill="#f0f0ff">
+<text x="13" y="37" font-size="10.5" letter-spacing="1">FUJIFILM</text>
+<text x="13" y="84" font-size="40.0" font-weight="800" letter-spacing="-1.2">50</text>
+<text x="13" y="99" font-size="9.5" letter-spacing=".8" opacity=".82">VELVIA</text>
+</g>
+<rect x="13" y="43" width="30" height="2.2" rx="1.1" fill="#f0f0ff" opacity=".62"/>
+<g clip-path="url(#cl-pin-velvia50)">
+<rect x="0" y="0" width="120" height="120" fill="url(#pinGloss)"/>
+</g>
+</symbol>
+<symbol id="pin-provia100f" viewBox="0 0 120 120">
+<defs>
+<clipPath id="cl-pin-provia100f">
+<rect x="4" y="10" width="74" height="100" rx="9"/>
+<rect x="52" y="16" width="64" height="62" rx="8"/>
+</clipPath>
+</defs>
+<g stroke="#0c0c0c" stroke-width="3.6" stroke-linejoin="round" stroke-linecap="round">
+<rect x="52" y="16" width="64" height="62" rx="8" fill="#c8403a"/>
+<rect x="4" y="10" width="74" height="100" rx="9" fill="#3d3aa0"/>
+</g>
+<g fill="#e8e8ff"><rect x="82" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="88.4" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="94.8" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="101.2" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="107.6" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="82" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="88.4" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="94.8" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="101.2" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="107.6" y="68" width="4.4" height="4.5" rx="1.2"/></g>
+<g font-family="'Arial Narrow','Helvetica Neue',Impact,'PingFang SC',sans-serif" font-weight="700" fill="#f0f0ff">
+<text x="13" y="37" font-size="10.5" letter-spacing="1">FUJIFILM</text>
+<text x="13" y="84" font-size="35.0" font-weight="800" letter-spacing="-1.2">100</text>
+<text x="13" y="99" font-size="9.5" letter-spacing=".8" opacity=".82">PROVIA</text>
+</g>
+<rect x="13" y="43" width="30" height="2.2" rx="1.1" fill="#f0f0ff" opacity=".62"/>
+<g clip-path="url(#cl-pin-provia100f)">
+<rect x="0" y="0" width="120" height="120" fill="url(#pinGloss)"/>
+</g>
+</symbol>
+<symbol id="pin-e100" viewBox="0 0 120 120">
+<defs>
+<clipPath id="cl-pin-e100">
+<rect x="4" y="10" width="74" height="100" rx="9"/>
+<rect x="52" y="16" width="64" height="62" rx="8"/>
+</clipPath>
+</defs>
+<g stroke="#0c0c0c" stroke-width="3.6" stroke-linejoin="round" stroke-linecap="round">
+<rect x="52" y="16" width="64" height="62" rx="8" fill="#3a2a52"/>
+<rect x="4" y="10" width="74" height="100" rx="9" fill="#d4442c"/>
+</g>
+<g fill="#ffe8e2"><rect x="82" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="88.4" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="94.8" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="101.2" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="107.6" y="22" width="4.4" height="4.5" rx="1.2"/><rect x="82" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="88.4" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="94.8" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="101.2" y="68" width="4.4" height="4.5" rx="1.2"/><rect x="107.6" y="68" width="4.4" height="4.5" rx="1.2"/></g>
+<g font-family="'Arial Narrow','Helvetica Neue',Impact,'PingFang SC',sans-serif" font-weight="700" fill="#fff4f0">
+<text x="13" y="37" font-size="11.5" letter-spacing="1">KODAK</text>
+<text x="13" y="84" font-size="35.0" font-weight="800" letter-spacing="-1.2">100</text>
+<text x="13" y="99" font-size="9.5" letter-spacing=".8" opacity=".82">E100</text>
+</g>
+<rect x="13" y="43" width="30" height="2.2" rx="1.1" fill="#fff4f0" opacity=".62"/>
+<g clip-path="url(#cl-pin-e100)">
+<rect x="0" y="0" width="120" height="120" fill="url(#pinGloss)"/>
+</g>
+</symbol></svg>
+
+<div class="pagehead">
+  <h1>银盐 <span>UI 预览稿 · 深色主题</span></h1>
+  <p>结构沿用方案 B，整体换成<b>深色主题</b>；胶片素材按参考图重做为<b>珐琅徽章</b>风格。<br>
+     仅视觉预览，<b>未改动插件本体</b>。真实面板会跟随 Photoshop 主题自动切换。</p>
+</div>
+
+<div class="scatter">
+  <div class="label">SILVER HALIDE · FILM STOCKS</div>
+  <svg class="p1"  viewBox="0 0 120 120"><use href="#pin-portra400"/></svg>
+  <svg class="p2"  viewBox="0 0 120 120"><use href="#pin-superia400"/></svg>
+  <svg class="p3"  viewBox="0 0 120 120"><use href="#pin-e100"/></svg>
+  <svg class="p4"  viewBox="0 0 120 120"><use href="#pin-hp5"/></svg>
+  <svg class="p5"  viewBox="0 0 120 120"><use href="#pin-velvia50"/></svg>
+  <svg class="p6"  viewBox="0 0 120 120"><use href="#pin-tmax400"/></svg>
+  <svg class="p7"  viewBox="0 0 120 120"><use href="#pin-ektar100"/></svg>
+  <svg class="p8"  viewBox="0 0 120 120"><use href="#pin-gold200"/></svg>
+  <svg class="p9"  viewBox="0 0 120 120"><use href="#pin-trix400"/></svg>
+  <svg class="p10" viewBox="0 0 120 120"><use href="#pin-provia100f"/></svg>
+  <b>7 条色路 · 3 个分组 · 23 款胶片，徽章由内联 SVG 参数化生成</b>
+</div>
+
+<div class="row">
+
+  <!-- ================= 展开态 ================= -->
+  <div class="col">
+    <div class="panel">
+      <div class="brand">银盐<em>Silver Halide</em></div>
+
+      <div class="view">
+        <div class="sky"></div><div class="sun"></div><div class="hill"></div><div class="hill h2"></div><div class="tone"></div>
+        <div class="tag">1:1 · 336×180</div>
+      </div>
+      <div class="viewcap"><span class="chip">看原图</span><span class="mono">@ 2000,3000</span></div>
+
+      <div class="lab"><b>胶片</b><i>点击收起</i></div>
+      <div class="film open">
+        <div class="stage"><svg class="pin card" viewBox="0 0 120 120"><use href="#pin-portra400"/></svg></div>
+        <div class="txt">
+          <div class="brandline">KODAK</div>
+          <div class="name">Portra 400</div>
+          <div class="meta">彩色负片 · 细颗粒</div>
+        </div>
+        <div class="caret">▲</div>
+      </div>
+      <div class="list"><div class="grp">彩色负片</div>
+        <div class="opt"><span class="mini"><svg class="pin mini" viewBox="0 0 120 120"><use href="#pin-ektar100"/></svg></span><span class="n">Ektar 100</span><span class="iso">100</span></div>
+        <div class="opt"><span class="mini"><svg class="pin mini" viewBox="0 0 120 120"><use href="#pin-portra160"/></svg></span><span class="n">Portra 160</span><span class="iso">160</span></div>
+        <div class="opt on"><span class="mini"><svg class="pin mini" viewBox="0 0 120 120"><use href="#pin-portra400"/></svg></span><span class="n">Portra 400</span><span class="iso">400</span></div>
+        <div class="opt"><span class="mini"><svg class="pin mini" viewBox="0 0 120 120"><use href="#pin-portra800"/></svg></span><span class="n">Portra 800</span><span class="iso">800</span></div>
+        <div class="opt"><span class="mini"><svg class="pin mini" viewBox="0 0 120 120"><use href="#pin-gold200"/></svg></span><span class="n">Gold 200</span><span class="iso">200</span></div>
+        <div class="opt"><span class="mini"><svg class="pin mini" viewBox="0 0 120 120"><use href="#pin-ultramax400"/></svg></span><span class="n">Ultramax 400</span><span class="iso">400</span></div>
+        <div class="opt"><span class="mini"><svg class="pin mini" viewBox="0 0 120 120"><use href="#pin-proimage100"/></svg></span><span class="n">Pro Image 100</span><span class="iso">100</span></div>
+        <div class="opt"><span class="mini"><svg class="pin mini" viewBox="0 0 120 120"><use href="#pin-superia400"/></svg></span><span class="n">Superia X-TRA 400</span><span class="iso">400</span></div>
+        <div class="opt"><span class="mini"><svg class="pin mini" viewBox="0 0 120 120"><use href="#pin-c200"/></svg></span><span class="n">C200</span><span class="iso">200</span></div>
+        <div class="grp">黑白负片</div>
+        <div class="opt"><span class="mini"><svg class="pin mini" viewBox="0 0 120 120"><use href="#pin-panf50"/></svg></span><span class="n">Pan F Plus 50</span><span class="iso">50</span></div>
+        <div class="opt"><span class="mini"><svg class="pin mini" viewBox="0 0 120 120"><use href="#pin-d100"/></svg></span><span class="n">Delta 100</span><span class="iso">100</span></div>
+        <div class="opt"><span class="mini"><svg class="pin mini" viewBox="0 0 120 120"><use href="#pin-tmax100"/></svg></span><span class="n">T-Max 100</span><span class="iso">100</span></div>
+        <div class="opt"><span class="mini"><svg class="pin mini" viewBox="0 0 120 120"><use href="#pin-fp4"/></svg></span><span class="n">FP4 Plus 125</span><span class="iso">125</span></div>
+        <div class="opt"><span class="mini"><svg class="pin mini" viewBox="0 0 120 120"><use href="#pin-acros100"/></svg></span><span class="n">Acros II 100</span><span class="iso">100</span></div>
+        <div class="opt"><span class="mini"><svg class="pin mini" viewBox="0 0 120 120"><use href="#pin-tmax400"/></svg></span><span class="n">T-Max 400</span><span class="iso">400</span></div>
+        <div class="opt"><span class="mini"><svg class="pin mini" viewBox="0 0 120 120"><use href="#pin-xp2"/></svg></span><span class="n">XP2 Super 400</span><span class="iso">400</span></div>
+        <div class="scrollhint">· 共 23 款 ·</div></div>
+
+      <div class="hero">
+        <div class="top"><span>感光度</span><span>箱速</span></div>
+        <div class="big"><small>ISO</small>400</div>
+        <div class="sub">Portra 400 · 未推冲</div>
+        <div class="seg">
+          <span>−1</span><span class="on">箱速</span><span>+1</span><span>+2</span><span>+3</span>
+        </div>
+      </div>
+
+      <div class="lab"><b>画幅</b><i>36 × 24 mm · 全画幅</i></div>
+      <div class="seg plain">
+        <span class="on">135</span><span>120</span><span>4×5</span><span>16mm</span>
+      </div>
+
+      <div class="lab"><b>颗粒量</b></div>
+      <div class="amt"><span class="v">100<small style="font-size:12px">%</small></span></div>
+      <div class="track">
+        <div class="rail"></div><div class="fill" style="width:50%"></div>
+        <div class="knob" style="left:calc(50% - 8px)"></div>
+      </div>
+
+      <div class="actions">
+        <div class="btn">应用颗粒</div>
+        <div class="btn ghost">移除</div>
+      </div>
+
+      <div class="foot mono">
+        <span><b>μr</b> 2.00px</span><span><b>σc</b> 6.8px</span><span><b>S</b> .0140</span>
+      </div>
+    </div>
+    <div class="caption"><b>展开态</b>　按组分段浏览全部胶片</div>
+  </div>
+
+  <!-- ================= 收起态 / 黑白片 ================= -->
+  <div class="col">
+    <div class="panel">
+      <div class="brand">银盐<em>Silver Halide</em></div>
+
+      <div class="view">
+        <div class="sky"></div><div class="sun"></div><div class="hill"></div><div class="hill h2"></div><div class="tone"></div>
+        <div class="tag">1:1 · 336×180</div>
+      </div>
+      <div class="viewcap"><span class="chip">看效果</span><span class="mono">@ 2000,3000</span></div>
+
+      <div class="lab"><b>胶片</b><i>黑白负片 · 强团簇</i></div>
+      <div class="film">
+        <div class="stage"><svg class="pin card" viewBox="0 0 120 120"><use href="#pin-hp5"/></svg></div>
+        <div class="txt">
+          <div class="brandline">ILFORD</div>
+          <div class="name">HP5 Plus 400</div>
+          <div class="meta">黑白负片 · 经典厚乳剂</div>
+        </div>
+        <div class="caret">▼</div>
+      </div>
+
+      <div class="hero">
+        <div class="top"><span>感光度</span><span>推一档</span></div>
+        <div class="big"><small>ISO</small>800</div>
+        <div class="sub">HP5 Plus 400 · +1 EV · 颗粒略变粗</div>
+        <div class="seg">
+          <span>−1</span><span>箱速</span><span class="on">+1</span><span>+2</span><span>+3</span>
+        </div>
+      </div>
+
+      <div class="lab"><b>画幅</b><i>120 · 6 × 6 cm</i></div>
+      <div class="seg plain">
+        <span>135</span><span class="on">120</span><span>4×5</span><span>16mm</span>
+      </div>
+
+      <div class="lab"><b>颗粒量</b></div>
+      <div class="amt"><span class="v">75<small style="font-size:12px">%</small></span></div>
+      <div class="track">
+        <div class="rail"></div><div class="fill" style="width:37.5%"></div>
+        <div class="knob" style="left:calc(37.5% - 8px)"></div>
+      </div>
+
+      <div class="actions">
+        <div class="btn">应用颗粒</div>
+        <div class="btn ghost">移除</div>
+      </div>
+
+      <div class="foot mono">
+        <span><b>μr</b> 1.65px</span><span><b>σc</b> 6.2px</span><span><b>S</b> .0105</span>
+      </div>
+    </div>
+    <div class="caption"><b>收起态</b>　日常使用时的样子（黑白片、色度通道关闭）</div>
+  </div>
+
+</div>
+
+<div class="spec">
+  <h2>这一版改了什么</h2>
+  <ul>
+    <li>整体转<b>深色主题</b>：页面底取参考图那块牛仔布的蓝黑 <code>#0f141b</code>，面板用 PS 深色主题的中性灰 <code>#232323</code></li>
+    <li>胶片素材从写实渲染改为<b>珐琅徽章</b>：扁平高饱和色块 + 匀黑描边 + 右侧带齿孔的片头条 + 顶层树脂高光</li>
+    <li>素材改为<b>内联 SVG 参数化生成</b>，不再是位图 —— <b>23</b> 款共用同一套几何，只换色路与文字</li>
+    <li>色路按<b>「品牌 × 分组」</b>分配，共 7 条：柯达彩负琥珀 / 富士彩负绿 / 柯达黑白炭黑 / 富士黑白冷灰蓝 / 依尔福黑白象牙 / 柯达反转红 / 富士反转紫蓝</li>
+    <li>感光度数字<b>按框宽自动收字号</b>，三位数与一位数都不会溢出</li>
+    <li>承台在深色下改为<b>内凹更深的井</b>（浅色主题是凸起的台面，方向相反）</li>
+    <li>强调色只用在「<b>当前状态</b>」上：ISO 块 / 列表选中行 / 画幅选中 / 滑块 / 主按钮 —— 语义一致，不滥用</li>
+  </ul>
+  <h2 style="margin-top:24px">设计 token</h2>
+  <ul>
+    <li>面板 <code>#232323</code> · 卡片 <code>#2c2c2c</code> · 承台 <code>#191919</code> · 分割线 <code>#383838</code></li>
+    <li>强调 <span class="swatch" style="background:#c1382a"></span><code>#c1382a</code>（按下 <code>#96291f</code>，暗底小字用 <code>#e0705f</code>）</li>
+    <li>对白字对比度 <b>5.4:1</b>（AAA 大字号 / AA 正文），对面板底 2.9:1 —— 只用于大块面，不用于小字</li>
+    <li>正文 <code>#eeeeee</code> · 次要 <code>#9e9e9e</code> · 极淡 <code>#6e6e6e</code></li>
+    <li>圆角：面板 26 / 卡片 18 / 承台 14 / 胶囊 999 · 字重只用 600 / 700 / 800，数字一律等宽</li>
+  </ul>
+</div>
+
+</body>
+</html>

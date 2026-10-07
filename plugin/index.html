@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<!-- ⚠️ charset 这行不能省。
+     没有它时，浏览器会按遗留编码解析本文件的 UTF-8 字节，所有中文都变成乱码
+     （而且是「看起来像汉字、但不是那个字」的那种乱码，极难发现）。
+     UXP 恰好默认 UTF-8 所以之前一直没暴露 —— 但那是隐式依赖。
+     顺带：这也是能在浏览器里预演面板的前提（见 tools/build-panel-preview.mjs）。 -->
+<title>银盐 · Silver Halide</title>
+<style>
+  /* ============================================================
+     银盐 · 面板样式 v0.6（深色主题，已对齐设计 token）
+     ============================================================
+     视觉基准 = ui-preview/template-dark.html（已确认的深色稿）。
+
+     要改颜色 / 圆角 / 字号，需要同时改两处：
+       ① tools/design-tokens.mjs   ← 唯一来源
+       ② 本文件的 :root            ← 内联同一份数值
+     tools/verify-bundle.mjs 会逐条断言两者相等，不一致直接报错。
+     之所以要这条约束：v0.5 的实现端凭「面板窄、要紧凑」的直觉把圆角统一改小
+     2px、字号整体收了一档，与设计稿逐条漂移且无人察觉 —— 直到逐维度对比才暴露。
+
+     【必须保留的 UXP 强制偏离（不要「修正」回去）】
+     · 所有 <button> 显式写 height，且不用 999px 圆角
+       （UXP 会把按钮撑高约 10px，超大圆角会把它渲染成正圆/肥椭圆）
+     · 胶片卡必须用 <div>，不能用 <button>（UXP 的 button 不保留子元素布局）
+     · 徽章用 CSS 百分比几何拼装，不用 SVG（UXP 的 SVG 支持不可靠）
+     ============================================================ */
+  :root {
+    /* --- 色板 --- */
+    --bg:#232323; --card:#2c2c2c; --cardh:#333333; --well:#191919;
+    --line:#383838; --line2:#4a4a4a; --rail:#3d3d3d;
+    --ink:#eeeeee; --mut:#9e9e9e; --faint:#6e6e6e;
+    --ac:#c1382a; --acd:#96291f; --acl:#e0705f;
+    --view:#141414;
+    /* --- 圆角（设计 token 表：面板 26 / 卡片 18 / 承台 14 / 胶囊 999）--- */
+    /* 面板 26 在真机上由 Photoshop 提供外框，插件里不需要这一档 */
+    --r-card:18px; --r-stage:14px; --r-mini:10px;
+    /* --- 关键字号 --- */
+    --fs-brand:25px; --fs-name:20px; --fs-hero:46px; --fs-amt:19px;
+  }
+  /* 浅色主题：跟随 PS 主题自动切换。形状、圆角、字号不变，只换色板。 */
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg:#f0efec; --card:#e2e0db; --cardh:#d8d5ce; --well:#d7d5cf;
+      --line:#c9c6bf; --line2:#b3afa6; --rail:#cfccc4;
+      --ink:#1b1a17; --mut:#6d6a63; --faint:#94918a;
+      --ac:#b03425; --acd:#8d2419; --acl:#8d2419;
+      --view:#1c1c1e;
+    }
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; padding:18px 16px 20px; background:var(--bg); color:var(--ink);
+         font-family:"Inter","Source Han Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+         font-size:12px; line-height:1.5; -webkit-font-smoothing:antialiased; }
+  /* 字体栈与预览稿有一处刻意的不同：这里把 "Source Han Sans SC"（思源黑体）排在
+     "Microsoft YaHei" 之前。理由是 Adobe 随 PS 分发思源黑体，比雅黑更适合面板；
+     而预览稿是网页语境，用 system-ui 优先。代价是浏览器预演时无头 Chromium
+     对思源黑体的 cmap 处理有误、中文会渲染成错字 —— 预演器里显式覆盖掉了。 */
+  .num { font-variant-numeric:tabular-nums; }
+
+  /* ---- 抬头 ---- */
+  .brand { font-size:var(--fs-brand); font-weight:800; line-height:1.08;
+           letter-spacing:-.024em; }
+  .brand em { display:block; font-style:normal; font-weight:800; color:var(--faint); }
+  .hdv { position:absolute; right:16px; top:19px; font-size:9.5px; color:var(--faint);
+         letter-spacing:.06em; }
+
+  /* ---- 预览 ---- */
+  .pv { position:relative; width:100%; height:150px; margin-top:16px;
+        background:var(--view); border-radius:var(--r-card); overflow:hidden; }
+  .pv img { display:block; width:100%; height:100%; object-fit:cover; }
+  .pve { position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+         color:var(--mut); font-size:10.5px; text-align:center; padding:0 20px; line-height:1.7; }
+  .pvcap { display:flex; align-items:center; justify-content:space-between; margin-top:9px; }
+  /* ⚠️ 所有 <button> 都显式给 height，并且不用 999px 这种超大圆角。
+       UXP 会把按钮撑得比自己声明的高（实测约 10px），高度一大，
+       999px 圆角就退化成「正圆 / 肥椭圆」——「应用颗粒」变成一颗蛋、
+       「−1 / 箱 / +1」变成一排圆点，都是这个原因。
+       对策：height 写死 + 圆角写死为「高度的一半」。 */
+  .chip { display:flex; align-items:center; height:25px; padding:0 11px;
+          border:1.5px solid var(--mut); border-radius:12.5px;
+          font-family:inherit; font-size:10.5px; font-weight:600;
+          background:transparent; color:var(--ink); cursor:pointer; }
+  .chip:hover { border-color:var(--ink); }
+  .pvcap .info { font-size:9.5px; color:var(--faint); }
+
+  /* ---- 通用 ---- */
+  .lab { display:flex; align-items:baseline; justify-content:space-between; margin:17px 2px 8px; }
+  .lab b { font-size:11px; font-weight:700; letter-spacing:.16em; color:var(--mut); }
+  .lab i { font-style:normal; font-size:11px; color:var(--faint); }
+
+  /* ============================================================
+     胶片徽章 —— 纯 CSS 拼装
+     几何按 120×120 的设计空间换算成百分比，两种尺寸共用。
+     盒身里的三段文字由 core/pinart.mjs 按框宽算好字号内联输出
+     （CSS 本身没有自动收字号的能力）。
+     ============================================================ */
+  .pin { position:relative; display:block; flex:0 0 auto; }
+  .pin.card { width:56px; height:56px; --bw:2px;   --rb:4.6px; --rt:3.8px; }
+  .pin.mini { width:34px; height:34px; --bw:1.7px; --rb:3px;   --rt:2.4px; }
+  /* 徽章投影：设计稿有，之前漏了 —— 没有它徽章像贴上去而不是摆在承台上。
+     若 UXP 不支持 filter，这层退化为无投影，不影响其它任何属性。 */
+  .pin.card { filter:drop-shadow(0 3px 4px rgba(0,0,0,.62)); }
+  .pin.mini { filter:drop-shadow(0 1px 2px rgba(0,0,0,.7)); }
+
+  /* 片头条（先画，会被盒身压住左半） */
+  .pin .tg { position:absolute; left:43.3%; top:13.3%; width:53.4%; height:51.7%;
+             border:var(--bw) solid #0c0c0c; border-radius:var(--rt); }
+  /* 盒身（标签面） */
+  .pin .bx { position:absolute; left:3.3%; top:8.3%; width:61.7%; height:83.4%;
+             border:var(--bw) solid #0c0c0c; border-radius:var(--rb);
+             overflow:hidden; }
+  /* 树脂高光：贴一层斜向渐变。若 UXP 不支持渐变，这层退化为透明，徽章仍成立。 */
+  .pin .gl { position:absolute; left:0; top:0; right:0; bottom:0;
+             background-image:linear-gradient(158deg,rgba(255,255,255,.34) 0%,rgba(255,255,255,.10) 30%,rgba(255,255,255,0) 52%,rgba(0,0,0,.05) 80%,rgba(0,0,0,.17) 100%); }
+  /* 两排齿孔：flex + space-between 自动分间距，不用 :last-child 之类的选择器 */
+  .pin .hs { position:absolute; left:68.3%; width:25.4%; height:3.9%;
+             display:flex; justify-content:space-between; }
+  .pin .r1 { top:18.3%; }
+  .pin .r2 { top:56.7%; }
+  .pin .hs i { display:block; width:15%; border-radius:1px; }
+  /* 缩略图：3 个齿孔（比 5 个大，才看得见），不放文字 */
+  .pin.mini .hs { left:66%; width:30%; height:5.5%; }
+  .pin.mini .hs i { width:22%; border-radius:0.5px; }
+  .pin.mini .cap { display:none; }
+  /* 盒身文字：字号由 pinart.mjs 内联给出，这里的值是兜底 */
+  .pin .cap { position:relative; display:block; padding:12% 3px 0 3px; }
+  .pin .cap b { display:block; font-size:7px; font-weight:700; letter-spacing:.04em; line-height:1; }
+  .pin .cap u { display:block; font-size:14px; font-weight:800; letter-spacing:-.045em;
+                line-height:1; text-decoration:none; margin-top:3px; }
+  .pin .cap em { display:block; font-style:normal; font-size:6px; font-weight:700;
+                 letter-spacing:.03em; line-height:1; margin-top:4px; opacity:.8; }
+
+  /* ---- 胶片卡片（点开列表）----
+     是 <div> 不是 <button>，原因见 HTML 里的注释（UXP 的 button 不保留子布局）。 */
+  .film { display:flex; align-items:center; gap:13px; width:100%; text-align:left;
+          background:var(--card); border-radius:var(--r-card); padding:10px 14px 10px 10px;
+          color:var(--ink); cursor:pointer; }
+  .film:hover { background:var(--cardh); }
+  /* 承台：内凹的井。设计稿是径向渐变 + 双段内阴影（下缘有一道 1px 亮边），
+     之前实现里丢了渐变与那道亮边，井底显得平。 */
+  .film .stage { width:62px; height:62px; flex:0 0 62px; border-radius:var(--r-stage);
+                 background:radial-gradient(ellipse 76% 56% at 50% 74%, #171717 0%, #1e1e1e 62%, #272727 100%);
+                 display:flex; align-items:center; justify-content:center;
+                 box-shadow:inset 0 2px 4px rgba(0,0,0,.72), inset 0 -1px 0 rgba(255,255,255,.05); }
+  .film .txt { flex:1 1 auto; min-width:0; }
+  .film .bl { font-size:10px; font-weight:700; letter-spacing:.14em; color:var(--mut); }
+  .film .nm { font-size:var(--fs-name); font-weight:800; letter-spacing:-.015em;
+              line-height:1.16; margin-top:1px; }
+  .film .mt { font-size:10.5px; color:var(--mut); margin-top:2px; }
+  .film .cv { flex:0 0 auto; font-size:10px; color:var(--mut); }
+  .film.open { border-radius:var(--r-card) var(--r-card) 0 0; }
+
+  /* ---- 胶片列表（内联展开，自带滚动） ---- */
+  .list { display:none; background:var(--card); border-radius:0 0 var(--r-card) var(--r-card);
+          max-height:236px; overflow-y:auto; padding-bottom:7px; }
+  .list.on { display:block; }
+  .sgh { font-size:9.5px; font-weight:700; letter-spacing:.16em; color:var(--faint);
+         padding:10px 14px 4px; }
+  .so { display:flex; align-items:center; gap:11px; padding:6px 14px; cursor:pointer; }
+  .so:hover { background:rgba(255,255,255,.05); }
+  .so .mh { width:36px; height:36px; flex:0 0 36px; display:flex; align-items:center; justify-content:center; }
+  .so .nm { flex:1 1 auto; font-size:13px; font-weight:600; }
+  .so .is { font-size:10px; color:var(--faint); }
+  /* ⚠️ 选中态必须排在 :hover 之后 —— 两者特异度相同，靠源码顺序决胜 */
+  .so.on { margin:0 6px; padding-left:8px; padding-right:8px; border-radius:var(--r-mini);
+           background:var(--ac); color:#fff; }
+  .so.on .is { color:rgba(255,255,255,.76); }
+  .scrollhint { text-align:center; font-size:9.5px; color:var(--faint); padding:7px 0 2px;
+                letter-spacing:.1em; }
+
+  /* ---- 感光度：全稿唯一的强调色块 ---- */
+  .hero { margin-top:17px; background:var(--ac); border-radius:var(--r-card);
+          padding:13px 14px 12px; color:#fff;
+          box-shadow:inset 0 1px 0 rgba(255,255,255,.16); }
+  .hero .top { display:flex; justify-content:space-between; align-items:baseline;
+               font-size:10.5px; font-weight:700; letter-spacing:.16em; }
+  .hero .big { font-size:var(--fs-hero); font-weight:800; letter-spacing:-.0435em;
+               line-height:1; margin:5px 0 2px; }
+  .hero .big small { font-size:15px; font-weight:700; letter-spacing:0; margin-right:6px;
+                     vertical-align:13px; opacity:.82; }
+  .hero .sub { font-size:11px; font-weight:600; opacity:.88; }
+  .seg { display:flex; gap:6px; margin-top:11px; }
+  /* 胶囊高度取 28px（设计稿约 27px，留 1px 余量作为点按热区），圆角 = 高度一半 */
+  .seg button { flex:1 1 0; min-width:0; height:28px; border:0; font-family:inherit; cursor:pointer;
+                display:flex; align-items:center; justify-content:center; padding:0;
+                font-size:10.5px; font-weight:700; border-radius:14px;
+                background:rgba(0,0,0,.22); color:#fff; }
+  .seg button:hover { background:rgba(0,0,0,.34); }
+  .seg.plain button { background:var(--card); color:var(--mut); }
+  .seg.plain button:hover { background:var(--cardh); }
+  /* 选中态排最后，压过上面的 :hover */
+  .seg button.on { background:#fff; color:var(--acd); }
+  .seg.plain button.on { background:var(--ac); color:#fff; }
+
+  /* ---- 颗粒量 ---- */
+  .amt { display:flex; justify-content:space-between; align-items:baseline; }
+  .amt b { font-size:var(--fs-amt); font-weight:800; letter-spacing:-.02em; }
+  .amt .sl { font-size:11px; color:var(--faint); }
+  .track { position:relative; height:22px; margin-top:4px; }
+  .track .rail { position:absolute; left:0; right:0; top:10px; height:3px; border-radius:2px;
+                 background:var(--rail); }
+  .track .fill { position:absolute; left:0; top:10px; height:3px; border-radius:2px; background:var(--ac); }
+  .track .knob { position:absolute; top:3px; width:16px; height:16px; border-radius:50%;
+                 background:var(--ac); border:3px solid var(--bg);
+                 box-shadow:0 1px 3px rgba(0,0,0,.6); }
+  input[type=range] { position:absolute; left:0; top:0; width:100%; height:22px; margin:0;
+                      background:transparent; border:0; padding:0; opacity:0; }
+
+  /* ---- 按钮 ---- */
+  .actions { display:flex; gap:9px; margin-top:19px; align-items:center; }
+  .btn { flex:1 1 auto; height:45px; padding:0; display:flex; align-items:center;
+         justify-content:center; font-family:inherit; font-size:13.5px; font-weight:800;
+         letter-spacing:.02em; border:0; border-radius:22.5px; background:var(--ac);
+         color:#fff; cursor:pointer; }
+  .btn:hover { background:var(--acd); }
+  .btn.ghost { flex:0 0 78px; background:transparent; color:var(--mut);
+               border:1.5px solid var(--line2); font-weight:600; font-size:11.5px; }
+  .btn.ghost:hover { border-color:var(--mut); color:var(--ink); }
+  .btn[disabled] { opacity:.42; }
+  .mini-btn { display:flex; align-items:center; justify-content:center;
+              width:100%; height:34px; font-family:inherit; font-size:11.5px; font-weight:600;
+              background:transparent; color:var(--ink); border:1.5px solid var(--line2);
+              border-radius:var(--r-mini); cursor:pointer; }
+  .mini-btn:hover { border-color:var(--mut); }
+
+  /* ---- 状态与进度 ---- */
+  .st { font-size:10.5px; color:var(--mut); margin:11px 1px 7px; min-height:30px;
+        white-space:pre-wrap; line-height:1.6; }
+  .trk { height:2px; background:var(--line); border-radius:1px; overflow:hidden; }
+  .bar { height:100%; width:0; background:var(--ac); }
+
+  /* ---- 读数 ---- */
+  .foot { display:flex; justify-content:space-between; margin-top:15px; padding-top:11px;
+          border-top:1.5px solid var(--line); font-size:9.5px; color:var(--faint); }
+  .foot b { color:var(--mut); font-weight:700; }
+  .bind { font-size:9.5px; color:var(--faint); margin-top:7px; line-height:1.6;
+          word-break:break-all; }
+  .fn { font-size:9.5px; color:var(--faint); margin-top:6px; line-height:1.65; }
+
+  /* ---- 高级 ---- */
+  .adv { margin-top:15px; border-top:1.5px solid var(--line); padding-top:11px; }
+  .advh { display:flex; align-items:center; height:22px; background:transparent; border:0; padding:0;
+          color:var(--mut); font-family:inherit; font-size:9.5px; letter-spacing:.16em;
+          font-weight:700; cursor:pointer; }
+  .advh .c { font-size:8px; margin-right:7px; letter-spacing:0; }
+  .advb { display:none; padding-top:13px; }
+  .advb.on { display:block; }
+  .grp { margin-bottom:13px; }
+  .grp:last-child { margin-bottom:0; }
+
+  /* ---- 悬停态说明 ----
+     上面各处的 :hover 在设计稿里都没有（设计稿是静态呈现）。
+     这里补上是因为真面板需要「可点」的反馈。
+     ⚠️ UXP 是否支持 :hover 伪类尚未验证：若不支持，这些规则只是永不命中，
+     表现为「没有悬停反馈」，不会影响任何其它样式。焦点态（:focus）暂不加 ——
+     Adobe 的 Known Issues 里明确提到 UXP 按钮的焦点可达性本身有问题。 */
+</style>
+</head>
+<body>
+  <div class="brand">银盐<em>Silver Halide</em></div>
+  <div class="hdv">v0.6</div>
+
+  <div class="pv">
+    <img id="preview" alt="">
+    <div class="pve" id="pvEmpty">正在准备预览…</div>
+  </div>
+  <div class="pvcap">
+    <button class="chip" id="compare">看原图</button>
+    <span class="info num" id="pvInfo">—</span>
+  </div>
+
+  <div class="lab"><b>胶片</b><i id="filmMeta"></i></div>
+  <!-- ⚠️ 这张卡必须是 <div>，不能是 <button>。
+       UXP 的 <button> 是原生控件，**不保留子元素的布局** —— 实测把徽章与三行文字
+       放进去后，徽章完全不渲染，所有文字被拍平成一行
+       （「KODAK160PORTRA KODAK Portra 160 彩色负片…」）。
+       列表里同样的徽章用 <div> 就正常 ⇒ 不是样式问题，是标签语义问题。
+       点击行为在 main.js 用 addEventListener 绑，不依赖标签本身。 -->
+  <div class="film" id="filmBtn">
+    <div class="stage"><span id="filmPin"></span></div>
+    <div class="txt">
+      <div class="bl" id="filmBrand">KODAK</div>
+      <div class="nm" id="filmName">Portra 400</div>
+      <div class="mt" id="filmSub">彩色负片 · 细颗粒</div>
+    </div>
+    <div class="cv" id="filmCaret">▼</div>
+  </div>
+  <div class="list" id="filmList"></div>
+
+  <div class="hero">
+    <div class="top"><span>感光度</span><span id="isoStop">箱速</span></div>
+    <div class="big"><small>ISO</small><span id="isoNum">400</span></div>
+    <div class="sub" id="isoSub">Portra 400 · 未推冲</div>
+    <div class="seg" id="isoSeg"></div>
+  </div>
+
+  <div class="lab"><b>画幅</b><i id="gaugeOut"></i></div>
+  <div class="seg plain" id="gaugeSeg"></div>
+
+  <div class="lab"><b>颗粒量</b></div>
+  <div class="amt"><b class="num" id="amtOut">100<small style="font-size:12px">%</small></b>
+    <span class="sl">拖动调整整体强度</span></div>
+  <div class="track">
+    <div class="rail"></div><div class="fill" id="amtFill" style="width:50%"></div>
+    <div class="knob" id="amtKnob" style="left:calc(50% - 8px)"></div>
+    <input type="range" id="amount" min="0" max="200" value="100">
+  </div>
+
+  <div class="actions">
+    <button class="btn" id="run">应用颗粒</button>
+    <button class="btn ghost" id="cancel" disabled>取消</button>
+  </div>
+  <div class="st" id="status">打开一张照片即可看到预览。</div>
+  <div class="trk"><div class="bar" id="bar"></div></div>
+
+  <div class="foot num" id="readout">—</div>
+  <div class="bind" id="bindOut">尚未建立</div>
+
+  <div class="adv">
+    <button class="advh" id="advH"><span class="c">▶</span>高级</button>
+    <div class="advb" id="advB">
+      <div class="grp">
+        <div class="lab"><b>团簇度</b><i class="num" id="clumpOut">0.35</i></div>
+        <div class="track">
+          <div class="rail"></div><div class="fill" id="clumpFill" style="width:35%"></div>
+          <div class="knob" id="clumpKnob" style="left:calc(35% - 8px)"></div>
+          <input type="range" id="clump" min="0" max="100" value="35">
+        </div>
+        <div class="fn">颗粒在画面上的聚集程度。切换胶片会重置为该型号的典型值。</div>
+      </div>
+      <div class="grp">
+        <div class="lab"><b>颗粒纹理</b></div>
+        <button class="mini-btn" id="reseed">换一批颗粒</button>
+        <div class="fn">同一个种子永远得到同一组颗粒；「应用」与预览用的是同一个种子。</div>
+      </div>
+      <div class="grp">
+        <div class="lab"><b>恢复原图</b></div>
+        <button class="mini-btn" id="remove">移除颗粒图层</button>
+        <div class="fn">删掉「银盐颗粒」图层，文档即回到原始状态。源图层从头到尾没有被改动过。</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="dist/core.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>

@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>银盐 · 胶片颗粒插件设计文档 v0.1</title>
+<style>
+  :root{
+    --bg:#f6f6f3; --panel:#ffffff; --panel-2:#f1f0ea;
+    --text:#1b1b1f; --muted:#5b5b66; --faint:#8a8a94;
+    --line:#e0dfd8; --line-strong:#c9c8be;
+    --accent:#a8471f; --accent-soft:#f3e3da;
+    --accent-2:#20625e; --accent-2-soft:#dcecea;
+    --warn:#8a5a00; --warn-soft:#f8ecd4;
+    --code-bg:#f0efe8;
+    --shadow:0 1px 2px rgba(0,0,0,.04),0 8px 24px rgba(0,0,0,.05);
+    --ui-bg:#2b2b30; --ui-panel:#37373e; --ui-panel2:#42424a; --ui-text:#e6e6ea;
+    --ui-muted:#9a9aa4; --ui-line:#4c4c56; --ui-ctrl:#55555f; --ui-accent:#e0906a;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#141416; --panel:#1c1c20; --panel-2:#232329;
+      --text:#e9e9ec; --muted:#a6a6b0; --faint:#7e7e88;
+      --line:#2e2e36; --line-strong:#42424c;
+      --accent:#e0906a; --accent-soft:#3a2318;
+      --accent-2:#6fc2b8; --accent-2-soft:#16302e;
+      --warn:#e0b063; --warn-soft:#33280f;
+      --code-bg:#232329;
+      --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35);
+    }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;background:var(--bg);color:var(--text);
+    font-family:"Source Han Sans SC","Noto Sans SC","PingFang SC","Microsoft YaHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    font-size:16px;line-height:1.85;-webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:880px;margin:0 auto;padding:0 24px 120px}
+  header.hero{padding:72px 0 40px;border-bottom:1px solid var(--line);margin-bottom:48px}
+  .kicker{font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:18px}
+  h1{font-size:38px;line-height:1.28;margin:0 0 18px;font-weight:800;letter-spacing:-.01em}
+  .subtitle{font-size:18px;color:var(--muted);margin:0 0 28px;line-height:1.7;max-width:44em}
+  .meta{display:flex;flex-wrap:wrap;gap:10px 28px;font-size:13.5px;color:var(--faint);padding-top:8px}
+  .meta b{color:var(--text);font-weight:600}
+  h2{font-size:26px;margin:64px 0 20px;font-weight:750;letter-spacing:-.01em;padding-bottom:12px;border-bottom:2px solid var(--accent);display:inline-block}
+  h2 .num{color:var(--accent);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;margin-right:10px;font-size:.85em}
+  h3{font-size:19.5px;margin:42px 0 14px;font-weight:700}
+  h4{font-size:16.5px;margin:28px 0 10px;font-weight:700}
+  p{margin:0 0 16px}
+  ul,ol{margin:0 0 18px;padding-left:24px}
+  li{margin-bottom:8px}
+  li::marker{color:var(--accent)}
+  strong{font-weight:700}
+  em{font-style:normal;background:var(--accent-soft);padding:1px 5px;border-radius:3px}
+  code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:var(--code-bg);padding:2px 6px;border-radius:4px;font-size:.88em}
+  a{color:var(--accent-2);text-decoration:none;border-bottom:1px solid color-mix(in srgb,var(--accent-2) 40%,transparent)}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:24px 26px;margin:24px 0;box-shadow:var(--shadow)}
+  .card > h3:first-child,.card > h4:first-child{margin-top:0}
+  .card.accent{border-left:4px solid var(--accent)}
+  .card.teal{border-left:4px solid var(--accent-2)}
+  .card.warn{border-left:4px solid var(--warn);background:var(--warn-soft)}
+  table{width:100%;border-collapse:collapse;margin:22px 0;font-size:14.5px;background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  caption{caption-side:top;text-align:left;font-size:13px;color:var(--faint);padding:0 0 10px}
+  th{background:var(--panel-2);text-align:left;font-weight:700;font-size:13px;padding:12px 14px;border-bottom:1px solid var(--line-strong);vertical-align:bottom}
+  td{padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.65}
+  tbody tr:last-child td{border-bottom:none}
+  td.num,th.num{font-family:ui-monospace,monospace;font-size:13.5px;white-space:nowrap}
+  .tag{display:inline-block;font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:20px;background:var(--accent-soft);color:var(--accent);white-space:nowrap}
+  .tag.t2{background:var(--accent-2-soft);color:var(--accent-2)}
+  .tag.t3{background:var(--warn-soft);color:var(--warn)}
+  figure{margin:32px 0;text-align:center}
+  figure svg{max-width:100%;height:auto;display:block;margin:0 auto}
+  figcaption{font-size:13.5px;color:var(--muted);margin-top:14px;line-height:1.65;text-align:left}
+  figcaption b{color:var(--text)}
+  .figframe{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:22px 18px 6px;box-shadow:var(--shadow)}
+  .formula{background:var(--code-bg);border:1px solid var(--line);border-radius:10px;padding:16px 20px;margin:18px 0;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:14.5px;line-height:2;overflow-x:auto}
+  .formula .lbl{display:block;font-family:inherit;font-size:12px;color:var(--faint);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px}
+  .formula .cmt{color:var(--faint);font-size:13px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:22px 0}
+  @media (max-width:680px){.grid2{grid-template-columns:1fr}}
+  .box{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 18px}
+  .box h4{margin:0 0 8px;font-size:14.5px}
+  .box p{margin:0;font-size:14px;color:var(--muted);line-height:1.7}
+  .box ul{margin:0;padding-left:20px;font-size:14px;color:var(--muted)}
+  .toc{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:22px 26px;box-shadow:var(--shadow)}
+  .toc h3{margin:0 0 14px;font-size:15px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint)}
+  .toc ol{margin:0;padding-left:22px;font-size:15px}
+  .toc li{margin-bottom:6px}
+  .toc a{color:var(--text);border:none}
+  .toc a:hover{color:var(--accent)}
+  .callout{display:flex;gap:14px;align-items:flex-start;padding:16px 18px;border-radius:10px;background:var(--accent-2-soft);border:1px solid color-mix(in srgb,var(--accent-2) 25%,transparent);margin:22px 0;font-size:14.5px}
+  .callout .ico{font-weight:800;color:var(--accent-2);font-size:13px;letter-spacing:.06em;padding-top:2px;white-space:nowrap}
+  .callout p{margin:0}
+  .callout.warnv{background:var(--warn-soft);border-color:color-mix(in srgb,var(--warn) 30%,transparent)}
+  .callout.warnv .ico{color:var(--warn)}
+  hr{border:none;border-top:1px solid var(--line);margin:56px 0}
+  .footnote{font-size:13.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:20px;margin-top:40px}
+  .axis{fill:var(--faint);font-size:11px;font-family:ui-monospace,monospace}
+  .axisname{fill:var(--muted);font-size:12px;font-weight:600}
+  .gridline{stroke:var(--line);stroke-width:1}
+  .lb{fill:var(--text);font-size:12.5px;font-weight:600}
+  .lbs{fill:var(--muted);font-size:11.5px}
+  pre.schema{background:var(--code-bg);border:1px solid var(--line);border-radius:10px;padding:16px 18px;overflow-x:auto;font-size:13px;line-height:1.7;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;margin:18px 0}
+  pre.schema .k{color:var(--accent)}
+  pre.schema .s{color:var(--accent-2)}
+  pre.schema .c{color:var(--faint)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <div class="kicker">设计文档 · 阶段二交付</div>
+  <h1>银盐 · 胶片颗粒插件设计</h1>
+  <p class="subtitle">Demo v0.1 的交互模型与实现方案。所有设计决策都标注了对研究报告的溯源，做到「每个参数都有物理出处，每个交互都有感知依据」。</p>
+  <div class="meta">
+    <span>版本 <b>v0.1</b></span>
+    <span>日期 <b>2026-10-03</b></span>
+    <span>状态 <b>设计完成，未编写代码</b></span>
+    <span>前置 <b>《胶片颗粒形成机理与视觉特征研究报告》v1.0</b></span>
+  </div>
+</header>
+
+<div class="card warn" style="margin-top:-24px">
+  <h4 style="margin-top:0">勘误 · 2026-10-03（实现阶段实测发现）</h4>
+  <p>本文档已进入实现验证阶段。以下三处结论被实测数据推翻，正文已就地修正；此处保留记录，以免后续引用时误用旧版。</p>
+  <table style="margin:14px 0 0;background:transparent">
+    <thead><tr><th style="width:6%">#</th><th style="width:30%">原文</th><th style="width:32%">实测结论</th><th>证据</th></tr></thead>
+    <tbody>
+      <tr>
+        <td class="num">1</td>
+        <td>颗粒噪声的功率谱是<strong>带通型</strong>，低频被团簇尺寸抑制，峰值在 1/(2r)~1/(r)</td>
+        <td>是<strong>低通型</strong>：DC 处功率最强，在 1/(2d)~1/d 处开始衰减。<br>Selwyn 定律 σ·√a = 常数 <em>本身就等价于低频功率谱平坦</em>，与本报告 §4.2 自洽，与 §4.4 原表述矛盾。</td>
+        <td>实测 −3dB 截止 0.1354 cyc/px，理论 <code>exp(−4π²σ_g²f²)</code> 预测 0.1325（偏差 2.2%）；谱形 RMS 偏差 4.27%</td>
+      </tr>
+      <tr>
+        <td class="num">2</td>
+        <td>在实现层面「颗粒尺寸」等价于<strong>带通</strong>滤波器的截止频率</td>
+        <td>等价于<strong>低通</strong>滤波器的截止频率。结论方向不变（尺寸 ↔ 截止频率），仅滤波器类型需更正。</td>
+        <td>同上</td>
+      </tr>
+      <tr>
+        <td class="num">3</td>
+        <td>（隐含）颗粒频谱可以只看峰值位置来验证</td>
+        <td>不能用「峰值位置」验证，应当比对<strong>整个低通谱形与截止频率</strong>。已改为与理论谱形的 RMS 偏差判据。</td>
+        <td>验收测试第 8 项</td>
+      </tr>
+    </tbody>
+  </table>
+  <p style="margin:14px 0 0;font-size:13.5px;color:var(--muted)">配套设计文档同日的勘误见 <code>design-spec.html</code> 顶部（共两处，涉及相关核设计、幅度曲线映射与通道权重归一化）。</p>
+</div>
+
+
+<div class="toc">
+  <h3>目录</h3>
+  <ol>
+    <li><a href="#s0">一句话定义与交付边界</a></li>
+    <li><a href="#s1">产品定位与命名</a></li>
+    <li><a href="#s2">技术选型：UXP 面板还是 C++ 智能滤镜</a></li>
+    <li><a href="#s3">交互设计</a></li>
+    <li><a href="#s4">功能实现</a></li>
+    <li><a href="#s5">参数模型与预设数据结构</a></li>
+    <li><a href="#s6">色彩域的关键决策：曲线在感知域，注入在线性域</a></li>
+    <li><a href="#s7">性能预算与调度策略</a></li>
+    <li><a href="#s8">Demo v0.1 范围界定</a></li>
+    <li><a href="#s9">内置诊断模式</a></li>
+    <li><a href="#s10">风险清单与决策门槛</a></li>
+    <li><a href="#s11">阶段计划</a></li>
+  </ol>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="s0"><span class="num">01</span>一句话定义与交付边界</h2>
+
+<div class="card accent">
+  <p style="margin:0;font-size:17px;line-height:1.8"><strong>银盐是一个 Photoshop 面板插件：你选一卷胶片、拨三个滑块，它按真实胶片的物理规律在你照片的中灰调里长出颗粒——放大看会成团，缩小时会消失，和你换一卷真胶片拍出来一样。</strong></p>
+</div>
+
+<h3>这个 demo 要证明什么</h3>
+<ol>
+  <li><strong>视觉上像不像。</strong>把输出和真实胶片扫描件放一起，有胶片经验的人分不出来。这是 demo 的第一目标。</li>
+  <li><strong>交互上顺不顺手。</strong>不懂物理的摄影师能不能在 30 秒内调出满意的结果；懂的人能不能找到他要的所有参数。</li>
+  <li><strong>架构上撑不撑得住。</strong>「颗粒场与幅度解耦」这个架构决策能否让拖动滑块做到准实时。这一条如果验证失败，整个性能路线要重做。</li>
+</ol>
+
+<h3>这个 demo 不做什么</h3>
+<ul>
+  <li>不追求全分辨率实时预览（接受松手后 1–3 秒的精算延迟）</li>
+  <li>不做多线程/GPU 优化（先用最简单的串行实现跑通正确性）</li>
+  <li>不做色调曲线、halation、色彩耦合——颗粒之外的「胶片感」因素全部留给后续阶段</li>
+  <li>不做预设的实测标定（先用报告里的公开数据 + 视觉微调，标定是 P2 的工作）</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2 id="s1"><span class="num">02</span>产品定位与命名</h2>
+
+<table>
+  <caption>表 1　定位与命名决策</caption>
+  <thead><tr><th style="width:22%">维度</th><th>决策</th><th style="width:30%">理由</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>产品名</td>
+      <td><strong>银盐 / Silver Halide</strong>（内部代号 <code>silverhalide</code>）</td>
+      <td>「银盐」是胶片成像的化学本质，专业用户一看就懂，且与所有竞品（FilmConvert、Dehancer、LiveGrain）在命名上区分开——那些名字都在讲「效果」，我们讲「原理」。</td>
+    </tr>
+    <tr>
+      <td>目标用户</td>
+      <td>有两类，界面必须同时服务</td>
+      <td>① <strong>摄影师</strong>：不懂也不想知道 p(1−p)，只想选个 Portra 400 然后拖一下强度。② <strong>调色师 / 技术型用户</strong>：会追问「为什么高光没有颗粒」，需要看到曲线和物理参数。</td>
+    </tr>
+    <tr>
+      <td>核心差异点</td>
+      <td><strong>唯一的「按观看条件正确缩放」的颗粒插件</strong></td>
+      <td>报告 §4.6：放大率是颗粒感的第一主导变量（PGI 28→79），比胶片型号差异更大。所有竞品都把颗粒当成固定像素尺寸的素材层，只有我们从物理上做对了这一条。</td>
+    </tr>
+    <tr>
+      <td>文案红线</td>
+      <td><strong>禁用「噪声」「Noise」</strong>二字</td>
+      <td>报告 §5.7 与 §7.4：这两个词会把用户拉进数码噪声的心理模型，导致调参方向系统性错误。统一用「颗粒 / Grain」「颗粒度 / Granularity」「团簇 / Clumping」。</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ============================================================ -->
+<h2 id="s2"><span class="num">03</span>技术选型：UXP 面板还是 C++ 智能滤镜</h2>
+
+<p>这是整个项目最关键的一次性决策，因为两条路线的代码几乎不共享。先把两条路的物理约束摊开：</p>
+
+<table>
+  <caption>表 2　两条技术路线对研究报告六条硬约束的满足度</caption>
+  <thead>
+    <tr><th style="width:30%">研究报告的硬约束</th><th style="width:35%">UXP 面板（JS/WASM）</th><th>C++ Plug-in SDK 智能滤镜</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>16/32 位内部精度（约束 13）</td>
+      <td><span class="tag t3">存疑</span> imaging API 的位深支持需实测；JS 端数值精度可控，但吞吐是瓶颈</td>
+      <td><span class="tag t2">原生满足</span> 滤镜入口按文档位深请求数据，16/32 位是一等公民</td>
+    </tr>
+    <tr>
+      <td>线性光域注入（约束 12）</td>
+      <td><span class="tag t2">可做</span> 自己转，但每次交互都要线性化，需缓存</td>
+      <td><span class="tag t2">可做</span> 同样自己转，但转换本身很快</td>
+    </tr>
+    <tr>
+      <td>分块 + halo 无接缝（约束 11）</td>
+      <td><span class="tag t2">可做</span> 自己在 tile 上实现</td>
+      <td><span class="tag t2">天然契合</span> SDK 本身就是按 tile 请求像素的，halo 是标准做法</td>
+    </tr>
+    <tr>
+      <td>非破坏 / 可反复调参（交互要求）</td>
+      <td><span class="tag t3">需绕</span> 得自己包 Smart Object 或用图层副本，历史栈较脏</td>
+      <td><span class="tag t2">原生满足</span> Smart Filter 就是为此设计的，参数随时改</td>
+    </tr>
+    <tr>
+      <td>蒙版 / 区域应用</td>
+      <td><span class="tag t3">受限</span> 需自己处理图层蒙版</td>
+      <td><span class="tag t2">原生满足</span> 智能滤镜挂在图层上，蒙版自动生效</td>
+    </tr>
+    <tr>
+      <td>性能（拖动滑块准实时）</td>
+      <td><span class="tag t3">高风险</span> 大图 getPixels/putPixels 往返是主要瓶颈</td>
+      <td><span class="tag t2">可控</span> 原生 + 可上 GPU（CUDA/Metal）</td>
+    </tr>
+    <tr>
+      <td>开发迭代速度（对 demo 最重要）</td>
+      <td><span class="tag t2">快</span> HTML/CSS/JS，改完即见，无需编译，无需 SDK 环境</td>
+      <td><span class="tag t3">慢</span> C++ 编译、SDK 版本匹配、调试靠日志</td>
+    </tr>
+    <tr>
+      <td>签名/分发门槛</td>
+      <td><span class="tag t2">低</span> 可本地加载；上架 Creative Cloud 需审核</td>
+      <td><span class="tag t3">高</span> 传统插件需 ZXP 打包与签名</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="card teal">
+  <h4>决策：两段式，算法核心从第一天就与壳层解耦</h4>
+  <ul style="margin-bottom:0">
+    <li><strong>Demo v0.1 用 UXP 面板。</strong>目标是验证「颗粒长相」与「交互模型」，不是验证性能。UXP 能把迭代周期压缩到小时级，这对 demo 阶段价值极高。</li>
+    <li><strong>算法核心写成平台无关的纯函数模块</strong>（TypeScript，零 DOM / 零 PS API 依赖，输入输出都是 <code>Float32Array</code>）。这一个决定让后续迁移只需重写「读像素/写像素」和「面板 UI」两块，核心算法一行不改。</li>
+    <li><strong>产品化阶段换 C++ 智能滤镜</strong>，把同一套算法用 C++ 重写（或把 TS 核心编译成原生），拿到位深、线性域、GPU、非破坏四项原生能力。迁移的触发条件见 §10 决策门槛。</li>
+  </ul>
+</div>
+
+<div class="callout warnv">
+  <div class="ico">选型的第一个不确定项——必须先做 30 分钟可行性实验</div>
+  <p>UXP 的 <code>imaging.getPixels</code> / <code>putPixels</code> 在大图 16 位上的实际吞吐，以及 UXP 运行时对 <strong>WebAssembly 与 Web Worker</strong> 的支持程度，是我目前无法从文档确证的。这两点直接决定 demo 的性能天花板。</p>
+  <p style="margin-top:10px"><strong>实验内容（写代码之前先做）：</strong>读入一张 6000×4000 的 16 位图像，不做任何算法，直接 <code>getPixels</code> → 原样 <code>putPixels</code>，测量一次往返耗时；再测一次 1024×1024 的分块往返，测 Worker 能否正常创建。</p>
+  <p style="margin-top:10px"><strong>判据：</strong>若全图往返 &gt; 1.5 s <em>且</em> 分块方案也不可行，则 demo 直接改走 C++ SDK 路线，不要浪费时间在 UXP 上。</p>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="s3"><span class="num">04</span>交互设计</h2>
+
+<h3>4.1 面板整体结构</h3>
+
+<figure>
+  <div class="figframe" style="background:transparent;border:none;box-shadow:none;padding:0">
+    <svg viewBox="0 0 680 620" role="img" aria-label="插件面板线框图">
+      <!-- 面板外框 -->
+      <rect x="150" y="10" width="380" height="600" rx="10" fill="var(--ui-bg)" stroke="var(--ui-line)"/>
+      <!-- 标题栏 -->
+      <rect x="150" y="10" width="380" height="38" rx="10" fill="var(--ui-panel)"/>
+      <rect x="150" y="40" width="380" height="8" fill="var(--ui-panel)"/>
+      <text x="166" y="34" fill="var(--ui-text)" style="font-size:13px;font-weight:700">银盐　Silver Halide</text>
+      <circle cx="502" cy="29" r="4" fill="var(--ui-muted)"/>
+      <circle cx="516" cy="29" r="4" fill="var(--ui-muted)"/>
+
+      <!-- A 预设区 -->
+      <rect x="162" y="58" width="356" height="86" rx="6" fill="var(--ui-panel)"/>
+      <text x="174" y="76" fill="var(--ui-muted)" style="font-size:10.5px;letter-spacing:.08em">① 胶片</text>
+      <g>
+        <rect x="174" y="84" width="76" height="52" rx="4" fill="var(--ui-panel2)" stroke="var(--ui-accent)" stroke-width="1.5"/>
+        <text x="212" y="105" text-anchor="middle" fill="var(--ui-text)" style="font-size:10.5px">Tri-X 400</text>
+        <text x="212" y="120" text-anchor="middle" fill="var(--ui-muted)" style="font-size:9.5px">黑白</text>
+        <rect x="256" y="84" width="76" height="52" rx="4" fill="var(--ui-panel2)"/>
+        <text x="294" y="105" text-anchor="middle" fill="var(--ui-text)" style="font-size:10.5px">Portra 400</text>
+        <text x="294" y="120" text-anchor="middle" fill="var(--ui-muted)" style="font-size:9.5px">彩色负片</text>
+        <rect x="338" y="84" width="76" height="52" rx="4" fill="var(--ui-panel2)"/>
+        <text x="376" y="105" text-anchor="middle" fill="var(--ui-text)" style="font-size:10.5px">VISION3</text>
+        <text x="376" y="120" text-anchor="middle" fill="var(--ui-muted)" style="font-size:9.5px">500T 电影</text>
+        <rect x="420" y="84" width="52" height="52" rx="4" fill="var(--ui-panel2)"/>
+        <text x="446" y="114" text-anchor="middle" fill="var(--ui-muted)" style="font-size:16px">＋</text>
+      </g>
+
+      <!-- B 核心三滑块 -->
+      <rect x="162" y="152" width="356" height="122" rx="6" fill="var(--ui-panel)"/>
+      <text x="174" y="170" fill="var(--ui-muted)" style="font-size:10.5px;letter-spacing:.08em">② 颗粒</text>
+      <text x="174" y="192" fill="var(--ui-text)" style="font-size:11px">强度</text>
+      <text x="506" y="192" text-anchor="end" fill="var(--ui-accent)" style="font-size:11px;font-weight:700">PGI 32 · 轻微可见</text>
+      <rect x="174" y="198" width="332" height="4" rx="2" fill="var(--ui-ctrl)"/>
+      <rect x="174" y="198" width="188" height="4" rx="2" fill="var(--ui-accent)"/>
+      <circle cx="362" cy="200" r="7" fill="var(--ui-text)"/>
+
+      <text x="174" y="228" fill="var(--ui-text)" style="font-size:11px">尺寸 / 画幅</text>
+      <text x="506" y="228" text-anchor="end" fill="var(--ui-accent)" style="font-size:11px;font-weight:700">135 全画幅</text>
+      <rect x="174" y="234" width="332" height="4" rx="2" fill="var(--ui-ctrl)"/>
+      <rect x="174" y="234" width="96" height="4" rx="2" fill="var(--ui-accent)"/>
+      <circle cx="270" cy="236" r="7" fill="var(--ui-text)"/>
+
+      <text x="174" y="264" fill="var(--ui-text)" style="font-size:11px">团簇度</text>
+      <text x="506" y="264" text-anchor="end" fill="var(--ui-accent)" style="font-size:11px;font-weight:700">中</text>
+      <rect x="174" y="270" width="332" height="4" rx="2" fill="var(--ui-ctrl)"/>
+      <rect x="174" y="270" width="166" height="4" rx="2" fill="var(--ui-accent)"/>
+      <circle cx="340" cy="272" r="7" fill="var(--ui-text)"/>
+
+      <!-- C 色调响应 -->
+      <rect x="162" y="284" width="356" height="120" rx="6" fill="var(--ui-panel)"/>
+      <text x="174" y="302" fill="var(--ui-muted)" style="font-size:10.5px;letter-spacing:.08em">③ 色调响应</text>
+      <g>
+        <rect x="174" y="312" width="200" height="72" rx="4" fill="var(--ui-panel2)"/>
+        <path d="M176,382 C205,382 214,332 252,330 C288,328 300,340 320,376 C332,381 350,382 372,382"
+              fill="none" stroke="var(--ui-accent)" stroke-width="2"/>
+        <line x1="174" y1="382" x2="374" y2="382" stroke="var(--ui-line)"/>
+        <line x1="174" y1="312" x2="174" y2="382" stroke="var(--ui-line)"/>
+        <text x="274" y="326" text-anchor="middle" fill="var(--ui-muted)" style="font-size:9.5px">峰值 ≈ 60% 灰</text>
+      </g>
+      <g>
+        <rect x="384" y="316" width="122" height="20" rx="3" fill="var(--ui-panel2)" stroke="var(--ui-accent)"/>
+        <text x="445" y="330" text-anchor="middle" fill="var(--ui-text)" style="font-size:10px">胶片（默认）</text>
+        <rect x="384" y="340" width="122" height="20" rx="3" fill="var(--ui-panel2)"/>
+        <text x="445" y="354" text-anchor="middle" fill="var(--ui-text)" style="font-size:10px">暗部保护</text>
+        <rect x="384" y="364" width="122" height="20" rx="3" fill="var(--ui-panel2)"/>
+        <text x="445" y="378" text-anchor="middle" fill="var(--ui-text)" style="font-size:10px">全色调均匀</text>
+      </g>
+
+      <!-- D 色彩 -->
+      <rect x="162" y="414" width="356" height="86" rx="6" fill="var(--ui-panel)"/>
+      <text x="174" y="432" fill="var(--ui-muted)" style="font-size:10.5px;letter-spacing:.08em">④ 色彩</text>
+      <text x="174" y="456" fill="var(--ui-text)" style="font-size:11px">亮度 / 色度</text>
+      <rect x="174" y="464" width="200" height="6" rx="3" fill="var(--ui-ctrl)"/>
+      <rect x="174" y="464" width="160" height="6" rx="3" fill="var(--ui-text)"/>
+      <text x="384" y="470" fill="var(--ui-muted)" style="font-size:10px">80 / 20</text>
+      <g>
+        <rect x="174" y="482" width="70" height="12" rx="3" fill="#c0504d"/>
+        <text x="209" y="491" text-anchor="middle" fill="#fff" style="font-size:9px">R .36</text>
+        <rect x="250" y="482" width="70" height="12" rx="3" fill="#3fa36b"/>
+        <text x="285" y="491" text-anchor="middle" fill="#fff" style="font-size:9px">G .40</text>
+        <rect x="326" y="482" width="90" height="12" rx="3" fill="#4a90d9"/>
+        <text x="371" y="491" text-anchor="middle" fill="#fff" style="font-size:9px">B 1.00</text>
+      </g>
+      <rect x="426" y="458" width="80" height="18" rx="3" fill="var(--ui-panel2)"/>
+      <text x="466" y="471" text-anchor="middle" fill="var(--ui-text)" style="font-size:9.5px">单色颗粒</text>
+
+      <!-- E 观察条件 -->
+      <rect x="162" y="510" width="356" height="52" rx="6" fill="var(--ui-panel)" stroke="var(--ui-accent)" stroke-width="1.2"/>
+      <text x="174" y="528" fill="var(--ui-accent)" style="font-size:10.5px;letter-spacing:.08em;font-weight:700">⑤ 观察条件（本插件独有）</text>
+      <text x="174" y="548" fill="var(--ui-text)" style="font-size:10.5px">输出宽度</text>
+      <rect x="228" y="538" width="52" height="14" rx="3" fill="var(--ui-panel2)"/>
+      <text x="254" y="549" text-anchor="middle" fill="var(--ui-text)" style="font-size:9.5px">24 cm</text>
+      <text x="292" y="548" fill="var(--ui-text)" style="font-size:10.5px">观看距离</text>
+      <rect x="352" y="538" width="52" height="14" rx="3" fill="var(--ui-panel2)"/>
+      <text x="378" y="549" text-anchor="middle" fill="var(--ui-text)" style="font-size:9.5px">36 cm</text>
+      <rect x="416" y="536" width="90" height="18" rx="3" fill="#3a5a2a"/>
+      <text x="461" y="549" text-anchor="middle" fill="#a8d88a" style="font-size:9.5px">✓ 此尺寸下可见</text>
+
+      <!-- F 高级折叠 -->
+      <rect x="162" y="570" width="356" height="28" rx="6" fill="var(--ui-panel2)"/>
+      <text x="174" y="589" fill="var(--ui-muted)" style="font-size:11px">▸ 高级（半径分布 / 观察侧柔化 / 图像柔化 / 种子）</text>
+
+      <!-- 左侧标注 -->
+      <g fill="var(--muted)" style="font-size:11.5px">
+        <text x="140" y="100" text-anchor="end">预设即心理锚点</text>
+        <text x="140" y="120" text-anchor="end" style="font-size:10px">带真实扫描缩略图</text>
+        <line x1="146" y1="105" x2="160" y2="105" stroke="var(--line-strong)"/>
+
+        <text x="140" y="200" text-anchor="end">强度用 PGI 表达</text>
+        <text x="140" y="220" text-anchor="end" style="font-size:10px">有阈值、有 JND 语义</text>
+        <line x1="146" y1="205" x2="160" y2="205" stroke="var(--line-strong)"/>
+
+        <text x="140" y="340" text-anchor="end">曲线两端锁零</text>
+        <text x="140" y="360" text-anchor="end" style="font-size:10px">与物理结论一致</text>
+        <line x1="146" y1="345" x2="160" y2="345" stroke="var(--line-strong)"/>
+
+        <text x="140" y="470" text-anchor="end">实测权重预置</text>
+        <text x="140" y="490" text-anchor="end" style="font-size:10px">蓝 ≫ 绿 &gt; 红</text>
+        <line x1="146" y1="475" x2="160" y2="475" stroke="var(--line-strong)"/>
+      </g>
+
+      <!-- 右侧标注 -->
+      <g fill="var(--muted)" style="font-size:11.5px">
+        <text x="546" y="240" text-anchor="start">物理耦合：</text>
+        <text x="546" y="258" text-anchor="start" style="font-size:10px">强度与尺寸</text>
+        <text x="546" y="274" text-anchor="start" style="font-size:10px">不是独立变量</text>
+        <line x1="522" y1="245" x2="542" y2="245" stroke="var(--line-strong)"/>
+
+        <text x="546" y="360" text-anchor="start">色度偏高时</text>
+        <text x="546" y="378" text-anchor="start" style="font-size:10px">此处弹出警告</text>
+        <line x1="522" y1="365" x2="542" y2="365" stroke="var(--line-strong)"/>
+
+        <text x="546" y="545" text-anchor="start">最关键的一块：</text>
+        <text x="546" y="563" text-anchor="start" style="font-size:10px">所有竞品都没有</text>
+        <line x1="522" y1="550" x2="542" y2="550" stroke="var(--line-strong)"/>
+      </g>
+    </svg>
+  </div>
+  <figcaption><b>图 1　插件面板线框图（从上到下的六块）。</b>布局顺序刻意照抄摄影师的决策顺序：先选胶片（心理锚点）→ 再调颗粒（三滑块）→ 再修色调分布 → 再配色 → 最后才是观察条件。高级参数默认折叠。</figcaption>
+</figure>
+
+<h3>4.2 六个区块逐个说明</h3>
+
+<h4>① 胶片（预设）</h4>
+<ul>
+  <li><strong>按族分组</strong>：黑白 / 彩色负片 / 彩色反转。分族不是分类癖，而是物理需要——报告 §3.4 指出彩色染料云的尺度是黑白银团的 2–5 倍且更柔，两组预设必须使用不同的半径与柔化参数。</li>
+  <li><strong>每个预设配一张真实胶片扫描缩略图</strong>（不是渲染图）。这一条很重要：用户在扫过预设时，靠的是视觉记忆匹配，不是参数名。没有缩略图的预设列表等于让人盲选。</li>
+  <li>首批预设（对应用户已有的审美认知，也对应报告里有公开数据的型号）：
+    <table style="margin-top:12px">
+      <thead><tr><th style="width:22%">族</th><th>预设</th><th style="width:32%">数据依据</th></tr></thead>
+      <tbody>
+        <tr><td>黑白</td><td>Tri-X 400 / HP5 Plus / T-Max 100 / Delta 3200</td><td>报告未采集黑白实测，先用视觉标定，标为「待标定」状态</td></tr>
+        <tr><td>彩色负片</td><td>Portra 160 / Portra 400 / Ektar 100 / Pro Image 100</td><td>柯达技术资料有 PGI 数值（报告表 6），可作为强度锚点</td></tr>
+        <tr><td>彩色负片（电影）</td><td>VISION3 500T</td><td>报告图 2 的完整三通道颗粒度曲线，数据最扎实，作为默认预设</td></tr>
+        <tr><td>彩色反转</td><td>Velvia 50 / Ektachrome E100</td><td>报告未采集；已知反转片颗粒感整体强于负片（约 ×2.5）</td></tr>
+      </tbody>
+    </table>
+  </li>
+  <li>预设列表要能显示<strong>「实测标定」还是「估计值」</strong>标签。诚实标注比假装精确更重要——报告 §8.2 明确说了公开数据不足。</li>
+</ul>
+
+<h4>② 颗粒（三个核心滑块）</h4>
+<p>这里做了三个不寻常的设计决策：</p>
+
+<div class="card accent">
+  <h4>决策 A：强度单位用 PGI，不用百分比</h4>
+  <p>滑块右侧不只是数字，而是一句人话状态：<code>PGI 18 · 低于可见阈值</code> / <code>PGI 32 · 轻微可见</code> / <code>PGI 55 · 明显</code> / <code>PGI 80 · 强烈</code>。</p>
+  <p>依据：报告 §4.6 的 PGI 定义——25 是视觉阈值，每 4 个单位是一个 JND。这给了滑块<strong>物理量纲和心理量纲</strong>，用户能理解「32 和 36 的差别刚好能看出来」「18 是白调了」。百分比滑块给不了这种语义。</p>
+</div>
+
+<div class="card accent">
+  <h4>决策 B：尺寸滑块用「画幅」表达，内部换算成放大率</h4>
+  <p>用户看到的是「辅助提示 + 一个连续滑块」，滑块左端对应 Super 8（颗粒最粗），右端对应 4×5 页片（最细），中间标出 16mm / 135 / 120 的位置。内部换算为等效放大率。</p>
+  <p>依据：报告 §4.6 表 6——同一底片的 PGI 随放大率从 4.4× 到 17.8× 变化时从 28 升到 79。放大率是主导变量，但用户脑子里没有「放大率」，只有「画幅」。<strong>用用户的语汇承载物理参数</strong>，这是整个交互设计的核心手法。</p>
+</div>
+
+<div class="card accent">
+  <h4>决策 C：强度与尺寸在内部<em>部分耦合</em>，但界面上看起来是独立的</h4>
+  <p>报告 §4.2 的 Selwyn + √D 律表明：改变颗粒半径会同时改变每个分辨单元内的颗粒数 N，从而按 √N 影响 σ。物理上二者不独立。</p>
+  <p><strong>处理方式：</strong>界面上仍是两个滑块（用户认知负担最低），但内部施加一个物理修正项——用户增大颗粒尺寸时，强度曲线整体做一次轻微上修（约 ×√N 的偏离），使结果符合物理而不是机械独立。修正量的幅度需要实测标定，demo 阶段先用理论值。</p>
+  <p><strong>这条必须写进 tooltip</strong>，否则专业用户会觉得「我明明没动强度，怎么变了」。</p>
+</div>
+
+<h4>③ 色调响应</h4>
+<ul>
+  <li><strong>可编辑曲线</strong>：横轴是图像亮度（0–100%），纵轴是颗粒强度系数（0–150%）。默认曲线<strong>两端锁死在 0</strong>——这不是设计偷懒，是报告 §4.7 的硬结论：纯黑没有颗粒（没有晶体被曝光）、纯白没有颗粒（覆盖率饱和）。</li>
+  <li><strong>默认峰值在 55–65% 灰</strong>，依据是布尔模型的 p(1−p) 与 PICS 的打印体颗粒度峰值（D ≈ 0.75）。</li>
+  <li><strong>曲线下方铺一条灰阶梯度条</strong>，把曲线的高度直接画成各亮度处的颗粒浓度。用户改曲线时能立刻看到「我要在哪一段加颗粒」，比看数字直观得多。</li>
+  <li>三个快捷按钮覆盖 90% 的使用场景：「胶片」（默认物理曲线）/「暗部保护」（峰值右移、暗部压得更狠，适合人像）/「全色调均匀」（接近水平直线，用于风格化）。</li>
+</ul>
+
+<h4>④ 色彩</h4>
+<ul>
+  <li><strong>亮度 / 色度比</strong>：单个双极滑块，默认 80 / 20。依据报告表 8。当色度分量超过 35% 时，滑块下方弹出警示：「色度颗粒偏高，可能出现彩虹噪点」。<em>用警告代替硬限制</em>——有经验的用户可能就要这个效果。</li>
+  <li><strong>三通道权重</strong>：三个可点击的色块，默认 <code>R .36 / G .40 / B 1.00</code>，来自报告图 2 的 VISION3 实测比值。色块面积正比于权重，不用看数字就能发现「蓝通道最大」这个事实。</li>
+  <li><strong>单色颗粒开关</strong>：勾选后三通道共用同一颗粒场，得到中性灰颗粒 = 黑白胶片模式。这同时是「三通道独立 vs 同步」的教学开关——用户来回切换几次就理解什么是色度颗粒了。</li>
+</ul>
+
+<h4>⑤ 观察条件 <span class="tag t2">核心差异点</span></h4>
+
+<p>这一块是整个插件唯一无法被现有产品替代的部分，也是报告 §4.6 的直接产物。</p>
+
+<table>
+  <caption>表 3　观察条件区块的交互内容</caption>
+  <thead><tr><th style="width:26%">控件</th><th>行为</th></tr></thead>
+  <tbody>
+    <tr><td>输出宽度 + 观看距离</td><td>用户输入实际输出尺寸（如「A4 打印」或「24 cm 屏幕」）与典型观看距离（默认 36 cm = 14 in，柯达标准）。内部据此反算等效放大率，并<strong>实时改写 PGI 读数</strong>。</td></tr>
+    <tr><td>可见度指示条</td><td>三态指示灯：<span class="tag t3">不可见</span>（PGI &lt; 25）/ <span class="tag t2">刚好可见</span>（25–40）/ <span class="tag">明显</span>（&gt; 40）。这是把 §4.6 的「视觉阈值」规则直接做成 UI。</td></tr>
+    <tr><td>观察尺度联动</td><td>改变输出尺寸时，界面上的「尺寸/画幅」滑块位置不变，但内部有效放大率随之变化，颗粒粗细实时反馈。这教育用户一个关键事实：<strong>同一卷胶片，洗 4×6 和洗 16×20 的颗粒感完全不同。</strong></td></tr>
+  </tbody>
+</table>
+
+<h4>⑥ 高级（默认折叠）</h4>
+<dl>
+  <dt><strong>颗粒半径分布</strong>（μᵣ / σᵣ）</dt>
+  <dd>对数正态分布的均值与离散度。μᵣ 控制颗粒绝对大小，σᵣ 控制「大小混杂」的程度。σᵣ 调大 → 大小颗粒混合 → 更接近真实乳剂（真实胶片从来不是单分散的）。默认值取自报告表 2、表 3 的尺寸区间。</dd>
+
+  <dt><strong>观察侧柔化</strong>（σ_view）</dt>
+  <dd>对应布尔模型里那个模拟「放大 + 人眼」的高斯核 φ。这是唯一一个纯粹为了「像扫描件」而存在的参数——调大会让颗粒变软、变糊，模拟低端扫描仪或远距离观看。专业用户会喜欢这个。</dd>
+
+  <dt><strong>图像柔化联动</strong>（0–100%）</dt>
+  <dd>依据报告 §5.5 的铁律「颗粒是画面最锐利的元素」。这个滑块按真实胶片的 MTF 关系轻微柔化底层图像，让颗粒相对更锐利。默认给一个很小的值（约 15%）。<em>这是最反直觉、但最能提升「胶片感」的一个参数。</em></dd>
+
+  <dt><strong>随机种子</strong> + 随机化按钮</dt>
+  <dd>依据报告 §5.6。批量处理组图时，逐张换种子才不会出现「所有照片颗粒位置相同」的破绽。UI 上给一个「应用到本组所有图像时随机化」的选项。</dd>
+</dl>
+
+<h3>4.3 三个关键交互机制</h3>
+
+<h4>机制一：1:1 对比窗口 <span class="tag t2">解决「小视图看不见」的问题</span></h4>
+
+<p>这是必须解决的体验问题。报告 §4.6 指出颗粒感随放大率急剧变化——所以当用户把画布缩到 25% 时，<strong>颗粒在物理上就应该是看不见的</strong>（PGI 掉到阈值以下）。用户会立刻以为插件坏了。</p>
+
+<div class="card teal">
+  <h4>方案：面板内嵌一个始终 1:1 的取样窗口</h4>
+  <ul>
+    <li>面板顶部固定一个约 200×140 px 的小窗，永远显示<strong>图像某处的 100% 裁切</strong>，左半原始、右半处理后，中间可拖动分割线。</li>
+    <li>取样点通过「在画布上点一下」或小窗内拖动来指定，小窗角落显示坐标。</li>
+    <li>这样无论画布缩放到多少，用户始终有一个可信的 1:1 参照——这是所有专业颗粒插件的刚需。</li>
+  </ul>
+</div>
+
+<h4>机制二：颗粒场与幅度解耦 <span class="tag">决定实时性成败</span></h4>
+
+<p>这是架构决策，但它直接决定交互手感，所以放在交互章节讲。</p>
+
+<div class="formula">
+  <span class="lbl">把「呈现」拆成两层</span>
+  <strong>颗粒场 G(x, y)</strong>　← 只依赖：随机种子、颗粒半径、团簇度、观察侧柔化<br>
+  <span class="cmt">　　（贵：需要生成 + 相关滤波。参数量级：全图级）</span><br><br>
+  <strong>幅度 A(u)</strong>　← 只依赖：预设、强度、色调曲线、色彩配比、通道权重<br>
+  <span class="cmt">　　（便宜：一张 1024 点的查找表。参数量级：常量）</span><br><br>
+  <strong>输出 = 图像 + G(x, y) × A(u(x, y)) × 通道权重</strong>
+</div>
+
+<div class="callout">
+  <div class="ico">这个拆分带来的直接体验</div>
+  <ul style="margin:0">
+    <li>拖动<strong>强度</strong>滑块、编辑<strong>色调曲线</strong>、改<strong>色彩配比</strong> → 颗粒场完全不动，只需重算一张 LUT 再做逐像素乘加 → <strong>准实时，无延迟感</strong></li>
+    <li>拖动<strong>尺寸</strong>或<strong>团簇度</strong>滑块 → 颗粒场必须重算 → 交互中先降采样预览（见机制三），松手后精算</li>
+  </ul>
+  <p style="margin-top:10px;margin-bottom:0">如果架构不做这个拆分，那么每拖一次强度滑块都要重算整幅颗粒场，实时性直接死掉。这是必须在第一天就定下来的设计。</p>
+</div>
+
+<h4>机制三：两档预览精度 + 双预览模式</h4>
+
+<table>
+  <caption>表 4　预览策略</caption>
+  <thead><tr><th style="width:22%">时机</th><th style="width:30%">处理范围与精度</th><th>目标耗时</th></tr></thead>
+  <tbody>
+    <tr><td>拖动滑块中</td><td>仅当前视口可见区域 + 1/2 降采样 + 8 位快路径；复用已缓存的颗粒场</td><td class="num">&lt; 50 ms（无感）</td></tr>
+    <tr><td>松手后（debounce 300 ms）</td><td>全分辨率 + 16/32 位精算路径</td><td class="num">&lt; 3 s（6000×4000）</td></tr>
+    <tr><td>手动「精算」按钮</td><td>全分辨率最高精度，供导出前确认</td><td class="num">不限时</td></tr>
+  </tbody>
+</table>
+
+<p>另外给一个二选一的<strong>预览模式开关</strong>，放在面板底部（默认选「真实」）：</p>
+
+<div class="grid2">
+  <div class="box">
+    <h4>真实预览（默认）</h4>
+    <p>按当前画布缩放级别渲染<strong>等效观看条件</strong>。物理正确：缩小画布 → 颗粒消失；放大到 100% → 颗粒清晰。</p>
+    <p style="margin-top:8px"><strong>优点：</strong>你看到的就是最终效果。专业用户信任这个。</p>
+    <p style="margin-top:8px"><strong>缺点：</strong>小视图下用户容易误以为插件没生效。</p>
+  </div>
+  <div class="box">
+    <h4>效果预览</h4>
+    <p>永远按 1:1 渲染颗粒后再缩放到当前视图显示。小视图下也能看到颗粒。</p>
+    <p style="margin-top:8px"><strong>优点：</strong>调试和教学时直观。</p>
+    <p style="margin-top:8px"><strong>缺点：</strong>尺度感失真——会误导用户以为缩略图就该长这样。</p>
+  </div>
+</div>
+
+<div class="callout warnv">
+  <div class="ico">顺手的教育提示</div>
+  <p>切到「效果预览」时，面板顶部显示一行提示：「效果预览仅用于查看纹理，颗粒尺度不准确。判断最终效果请用真实预览或 1:1 窗口。」——把技术限制变成一次用户教育，而不是藏起来。这类诚实提示会显著提升专业用户的信任度。</p>
+</div>
+
+<h3>4.4 三个典型用户旅程</h3>
+
+<table>
+  <caption>表 5　主要使用路径</caption>
+  <thead><tr><th style="width:16%">用户</th><th style="width:28%">目标</th><th>路径</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>摄影师（30 秒路径）</strong></td>
+      <td>给一组人像加自然颗粒</td>
+      <td>打开面板 → 点「Portra 400」→ 看 1:1 窗口 → 强度滑块拖到「轻微可见」→ 点「暗部保护」→ 完成。全程不打开任何高级选项，不知道也没必要知道 p(1−p) 是什么。</td>
+    </tr>
+    <tr>
+      <td><strong>调色师（3 分钟路径）</strong></td>
+      <td>让数字素材匹配已有的胶片素材</td>
+      <td>打开高级 → 把「观察侧柔化」调到与素材扫描仪匹配 → 手动编辑色调响应曲线，把峰值移到素材实测的位置 → 微调三通道权重修正色度颗粒方向 → 保存为「我的预设」。</td>
+    </tr>
+    <tr>
+      <td><strong>技术型用户（验证路径）</strong></td>
+      <td>确认插件没有在唬人</td>
+      <td>打开诊断模式（§10）→ 看输出的 NPS 曲线是不是低通带限、−3dB 截止频率是否随「尺寸」滑块反比移动 → 看灰阶梯度条上各阶梯的方差是否符合「中间高两端零」→ 检查纯黑纯白区域是否真的没被改动。</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr>
+
+<!-- ============================================================ -->
+<h2 id="s4"><span class="num">05</span>功能实现</h2>
+
+<h3>5.1 数据流总览</h3>
+
+<figure>
+  <div class="figframe">
+    <svg viewBox="0 0 680 400" role="img" aria-label="算法数据流图">
+      <defs>
+        <marker id="d1" markerWidth="8" markerHeight="8" refX="6" refY="2.5" orient="auto">
+          <path d="M0,0 L6,2.5 L0,5 z" fill="var(--line-strong)"/>
+        </marker>
+        <marker id="d2" markerWidth="8" markerHeight="8" refX="6" refY="2.5" orient="auto">
+          <path d="M0,0 L6,2.5 L0,5 z" fill="var(--accent)"/>
+        </marker>
+      </defs>
+
+      <!-- 参数入口 -->
+      <rect x="24" y="16" width="150" height="44" rx="7" fill="var(--panel-2)" stroke="var(--line-strong)"/>
+      <text x="99" y="34" text-anchor="middle" class="lb" style="font-size:11.5px">预设 + 滑块参数</text>
+      <text x="99" y="50" text-anchor="middle" class="lbs" style="font-size:10.5px">强度 / 画幅 / 团簇度 / 曲线</text>
+
+      <!-- L1 -->
+      <rect x="212" y="10" width="200" height="110" rx="8" fill="var(--accent-2-soft)" stroke="var(--accent-2)"/>
+      <text x="312" y="30" text-anchor="middle" class="lb" style="font-size:11.5px" fill="var(--accent-2)">L1 物理预计算</text>
+      <text x="312" y="50" text-anchor="middle" class="lbs" style="font-size:10.5px">幅度曲线 a(u) → LUT 1024</text>
+      <text x="312" y="68" text-anchor="middle" class="lbs" style="font-size:10.5px">相关核 = 高斯低通 + 乘性团簇</text>
+      <text x="312" y="86" text-anchor="middle" class="lbs" style="font-size:10.5px">半径 μᵣ / 离散 σᵣ / 观察 σ_view</text>
+      <text x="312" y="106" text-anchor="middle" class="lbs" style="font-size:10.5px" fill="var(--accent-2)">只在参数变化时运行 · 结果可缓存</text>
+
+      <line x1="176" y1="38" x2="208" y2="38" stroke="var(--line-strong)" marker-end="url(#d1)"/>
+
+      <!-- L0 -->
+      <rect x="24" y="150" width="200" height="88" rx="8" fill="var(--panel-2)" stroke="var(--line-strong)"/>
+      <text x="124" y="170" text-anchor="middle" class="lb" style="font-size:11.5px">L0 输入</text>
+      <text x="124" y="190" text-anchor="middle" class="lbs" style="font-size:10.5px">读像素（16/32 位）</text>
+      <text x="124" y="208" text-anchor="middle" class="lbs" style="font-size:10.5px">v → 线性 l = f(v)</text>
+      <text x="124" y="226" text-anchor="middle" class="lbs" style="font-size:10.5px">保留 v 作为查表索引</text>
+
+      <!-- L2 -->
+      <rect x="252" y="150" width="180" height="88" rx="8" fill="var(--accent-soft)" stroke="var(--accent)"/>
+      <text x="342" y="170" text-anchor="middle" class="lb" style="font-size:11.5px" fill="var(--accent)">L2 噪声合成</text>
+      <text x="342" y="190" text-anchor="middle" class="lbs" style="font-size:10.5px">坐标寻址哈希 PRNG</text>
+      <text x="342" y="208" text-anchor="middle" class="lbs" style="font-size:10.5px">白噪声 → 卷积 K</text>
+      <text x="342" y="226" text-anchor="middle" class="lbs" style="font-size:10.5px">理论方差归一化</text>
+
+      <!-- L3 -->
+      <rect x="456" y="150" width="200" height="88" rx="8" fill="var(--panel-2)" stroke="var(--line-strong)"/>
+      <text x="556" y="170" text-anchor="middle" class="lb" style="font-size:11.5px">L3 合成</text>
+      <text x="556" y="190" text-anchor="middle" class="lbs" style="font-size:10.5px">σ_lin = A(v)·v^1.2·S</text>
+      <text x="556" y="208" text-anchor="middle" class="lbs" style="font-size:10.5px">通道权重分配 + 抖动</text>
+      <text x="556" y="226" text-anchor="middle" class="lbs" style="font-size:10.5px">l → v 回编码 → 写出</text>
+
+      <line x1="312" y1="120" x2="250" y2="146" stroke="var(--accent-2)" marker-end="url(#d2)"/>
+      <line x1="342" y1="120" x2="342" y2="146" stroke="var(--accent-2)" marker-end="url(#d2)"/>
+      <line x1="224" y1="194" x2="248" y2="194" stroke="var(--line-strong)" marker-end="url(#d1)"/>
+      <line x1="432" y1="194" x2="452" y2="194" stroke="var(--line-strong)" marker-end="url(#d1)"/>
+      <line x1="312" y1="126" x2="540" y2="146" stroke="var(--accent-2)" marker-end="url(#d2)"/>
+
+      <!-- 分块循环示意 -->
+      <rect x="24" y="266" width="632" height="112" rx="8" fill="var(--panel-2)" stroke="var(--line-strong)" stroke-dasharray="5 4"/>
+      <text x="40" y="288" class="lb" style="font-size:11.5px">分块调度（L0 → L3 在每个 tile 上循环执行）</text>
+
+      <rect x="46" y="302" width="110" height="56" rx="5" fill="var(--panel)" stroke="var(--line-strong)"/>
+      <text x="101" y="324" text-anchor="middle" class="lbs" style="font-size:10.5px">tile 512×512</text>
+      <text x="101" y="342" text-anchor="middle" class="lbs" style="font-size:10.5px">+ halo（核半径×3）</text>
+
+      <line x1="160" y1="330" x2="184" y2="330" stroke="var(--line-strong)" marker-end="url(#d1)"/>
+
+      <rect x="190" y="302" width="120" height="56" rx="5" fill="var(--panel)" stroke="var(--line-strong)"/>
+      <text x="250" y="324" text-anchor="middle" class="lbs" style="font-size:10.5px">生成噪声 + 卷积</text>
+      <text x="250" y="342" text-anchor="middle" class="lbs" style="font-size:10.5px">（halo 区一并生成）</text>
+
+      <line x1="314" y1="330" x2="338" y2="330" stroke="var(--line-strong)" marker-end="url(#d1)"/>
+
+      <rect x="344" y="302" width="140" height="56" rx="5" fill="var(--panel)" stroke="var(--line-strong)"/>
+      <text x="414" y="324" text-anchor="middle" class="lbs" style="font-size:10.5px">裁掉 halo，取中心</text>
+      <text x="414" y="342" text-anchor="middle" class="lbs" style="font-size:10.5px">→ 写回该 tile</text>
+
+      <line x1="488" y1="330" x2="512" y2="330" stroke="var(--line-strong)" marker-end="url(#d1)"/>
+
+      <rect x="518" y="302" width="116" height="56" rx="5" fill="var(--panel)" stroke="var(--line-strong)"/>
+      <text x="576" y="324" text-anchor="middle" class="lbs" style="font-size:10.5px">Worker 池并行</text>
+      <text x="576" y="342" text-anchor="middle" class="lbs" style="font-size:10.5px">（demo 可先串行）</text>
+
+      <text x="40" y="372" class="lbs" style="font-size:10.5px">要点：halo 区域的噪声也必须由同一套坐标寻址哈希生成——否则 tile 边界处颗粒会断开，出现报告 §7.4 明令禁止的网格接缝。</text>
+    </svg>
+  </div>
+  <figcaption><b>图 2　算法数据流。</b>L1 只在参数变化时运行（输出查找表与卷积核），L2/L3 是无状态可并行的逐像素运算。<b>整个架构的性能支点是 L1 与 L3 的解耦</b>——这让拖动强度/曲线类参数不必重算颗粒场。</figcaption>
+</figure>
+
+<h3>5.2 L0 输入层</h3>
+
+<table>
+  <caption>表 6　输入层的具体任务</caption>
+  <thead><tr><th style="width:26%">任务</th><th>做法</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>位深检查</td>
+      <td>读取文档 <code>bitsPerChannel</code>。若为 8 位，面板顶部显示可点击提示：「当前 8 位。颗粒的密度涨落量级为 0.4%–2.5%，8 位量化会吞掉细颗粒 → 一键转 16 位」。<em>依据：报告 §4.3 的 σ 量级与 §7.4 反模式的第 8 条。</em></td>
+    </tr>
+    <tr>
+      <td>像素读取</td>
+      <td>按 tile 读入，<strong>连同 halo 区域一起读</strong>（多读一圈，避免为边界单独处理）。以 <code>Float32Array</code> 持有。</td>
+    </tr>
+    <tr>
+      <td>线性化</td>
+      <td>文档若是 sRGB 编码值 v，按标准 sRGB EOTF 转线性 l。这是逐像素的超越函数，<strong>必须用 1024 点 LUT + 线性插值</strong>，不要直接调用 <code>pow()</code>。</td>
+    </tr>
+    <tr>
+      <td>保留 v</td>
+      <td>同时保留 v（未线性化的值）作为后续查幅度曲线的索引。<em>这一步是 §7 那个关键决策的落地基础，别省。</em></td>
+    </tr>
+    <tr>
+      <td>不要缓存全图线性值</td>
+      <td>用 LUT 做线性化本身已足够快（全图 6000×4000 约 150 ms），不值得为它多占一份全图 Float32 缓冲（288 MB）。<strong>真正必须缓存的是颗粒场</strong>，见 §8.3。</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>5.3 L1 物理预计算层</h3>
+
+<p>这一层是整个插件「物理正确」的唯一来源。它的输入是用户的滑块，输出是后续两层需要的全部数值。</p>
+
+<h4>步骤 1：把用户参数翻译成物理量</h4>
+
+<div class="formula">
+  <span class="lbl">像素 ↔ 微米的换算（必须先建立这个约定）</span>
+  假设：把输入照片视为「等效 135 全画幅」（感光区宽 36 mm）铺满图像宽度 W px<br>
+  <strong>1 px = 36 / W  mm　⇒　r_px = r_μm × W / 36000</strong><br><br>
+  <span class="cmt">例：W = 6000 px → 6 μm/px。报告 §5.1 的「颗粒簇 10–30 μm」⇒ 1.7–5.0 px。<br>
+  这个结果与报告给出的经验值（2–5 px）吻合，说明这个约定是合理的，可以作为默认标定基准。</span>
+</div>
+
+<table>
+  <caption>表 7　L1 输出的四个物理参数及其来源</caption>
+  <thead><tr><th style="width:20%">参数</th><th style="width:24%">含义</th><th>由什么决定</th></tr></thead>
+  <tbody>
+    <tr><td class="num">μᵣ</td><td>颗粒平均半径（像素）</td><td>预设的颗粒绝对尺寸 × 「画幅」滑块的等效放大率 ÷ 观察条件缩放。三个来源相乘——这正是报告 §4.6「放大率主导」的落地。</td></tr>
+    <tr><td class="num">σᵣ</td><td>半径离散度（对数正态）</td><td>预设给定（黑白低、高速彩色高）。真实乳剂从来不是单分散的，报告 §3.1 指出高速片尺寸分布更宽。</td></tr>
+    <tr><td class="num">σ<sub>view</sub></td><td>观察侧低通宽度（像素）</td><td>由高级里的「观察侧柔化」滑块直接给出。对应布尔模型里模拟放大+人眼的高斯核 φ。</td></tr>
+    <tr><td class="num">c</td><td>团簇度 [0, 1]</td><td>「团簇度」滑块。控制相关核的低频成分权重（见步骤 3）。</td></tr>
+  </tbody>
+</table>
+
+<h4>步骤 2：计算归一化幅度曲线 a(u)</h4>
+
+<p>目标：得到「图像亮度 u → 颗粒相对幅度」的曲线。这是报告 §4.7 三条事实的交汇点。</p>
+
+<div class="card">
+  <h4>Demo 阶段：解析近似（先跑通）</h4>
+  <div class="formula" style="margin-top:12px">
+    a(u) = 2·√( p(1−p) )，　p = u<sup>γ</sup>，　γ = ln(0.5)/ln(uPeak)<br>
+    <span class="cmt">直接来自布尔模型的覆盖波动方差 Var = p(1−p)（报告 §4.7 事实 C）。<br>
+    形态：中间调峰值、两端为零。<strong>一条式子命中报告的核心结论。</strong></span>
+  </div>
+  <p style="margin-bottom:0">优点是零成本、无需蒙特卡洛、行为可预测。缺点是忽略了 μᵣ 与 σ_view 对曲线形状的影响（颗粒很小时曲线更窄，颗粒很大时更平）。对 demo 而言足够。</p>
+</div>
+
+<div class="card teal">
+  <h4>P1 阶段：蒙特卡洛标定（提升精度）</h4>
+  <ol style="margin-bottom:0">
+    <li>取 17 个采样灰度 u ∈ {0, 1/16, 2/16, …, 1}；</li>
+    <li>对每个 u，在 256×256 窗口内生成布尔模型实现：圆盘中心数 = λ(u)·A<sub>win</sub>（λ 由报告 §6.5 公式③ <code>log(1/(1−u))/E[πr²]</code> 给出），半径按对数正态采样；</li>
+    <li>与高斯核 φ(σ<sub>view</sub>) 卷积；</li>
+    <li>统计窗口内方差 → Var(u)；</li>
+    <li>归一化 a(u) = √Var(u) / √Var<sub>max</sub>，用单调三次样条插值成 1024 点 LUT。</li>
+  </ol>
+</div>
+
+<blockquote style="border-left:3px solid var(--accent-2);margin:22px 0;padding:2px 0 2px 20px;color:var(--muted)">
+  这一层是「物理模型」与「实时渲染」之间的桥。预计算的本质是：<strong>把昂贵的蒙特卡洛模拟从「每帧执行」降级为「参数变化时执行一次」</strong>。原论文的实现在典型工作负载下开销较大，而我们的架构里它根本不参与交互循环。
+</blockquote>
+
+<h4>步骤 3：生成相关核 K <span class="tag t3">已按实现修正</span></h4>
+
+<p>目标：一个能让白噪声变成「带限 + 团簇」的滤波器。<strong>注意：频谱目标不是带通而是低通带限</strong>（见文档顶部勘误）。</p>
+
+<div class="formula">
+  <span class="lbl">方案：单高斯低通 + 乘性对数正态调制</span>
+  <strong>细颗粒：　F = G(σ_g) ∗ W　　　　σ_g = μᵣ / 2</strong><br>
+  <strong>团簇：　　G = F · exp( β · C ) / exp(β²)</strong>　　<span class="cmt">C = G(σ_c) ∗ W′，独立噪声流</span><br>
+  σ_c = μᵣ · (2 + 4c)　　β = 0.9 · c<br><br>
+  <span class="cmt">归一化解析精确（W、W′ 均为零均值单位方差、且核按 L2 归一化）：<br>
+  &nbsp;&nbsp;E[G]　 = E[F]·E[e^{βC}] / e^{β²} = 0<br>
+  &nbsp;&nbsp;Var(G) = E[F²]·E[e^{2βC}] / e^{2β²} = e^{2β²}/e^{2β²} = 1<br>
+  与像素位置无关，因此分块不会产生强度台阶。</span>
+</div>
+
+<div class="callout warnv">
+  <div class="ico">原方案（高斯差分 DoG）为什么被推翻</div>
+  <p>设计稿原本写 <code>K = G(σ₁) − k·G(σ₂)</code>，理由当时是「报告 §4.4 要求带通」。实现阶段的实测推翻了它：</p>
+  <ul style="margin:10px 0 0">
+    <li>DoG 的功率谱峰值落在<strong>远低于颗粒尺度</strong>的频率上——实测周期约 96 px，而颗粒直径只有 4 px。用它做出来的不是颗粒，是大尺度云斑。</li>
+    <li>原公式 <code>σ₂ = σ₁(1 + 4c)</code> 在 c = 0 时给出 σ₂ = σ₁，<strong>DoG 退化为零核</strong>，颗粒直接消失。这是一个公式级的 bug。</li>
+    <li>更要紧的是：颗粒的频谱本来就不是带通（Selwyn 定律 σ·√a = 常数 ⟺ 低频功率谱平坦），所以「用 DoG 造带通」这个目标本身就建立在错误前提上。</li>
+  </ul>
+  <p style="margin-top:10px;margin-bottom:0"><strong>换成乘性调制之后还多了一个好处：</strong>「团簇」在物理上本来就是<em>颗粒密度的空间不均</em>，而不是某个尺度的带通滤波结果。乘性对数正态调制直接建模这件事，参数 c 的含义（密度起伏的强度）也比原来的「低频成分权重」清晰得多。</p>
+</div>
+
+<div class="callout">
+  <div class="ico">为什么用可分离高斯而不是 FFT 频域滤波</div>
+  <ol style="margin:0">
+    <li><strong>可分离、复杂度低：</strong>二维卷积退化为两次一维卷积，代价 O(N·k) 而非 O(N log N)。</li>
+    <li><strong>halo 好算：</strong>核的有效半径是 3σ，halo 宽度直接由它决定，不用考虑频域绕回（wrap-around）这种容易出错的细节。</li>
+    <li><strong>归一化有闭式解：</strong>核按 L2 归一到 1，则二维可分离卷积输出的方差精确等于输入方差（1），无需任何样本估计。</li>
+    <li><strong>参数可解释：</strong>σ_g 对应「颗粒多细」，σ_c 对应「团簇多大」，β 对应「密度起伏多强」。</li>
+  </ol>
+</div>
+
+<h4>步骤 4：产物与缓存</h4>
+<pre class="schema">L1 输出结构
+{
+  <span class="k">amp</span>:     Float32Array(1024),    <span class="c">// A(v)·S，感知域标准差（用户看到的量）</span>
+  <span class="k">sigLin</span>:  Float32Array(1024),    <span class="c">// A(v)·S / g'(l)，线性域标准差（真正注入的量）</span>
+  <span class="k">corr</span>:    Float32Array(1024),    <span class="c">// ½·g''(l)·σ_lin²，二阶偏置补偿系数</span>
+  <span class="k">kernel1D</span>: Float32Array(2R+1),   <span class="c">// 一维高斯核（L2 归一化），R = ceil(3σ_g)</span>
+  <span class="k">kernelC</span>:  Float32Array(2Rc+1),  <span class="c">// 团簇场核，Rc = ceil(3σ_c)</span>
+  <span class="k">mu_r</span>:     number,               <span class="c">// 颗粒平均半径（像素）</span>
+  <span class="k">beta</span>:     number,               <span class="c">// 团簇调制强度</span>
+  <span class="k">hash</span>:     string                <span class="c">// 参数指纹，缓存键</span>
+}
+</pre>
+
+<h3>5.4 L2 噪声合成层</h3>
+
+<h4>① 坐标寻址的确定性哈希 PRNG <span class="tag">关键实现细节</span></h4>
+
+<div class="formula">
+  <span class="lbl">为什么不能用普通的顺序随机数发生器</span>
+  需求：分块并行处理时，<strong>任意像素 (i, j) 的噪声值必须只由 (种子, 坐标, 流编号) 决定</strong>。<br><br>
+  <strong>hash(seed, stream, i, j) → uint64 → [0, 1)</strong>　（SplitMix64 类混合函数）<br><br>
+  <span class="cmt">若用顺序 PRNG（如 Math.random 或线性同余）：<br>
+  ① 块的处理顺序会影响结果 → 拖动滑块时颗粒会「跳动」；<br>
+  ② halo 区域无法独立重算 → 块边界颗粒断裂。</span>
+</div>
+
+<p>流编号的分配：<code>stream 0 = 亮度场</code>，<code>stream 1/2/3 = 色度 R/G/B</code>。这样同一坐标的亮度与色度噪声互相独立，同时各自可复现。</p>
+
+<h4>② 白噪声 → 相关噪声</h4>
+<ul>
+  <li>在 <code>(512 + 2h)²</code> 的缓冲上生成白噪声（h = halo 宽度 ≥ ceil(3σ₂)）。</li>
+  <li>做可分离一维卷积：细颗粒场一次（σ_g），团簇场一次（σ_c），再按 §5.3 步骤 3 的乘性公式合成。</li>
+  <li><strong>归一化必须用理论方差，不能用实际样本方差。</strong></li>
+</ul>
+
+<div class="callout warnv">
+  <div class="ico">这是一个很容易踩的坑</div>
+  <p>如果对每个 tile 用「该 tile 内噪声的实际标准差」做归一化，那么每个 tile 的方差估计都不同 → 相邻块之间有轻微强度台阶 → 大平面上出现可见的方块（正是报告 §7.4 反模式里的网格效应）。</p>
+  <p style="margin-top:10px;margin-bottom:0"><strong>正确做法：</strong>把一维高斯核归一化到单位 L2 范数（<code>||k||₂ = 1</code>）。二维可分离卷积的方差即精确等于输入方差（1），<strong>没有任何样本估计</strong>。这个归一化与像素位置无关，因此天然全局一致。</p>
+</div>
+
+<h4>③ 关于噪声的分布形态（一个值得做的实验）</h4>
+<p>真实胶片颗粒的分布<strong>不是高斯</strong>——布尔模型的输出是非高斯的二值随机集的滤波结果。因此 demo 里值得做一个小实验：</p>
+<ol>
+  <li>用 Irwin–Hall 近似（多个均匀数求和）生成近似高斯白噪声 → 输出颗粒偏「均匀细密」</li>
+  <li>用稀疏脉冲（少量大值 + 大量零）生成重尾白噪声 → 输出颗粒更「孤立、有颗粒感」</li>
+</ol>
+<p>建议把「分布形态」做成一个隐藏参数（可用于 A/B 与后续论文级标定），不放进正式 UI。</p>
+
+<h3>5.5 L3 合成与输出层</h3>
+
+<div class="formula">
+  <span class="lbl">逐像素合成（详细推导见 §7）</span>
+  u = v(pixel)　　　　　　　　　<span class="cmt">感知域灰度，用作 LUT 索引</span><br>
+  l = f(u)　　　　　　　　　　　<span class="cmt">对应线性光值（已在 L0 算好并缓存）</span><br>
+  σ_lin = A(u) · u<sup>1.2</sup> · S　　<span class="cmt">幅度换算到线性域（因子 1.2 见 §7）</span><br>
+  g = G(x, y)　　　　　　　　　<span class="cmt">L2 输出的单位方差颗粒场</span><br><br>
+  <strong>l_out = l + σ_lin · ( g_luma · √(1−w) + g_chroma · √w ) · w_channel</strong><br><br>
+  <span class="cmt">w = 色度分量占比（默认 0.2）；w_channel = {R: .36, G: .40, B: 1.00} 归一化后的通道权重；<br>
+  色度场的卷积核额外放大（模拟染料云更大更柔，报告 §3.4 表 3）。</span>
+</div>
+
+<table>
+  <caption>表 8　输出层的收尾动作</caption>
+  <thead><tr><th style="width:24%">动作</th><th>做法与依据</th></tr></thead>
+  <tbody>
+    <tr><td>回编码</td><td>线性 → sRGB 编码值。同样用 LUT，不要逐像素 <code>pow()</code>。</td></tr>
+    <tr><td>抖动</td><td>8 位输出前施加 TPDF 抖动（三角分布，幅度 ±0.5 LSB），防止平滑渐变区出现色阶断层。<em>依据：报告 §7.1 约束 13。</em></td></tr>
+    <tr><td>clamp 与溢出保护</td><td>线性域相加后可能越界。用软压缩而非硬 clamp，避免高光处出现颗粒状的硬边。</td></tr>
+    <tr><td>写回</td><td>按 tile 写出，与读取的 halo 逻辑对称。</td></tr>
+    <tr><td>历史记录</td><td>UXP 路径下，交互过程中的参数变化<strong>不写历史</strong>，只在用户点「确定」时合并为一步。否则历史面板会被几百个滑块状态淹没。</td></tr>
+  </tbody>
+</table>
+
+<hr>
+
+<!-- ============================================================ -->
+<h2 id="s5"><span class="num">06</span>参数模型与预设数据结构</h2>
+
+<p>一个刻意的设计：<strong>预设里只存物理参数，不存像素、不存纹理、不存尺寸。</strong>这是与所有「颗粒素材包」方案的根本区别——素材包存的是像素，我们的预设存的是一组数。这带来三个好处：预设文件只有几百字节、与图像分辨率完全无关、可读可审计可手改。</p>
+
+<pre class="schema"><span class="c">// 胶片预设（只读，随插件分发）</span>
+{
+  <span class="k">"id"</span>:          <span class="s">"kodak-vision3-500t"</span>,
+  <span class="k">"name"</span>:        <span class="s">"VISION3 500T"</span>,
+  <span class="k">"family"</span>:      <span class="s">"color-negative"</span>,        <span class="c">// 黑白 / 彩色负片 / 彩色反转 / 电影</span>
+  <span class="k">"calibration"</span>: <span class="s">"measured"</span>,              <span class="c">// measured | estimated | visual</span>
+  <span class="k">"source"</span>:      <span class="s">"KODAK H-1-5219，漫射 RMS 颗粒度曲线"</span>,
+  <span class="k">"grain"</span>: {
+    <span class="k">"radius_um"</span>:    <span class="s">6.0</span>,                  <span class="c">// 颗粒簇等效半径（微米）</span>
+    <span class="k">"radius_sigma"</span>: <span class="s">0.45</span>,                 <span class="c">// 对数正态离散度</span>
+    <span class="k">"clumping"</span>:     <span class="s">0.55</span>                  <span class="c">// 团簇度 0–1</span>
+  },
+  <span class="k">"tone"</span>: {
+    <span class="k">"points"</span>: [[0,0],[0.15,0.35],[0.55,1.0],[0.85,0.45],[1,0]]  <span class="c">// 感知域控制点</span>
+  },
+  <span class="k">"color"</span>: {
+    <span class="k">"luma_chroma"</span>: <span class="s">0.8</span>,                  <span class="c">// 亮度占比</span>
+    <span class="k">"weights"</span>:      {<span class="k">"r"</span>:<span class="s">0.36</span>, <span class="k">"g"</span>:<span class="s">0.40</span>, <span class="k">"b"</span>:<span class="s">1.00</span>},
+    <span class="k">"mono"</span>:         <span class="s">false</span>
+  },
+  <span class="k">"anchor"</span>: {                              <span class="c">// 标定锚点，用于把强度滑块映射到 PGI</span>
+    <span class="k">"pgi"</span>:       {<span class="k">"4x6"</span>:<span class="s">28</span>, <span class="k">"8x10"</span>:<span class="s">50</span>, <span class="k">"16x20"</span>:<span class="s">79</span>},
+    <span class="k">"rms_dense"</span>: [<span class="s">0.004</span>, <span class="s">0.010</span>, <span class="s">0.025</span>]  <span class="c">// 高密度处 R/G/B 的 σ_D</span>
+  }
+}</pre>
+
+<pre class="schema"><span class="c">// 会话状态（用户当前调整的值）</span>
+{
+  <span class="k">"preset"</span>:       <span class="s">"kodak-vision3-500t"</span>,
+  <span class="k">"strength_pgi"</span>: <span class="s">32</span>,                  <span class="c">// 强度，以等效 PGI 表达</span>
+  <span class="k">"gauge"</span>:        <span class="s">1.0</span>,                 <span class="c">// 画幅倍率（1.0 = 135）</span>
+  <span class="k">"clumping"</span>:     <span class="s">0.55</span>,
+  <span class="k">"tone_curve"</span>:   [ <span class="c">/* 覆盖预设的控制点 */</span> ],
+  <span class="k">"luma_chroma"</span>:  <span class="s">0.2</span>,
+  <span class="k">"weights"</span>:      {<span class="k">"r"</span>:<span class="s">0.36</span>, <span class="k">"g"</span>:<span class="s">0.40</span>, <span class="k">"b"</span>:<span class="s">1.00</span>},
+  <span class="k">"viewing"</span>:      {<span class="k">"output_cm"</span>:<span class="s">24</span>, <span class="k">"distance_cm"</span>:<span class="s">36</span>},
+  <span class="k">"advanced"</span>: {
+    <span class="k">"view_soften"</span>:  <span class="s">0.6</span>,                <span class="c">// 观察侧柔化（σ_view 缩放）</span>
+    <span class="k">"image_soften"</span>: <span class="s">0.15</span>,               <span class="c">// 图像柔化联动</span>
+    <span class="k">"seed"</span>:         <span class="s">1234567</span>,
+    <span class="k">"dist_shape"</span>:   <span class="s">"gaussian"</span>          <span class="c">// 隐藏参数，用于 A/B 实验</span>
+  },
+  <span class="k">"precision"</span>:    <span class="s">16</span>
+}</pre>
+
+<div class="callout">
+  <div class="ico">预设的可信度标签</div>
+  <p><code>calibration</code> 字段必须显示在 UI 上。<strong>measured</strong>（有公开实测数据支撑，目前只有 VISION3 500T 与几个柯达彩负的 PGI）、<strong>estimated</strong>（由同族数据外推）、<strong>visual</strong>（纯视觉调出来的）。</p>
+  <p style="margin-top:10px;margin-bottom:0">这条不是为了免责，而是为了给后续标定工作建立待办清单——用户可以看到哪些预设是「待实测补齐」的，也可以自己用诊断模式测出数据后把某个预设升级为 measured。</p>
+</div>
+
+<hr>
+
+<!-- ============================================================ -->
+<h2 id="s6"><span class="num">07</span>色彩域的关键决策：曲线在感知域，注入在线性域</h2>
+
+<p>这是整个实现里最容易做错、也最不显眼的一步。研究报告 §8.2 已经指出「数码照片与胶片密度域没有天然映射」，本节给出一个可落地的解法。</p>
+
+<h3>7.1 三个域，各管一件事</h3>
+
+<table>
+  <caption>表 9　三个色彩域的职责划分</caption>
+  <thead><tr><th style="width:18%">域</th><th style="width:24%">变量</th><th>在本插件中的职责</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>感知域</strong></td>
+      <td class="num">v（sRGB 编码值）</td>
+      <td><strong>定义用户编辑的色调响应曲线 A(v)</strong>。<br>依据：报告 §4.7 的「打印体颗粒度峰值在 D≈0.75」这个结论本身就是在带视觉权重的感知测量下得到的，所以曲线天然属于感知域。</td>
+    </tr>
+    <tr>
+      <td><strong>线性光域</strong></td>
+      <td class="num">l（线性亮度）</td>
+      <td><strong>实际注入颗粒的地方</strong>。<br>依据：只有在线性域做加减才对应「光量的增减」这一物理量。报告 §7.1 约束 12。</td>
+    </tr>
+    <tr>
+      <td><strong>密度域</strong></td>
+      <td class="num">D = −log₁₀T</td>
+      <td><strong>不进入我们的管线</strong>。<br>依据：报告 §8.2，数码图像没有天然密度对应；且若在 log 域注入噪声，暗部会被反向放大到不可控。</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>7.2 两个域之间的换算因子（这部分是纯推导）</h3>
+
+<div class="formula">
+  <span class="lbl">推导</span>
+  设 v 为目标显示值，l 为线性值，l = f(v)，工程上用 f(v) ≈ v<sup>2.2</sup>；反函数 g(l) ≈ l<sup>1/2.2</sup>。<br>
+  g'(l) = (1/2.2) · l<sup>1/2.2 − 1</sup> = (1/2.2) · l<sup>−0.5455</sup><br><br>
+  要让<strong>显示的</strong>颗粒幅度等于 A(v)·S：<br>
+  &nbsp;&nbsp;δv = A(v)·S·Δv₀　（我们想要的效果）<br>
+  &nbsp;&nbsp;δv = g'(l)·δl　　　（这是数学关系）<br>
+  ⇒ δl = A(v)·S·Δv₀ / g'(l) = A(v)·S·Δv₀ · 2.2 · l<sup>0.5455</sup><br><br>
+  代入 l = v<sup>2.2</sup>：　l<sup>0.5455</sup> = (v<sup>2.2</sup>)<sup>0.5455</sup> = v<sup>1.2</sup><br><br>
+  ⇒ <strong>σ_lin(v) = 2.2·Δv₀ · A(v) · v<sup>1.2</sup> · S　　⇒　σ_lin ∝ A(v) · v<sup>1.2</sup> · S</strong><br><br>
+  <span class="cmt">结论就这么干净：线性域的颗粒标准差 = 用户曲线 A(v) × v 的 1.2 次方 × 强度。没有任何需要迭代或查表的复杂环节。</span>
+</div>
+
+<h3>7.3 这个公式自带一个很好的自我检验</h3>
+
+<p>用三种不同的 A(v) 代入，看感知域得到什么——第三种正是数码传感器噪声的观感：</p>
+
+<table>
+  <caption>表 10　不同 A(v) 对应的观感（表内为推导结果，非实测）</caption>
+  <thead><tr><th style="width:22%">A(v)</th><th style="width:22%">线性域 σ_lin</th><th style="width:26%">感知域 v 域的观感</th><th>对应什么</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>常数</td>
+      <td class="num">∝ v<sup>1.2</sup></td>
+      <td>各亮度颗粒量一致</td>
+      <td>中性、平整，但不像胶片——真实胶片不会这样</td>
+    </tr>
+    <tr>
+      <td>∝ v<sup>−1.2</sup></td>
+      <td class="num">常数（即线性域加等量噪声）</td>
+      <td><strong>暗部剧烈放大、高光干净</strong></td>
+      <td><strong>≡ 数码传感器噪声</strong>。这是一个一致性检验：线性域加白噪声本来就会得到「暗部最脏」的观感，公式把它复现出来了 ✓</td>
+    </tr>
+    <tr>
+      <td>中间调峰值<br>（默认 0.55–0.65）</td>
+      <td class="num">∝ A(v)·v<sup>1.2</sup></td>
+      <td><strong>中间调最强、两端归零</strong></td>
+      <td>胶片颗粒 ✓（报告 §4.7 表 7）</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="callout">
+  <div class="ico">这个检验为什么重要</div>
+  <p>第二行说明这套公式<strong>能够自然复现「数码噪声为什么在暗部最脏」这一已知事实</strong>——这强烈支持了整个域划分的正确性。如果公式推出来是反的（比如线性域加噪声反而得到高光最脏），那就说明域划分错了，必须回头重做。</p>
+</div>
+
+<h3>7.4 实现上零额外开销</h3>
+
+<p>把 <code>v<sup>1.2</sup></code> 因子直接<strong>烘进 LUT</strong>：</p>
+
+<div class="formula">
+  <span class="lbl">运行时只有一次查表</span>
+  <strong>LUT[k] = A(k/1023) · (k/1023)<sup>1.2</sup> · S_normalize</strong>　　k = 0 … 1023<br>
+  逐像素：<code>σ_lin = LUT[ v &gt;&gt; 6 ]</code>　<span class="cmt">（16 位 v 右移 6 位得到 1024 级索引）</span><br><br>
+  <span class="cmt">用户编辑曲线 → 重算这张 1024 点 LUT → 约 0.1 ms。这就是「拖动色调曲线准实时」的底气。</span>
+</div>
+
+<blockquote style="border-left:3px solid var(--accent-2);margin:22px 0;padding:2px 0 2px 20px;color:var(--muted)">
+  顺带解决一个实际问题：因为曲线是按<strong>每张图自身的编码亮度</strong>查表的，所以同一套参数在欠曝和过曝的照片上会得到符合各自基调的颗粒分布，不需要用户为不同曝光的照片分别调参。
+</blockquote>
+
+<hr>
+
+<!-- ============================================================ -->
+<h2 id="s7"><span class="num">08</span>性能预算与调度策略</h2>
+
+<div class="callout warnv">
+  <div class="ico">先声明</div>
+  <p>下表的耗时全部是<strong>基于算法复杂度的估算，不是实测</strong>。UXP 的像素吞吐是最大不确定项（§3）。这些数字的唯一用途是：给出一个「如果实现出来明显超出这个量级，说明架构有问题」的参照系。</p>
+</div>
+
+<h3>8.1 全分辨率精算路径（6000×4000，16 位，三通道）</h3>
+
+<table>
+  <caption>表 11　耗时预算（估算值）</caption>
+  <thead><tr><th style="width:30%">阶段</th><th class="num" style="width:20%">估算耗时</th><th>说明</th></tr></thead>
+  <tbody>
+    <tr><td>L0 读像素（分块）</td><td class="num">待实测</td><td>UXP 最大风险点。需先做 §3 的可行性实验。</td></tr>
+    <tr><td>L0 线性化</td><td class="num">~150 ms</td><td>LUT + 插值，纯查表</td></tr>
+    <tr><td>L1 预计算</td><td class="num">&lt; 100 ms</td><td>解析近似版；蒙特卡洛版约 2 s（P1 阶段再评估是否值得）</td></tr>
+    <tr><td>L2 噪声生成 + 高斯卷积</td><td class="num">~1.2 s</td><td>最大的单项。细颗粒场 + 团簇场各一次可分离卷积，halo 区域一并计算</td></tr>
+    <tr><td>L3 合成（乘法 + 加）</td><td class="num">~300 ms</td><td>逐像素：一次查表 + 一次乘加</td></tr>
+    <tr><td>回编码 + 抖动 + 写回</td><td class="num">~250 ms</td><td>LUT</td></tr>
+    <tr><td><strong>合计</strong></td><td class="num"><strong>~2 s 量级</strong></td><td>目标：&lt; 3 s（松手后的精算）</td></tr>
+  </tbody>
+</table>
+
+<h3>8.2 交互路径（拖动滑块中）</h3>
+
+<table>
+  <thead><tr><th style="width:36%">情形</th><th class="num" style="width:20%">估算耗时</th><th>做法</th></tr></thead>
+  <tbody>
+    <tr><td>拖强度 / 色调曲线 / 色彩配比</td><td class="num">&lt; 50 ms</td><td>颗粒场直接复用缓存（1/2 分辨率预览版），只重算 LUT + 逐像素乘加</td></tr>
+    <tr><td>拖颗粒尺寸 / 团簇度 / 观察柔化</td><td class="num">~200 ms</td><td>颗粒场失效，需重算预览版（1/2 降采样，约为全图 1/4 像素）</td></tr>
+    <tr><td>拖随机种子</td><td class="num">~200 ms</td><td>同上一行</td></tr>
+  </tbody>
+</table>
+
+<h3>8.3 缓存策略（含一个内存优化决策）</h3>
+
+<p>内存设计上有一个真实矛盾：全分辨率的颗粒场如果缓存起来，Float32 三通道要 288 MB，不可接受；但完全不缓存，则拖动强度滑块也要重算 1.2 s，交互体验会崩溃。</p>
+
+<div class="card teal">
+  <h4>解法：双精度颗粒场</h4>
+  <ul>
+    <li><strong>预览级颗粒场</strong>：1/2 分辨率 + Float16 + 三通道。<br>
+      内存 = 6000×4000 ÷ 4 × 2 B × 3 ≈ <strong>36 MB</strong>。交互全程使用它，任何幅度类参数变化都在这个场上完成。</li>
+    <li><strong>精算级颗粒场</strong>：<strong>不缓存</strong>，按 tile 即时生成。<br>
+      因为精算只在松手后跑一次，1.2 s 可接受，没有必要为它付 288 MB 的代价。</li>
+  </ul>
+  <p style="margin-bottom:0">这个取舍让峰值内存降到了几十 MB 量级，同时保住了交互手感——<strong>「预览用低精度缓存、精算用一次性重算」是图像处理插件的通用手法，值得作为规范写进实现。</strong></p>
+</div>
+
+<table>
+  <caption>表 12　缓存清单</caption>
+  <thead><tr><th style="width:26%">缓存对象</th><th style="width:26%">规格 / 内存</th><th>失效条件</th></tr></thead>
+  <tbody>
+    <tr><td>预览颗粒场</td><td>1/2 分辨率，Float16 ×3，≈36 MB</td><td>种子 / 颗粒尺寸 / 团簇度 / 观察柔化 变化</td></tr>
+    <tr><td>L1 预计算产物</td><td>LUT 1024 + 一维核，&lt; 100 KB</td><td>强度 / 曲线 / 色彩 / 画幅 变化</td></tr>
+    <tr><td>色彩转换 LUT</td><td>2 × 1024，8 KB</td><td>色彩空间变化（罕见）</td></tr>
+    <tr><td>全图源像素</td><td><strong>不缓存</strong>，按 tile 从 PS 读取</td><td>—<span class="lbs">（若 UXP 的分块读取开销过高，则退化为缓存全图 16 位，144 MB）</span></td></tr>
+  </tbody>
+</table>
+
+<hr>
+
+<!-- ============================================================ -->
+<h2 id="s8"><span class="num">09</span>Demo v0.1 范围界定</h2>
+
+<div class="grid2">
+  <div class="box">
+    <h4 style="color:var(--accent-2)">✓ 做</h4>
+    <ul>
+      <li>UXP 面板：预设 + 三滑块 + 色调曲线 + 色彩 + 观察条件</li>
+      <li>3 个预设（Tri-X 400 / Portra 400 / VISION3 500T）</li>
+      <li>1:1 对比窗口</li>
+      <li>L1 用解析近似（a(u) ∝ √(p(1−p))）</li>
+      <li>L2 用坐标寻址哈希 + 高斯卷积 + 乘性团簇</li>
+      <li>L3 线性域注入 + v^1.2 因子</li>
+      <li>分块 + halo，<strong>先串行</strong>跑通正确性</li>
+      <li>诊断模式（§10）</li>
+      <li>参数 JSON 导出/导入</li>
+    </ul>
+  </div>
+  <div class="box">
+    <h4 style="color:var(--warn)">× 不做（留给后续阶段）</h4>
+    <ul>
+      <li>实时全分辨率预览（接受 1–3 s 精算延迟）</li>
+      <li>Worker / WASM / GPU 并行优化</li>
+      <li>L1 的蒙特卡洛标定</li>
+      <li>图像柔化联动（先留接口，逻辑后补）</li>
+      <li>色调曲线、halation、色彩耦合</li>
+      <li>预设的实测标定（先用公开数据 + 视觉调）</li>
+      <li>批量处理 / 脚本调用 / 组图种子随机化</li>
+      <li>蒙版内的边缘羽化优化</li>
+    </ul>
+  </div>
+</div>
+
+<div class="card accent">
+  <h4>Demo 的验收定义（什么算跑通了）</h4>
+  <ol style="margin-bottom:0">
+    <li>三个预设的 1:1 输出，与对应的真实胶片扫描件并排看，<strong>有胶片经验的人无法一眼分辨</strong>。</li>
+    <li>拖动强度滑块时<strong>感觉不到卡顿</strong>（&lt; 100 ms 反馈）。</li>
+    <li>在纯色大平面（如天空）上放大 800% 检查，<strong>无重复图案、无方块接缝</strong>。</li>
+    <li>纯黑区域与纯白区域的像素值<strong>逐位不变</strong>。</li>
+    <li>诊断模式下，输出 NPS 呈低通带限，且 −3dB 截止频率与「尺寸」滑块成反比。</li>
+  </ol>
+</div>
+
+<hr>
+
+<!-- ============================================================ -->
+<h2 id="s9"><span class="num">10</span>内置诊断模式</h2>
+
+<p>这是给技术型用户和开发者自己用的，但它的价值不止于此——<strong>它是把研究报告的五道验收测试直接做进产品</strong>，让「物理正确」这件事变得可被用户验证。竞品没有这个，因为它们的算法经不起验证。</p>
+
+<table>
+  <caption>表 13　诊断模式的四个视图（隐藏入口，快捷键或开发菜单唤起）</caption>
+  <thead><tr><th style="width:24%">视图</th><th style="width:32%">显示内容</th><th>对应的报告验收项</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>频谱视图</strong></td>
+      <td>对当前 100% 裁切区域计算实测 NPS，与理论低通曲线 exp(−4π²σ_g²f²) 叠在一张图上显示。−3dB 截止位置实时随「尺寸」滑块移动。</td>
+      <td>报告 §7.5 测试 1（频谱测试）。这是最硬的客观判据。</td>
+    </tr>
+    <tr>
+      <td><strong>灰阶响应视图</strong></td>
+      <td>在 0–100% 的 11 级灰阶阶梯上运行，把每级的输出标准差画成柱状图，与曲线控件的形状叠在一起。</td>
+      <td>报告 §7.5 测试 4（色调响应测试）。用户能亲眼看到「峰值确实在中间调」。</td>
+    </tr>
+    <tr>
+      <td><strong>颗粒场视图</strong></td>
+      <td>只显示 L2 输出的颗粒场本身（灰底白噪声图），不含图像内容。放大 400% 可直视团簇结构。</td>
+      <td>报告 §5.2 的团簇判别测试。用来确认「不是白噪声」。</td>
+    </tr>
+    <tr>
+      <td><strong>统计仪表</strong></td>
+      <td>实时数字：输入/输出均值差、实测 σ、等效 RMS 颗粒度、当前 PGI 估值、处理耗时、内存占用、缓存命中状态。</td>
+      <td>报告 §7.5 测试 2（均值保持）与测试 3（尺度不变性）。</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr>
+
+<!-- ============================================================ -->
+<h2 id="s10"><span class="num">11</span>风险清单与决策门槛</h2>
+
+<table>
+  <caption>表 14　风险登记（按影响程度排序）</caption>
+  <thead><tr><th style="width:26%">风险</th><th style="width:10%">等级</th><th>应对</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>UXP 像素吞吐不足</strong></td>
+      <td><span class="tag t3">高</span></td>
+      <td>写代码前先做 30 分钟可行性实验（§3）。若判据不通过，直接转 C++ SDK，不要在 UXP 上恋战。</td>
+    </tr>
+    <tr>
+      <td><strong>UXP 的 WASM / Worker 支持不确定</strong></td>
+      <td><span class="tag t3">高</span></td>
+      <td>同一个实验里一并测掉。若都不支持，demo 退化为「串行 + 降采样预览」，交互手感会明显变差，需重新评估是否值得做 UXP 版。</td>
+    </tr>
+    <tr>
+      <td><strong>预览尺度的用户预期冲突</strong></td>
+      <td><span class="tag">中</span></td>
+      <td>用 1:1 对比窗口（§4.3 机制一）+ 真实/效果双预览模式解决。这是设计问题，不是技术问题。</td>
+    </tr>
+    <tr>
+      <td><strong>预设参数未经实测标定</strong></td>
+      <td><span class="tag">中</span></td>
+      <td>用 <code>calibration</code> 标签诚实标注（§6）。demo 的验收标准是「视觉上像」，不是「数值上对」，因此不阻塞。</td>
+    </tr>
+    <tr>
+      <td><strong>解析近似的 a(u) 与真实曲线有偏差</strong></td>
+      <td><span class="tag t2">低</span></td>
+      <td>结构上是对的（中间调峰值、两端归零），只是峰宽与偏度可能有偏差。P1 阶段用蒙特卡洛标定替换。</td>
+    </tr>
+    <tr>
+      <td><strong>线性域往返的色彩管理开销</strong></td>
+      <td><span class="tag t2">低</span></td>
+      <td>用 LUT，全图约 150 ms，可接受。不做全图 Float32 缓存以避免 288 MB 内存占用。</td>
+    </tr>
+    <tr>
+      <td><strong>大图分块读取的 PS API 开销</strong></td>
+      <td><span class="tag t2">低</span></td>
+      <td>实测若分块读取开销高，退化为缓存全图 16 位源（144 MB）。</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="card warn">
+  <h4>技术路线的决策门槛（Go / No-Go）</h4>
+  <p><strong>实验：</strong>读入 6000×4000 的 16 位图像，<code>getPixels</code> → 原样 <code>putPixels</code>，不做任何算法，测往返耗时；再测 1024×1024 分块往返与 Worker 创建。</p>
+  <ul style="margin-bottom:0">
+    <li>全图往返 &lt; 800 ms，且分块可用 → <strong>Go</strong>，继续 UXP 路线。</li>
+    <li>全图往返 800 ms – 1.5 s，但分块可用 → <strong>条件 Go</strong>，只做分块方案，且接受交互预览更粗糙。</li>
+    <li>全图往返 &gt; 1.5 s，或分块 / Worker / WASM 均不可用 → <strong>No-Go</strong>，直接转 C++ Plug-in SDK 智能滤镜。UXP 只保留一个参数面板，算法全部下沉到原生。</li>
+  </ul>
+</div>
+
+<hr>
+
+<!-- ============================================================ -->
+<h2 id="s11"><span class="num">12</span>阶段计划</h2>
+
+<table>
+  <caption>表 15　实施顺序（每步都有可验证的产出）</caption>
+  <thead><tr><th style="width:8%">步骤</th><th style="width:32%">内容</th><th>完成标志</th></tr></thead>
+  <tbody>
+    <tr>
+      <td class="num">0</td>
+      <td><strong>可行性实验</strong>（§3 决策门槛）</td>
+      <td>拿到三个耗时数字，做出 Go / No-Go 决定</td>
+    </tr>
+    <tr>
+      <td class="num">1</td>
+      <td><strong>算法核心（平台无关 TS 模块）</strong>：L1 + L2 + L3，先跑单张固定尺寸图</td>
+      <td>命令行/控制台里能对一张测试图输出带颗粒的图像，肉眼确认「中间调有颗粒、两端没有」</td>
+    </tr>
+    <tr>
+      <td class="num">2</td>
+      <td><strong>诊断工具</strong>：NPS 计算 + 灰阶方差统计</td>
+      <td>能打印出 NPS 曲线，与理论低通谱形 RMS 偏差 &lt; 30%，且截止频率与颗粒半径成反比</td>
+    </tr>
+    <tr>
+      <td class="num">3</td>
+      <td><strong>分块 + halo 调度</strong></td>
+      <td>对 6000×4000 全图跑通，大平面放大无接缝</td>
+    </tr>
+    <tr>
+      <td class="num">4</td>
+      <td><strong>UXP 面板 + 参数绑定 + 缓存</strong></td>
+      <td>三个预设可切换，强度滑块拖动无卡顿</td>
+    </tr>
+    <tr>
+      <td class="num">5</td>
+      <td><strong>1:1 对比窗口 + 观察条件区块</strong></td>
+      <td>缩放到 25% 时提示正确地出现，1:1 窗口始终可用</td>
+    </tr>
+    <tr>
+      <td class="num">6</td>
+      <td><strong>盲测与调参</strong>：与真实扫描件比对，调整预设</td>
+      <td>通过 §9 的第 1 条验收</td>
+    </tr>
+    <tr>
+      <td class="num">7</td>
+      <td><strong>性能优化</strong>（Worker / WASM / 或迁移 C++）</td>
+      <td>精算耗时进入 3 s 以内，交互反馈 &lt; 100 ms</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="footnote">
+  <p><b>设计文档结束。</b>本文档为阶段二交付物，<strong>不包含任何插件代码</strong>。所有设计决策均标注了对《胶片颗粒形成机理与视觉特征研究报告》v1.0 的溯源；文中所有耗时数字均为估算值，已在对应位置明确标注，实施时应以实测替换。</p>
+  <p style="margin-top:12px;color:var(--faint);font-size:13px">银盐 · 胶片颗粒插件设计文档 v0.1 · 2026-10-03</p>
+</div>
+
+</div>
+</body>
+</html>
