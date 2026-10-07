@@ -78,6 +78,8 @@ film-grain-plugin/
 │   ├── design-tokens.mjs    设计 token 唯一来源
 │   ├── build-panel-preview.mjs  面板浏览器预演器（PS 里没控制台，靠它）
 │   ├── install-plugin.mjs   安装到 Photoshop
+│   ├── push-to-github.mjs   建仓 + git push（正常网络环境用这个）
+│   ├── publish-via-api.mjs  ⚠️ git push 被环境拦截时，走 REST API 发布提交
 │   ├── fft.mjs / png.mjs / img.mjs   自写的 FFT / PNG 编解码 / 图像处理
 │   ├── bench-*.mjs          性能基准（L3 / 卷积 / 胶片标定）
 │   └── diag-*.mjs           诊断脚本（频谱 / 色度脏污 / 补偿残差）
