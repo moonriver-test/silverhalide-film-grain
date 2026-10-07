@@ -18,9 +18,18 @@
  *   --branch   默认 main
  *   --visibility public | private   默认 public（仅建仓时生效）
  *
+ * 重要：本机网络有 TLS 中间人代理，证书链无法验证，直接跑会报
+ *   UNABLE_TO_VERIFY_LEAF_SIGNATURE（node fetch）/ SSL certificate problem（git）。
+ *   必须先放宽校验再执行（只对本条命令生效，不改全局配置）：
+ *
+ *     NODE_TLS_REJECT_UNAUTHORIZED=0 GIT_SSL_NO_VERIFY=1 \
+ *       node tools/push-to-github.mjs --token-file D:/gh_token.txt
+ *
+ *   若目标机器证书正常（能直连 github.com 且无代理拦截），不要加这两个变量。
+ *
  * 它的行为：
- *   1. 用 token 查仓库是否存在，不存在则创建
- *   2. git remote 设为带 token 的 URL → push → **立刻把 remote 改回不带 token**
+ *   1. 用 token 查仓库是否存在，不存在则创建，并轮询等它真正可达
+ *   2. git remote 设为带 token 的 URL → push（失败自动重试 3 次）→ **立刻改回不带 token**
  *   3. 全程不打印 token；结束时提示去撤销 token
  */
 
@@ -82,8 +91,21 @@ function scrubRemote() {
   }
 }
 
+/* 无论怎么退出，都要把带 token 的 remote 清掉。
+ * 实测：若只挂 exit/SIGINT，某些异常终止路径不会触发，token 会留在 .git/config 里。
+ * 所以把未捕获异常/未处理 rejection 也显式接住。 */
 process.on('exit', scrubRemote);
 process.on('SIGINT', () => { scrubRemote(); process.exit(130); });
+process.on('uncaughtException', (e) => {
+  console.error('未捕获异常：' + ((e && e.message) || e));
+  scrubRemote();
+  process.exit(1);
+});
+process.on('unhandledRejection', (e) => {
+  console.error('未处理的异步错误：' + ((e && e.message) || e));
+  scrubRemote();
+  process.exit(1);
+});
 
 console.log('目标：' + owner + '/' + repo + '　分支 ' + branch + '　可见性 ' + visibility);
 
@@ -120,6 +142,15 @@ if (exists) {
     process.exit(1);
   }
   console.log('  ✓ 已创建 https://github.com/' + owner + '/' + repo);
+
+  /* 刚建好的仓库存在数秒的"尚不可见"窗口，此时 git push 会报 Repository not found。
+   * 必须轮询到它真的可达再推 —— 这是首次推送失败的唯一原因（实测）。 */
+  for (let i = 0; i < 8; i++) {
+    const probe = await gh('GET', `/repos/${owner}/${repo}`);
+    if (probe.ok) { console.log('  ✓ 仓库已可访问，可以推送'); break; }
+    if (i === 7) { console.log('  ! 等待超时，仍继续尝试推送'); break; }
+    await new Promise((r) => setTimeout(r, 1500));
+  }
 }
 
 /* 2) 提交检查 */
@@ -139,15 +170,28 @@ try {
 git(['remote', 'add', 'origin', authedUrl]);
 
 console.log('推送中（' + git(['count-objects', '-vH']).split('\n').find((l) => l.startsWith('size-pack')) + '）……');
-try {
-  const out = git(['push', '-u', 'origin', branch, '--force']);
-  console.log(out.trim() || '  ✓ 推送完成');
-} catch (e) {
-  const msg = (e.stderr || e.stdout || e.message || '').toString();
-  // 必须把 token 从任何输出里剪掉
-  console.log(msg.replaceAll(token, '***'));
+let pushed = false;
+for (let attempt = 1; attempt <= 3; attempt++) {
+  try {
+    const out = git(['push', '-u', 'origin', branch, '--force']);
+    console.log(out.trim() || '  ✓ 推送完成');
+    pushed = true;
+    break;
+  } catch (e) {
+    // execFileSync 失败时 e.stderr / e.stdout 是 Buffer，e.status 是退出码
+    const raw = [e.stderr, e.stdout, e.message]
+      .filter(Boolean).map((x) => x.toString()).join('\n').trim();
+    const detail = (raw || '(git 未返回输出，退出码 ' + (e.status ?? '?') + ')')
+      .replaceAll(token, '***');
+    console.log('  第 ' + attempt + ' 次推送失败：' + detail);
+    // 疑似"仓库刚建好还没就绪"，等一下再试
+    if (attempt < 3) await new Promise((r) => setTimeout(r, 3000));
+  }
+}
+if (!pushed) {
   scrubRemote();
-  console.error('推送失败。常见原因：token 缺少 Contents 写权限、或分支保护规则拒绝 force push。');
+  console.error('推送失败（已重试 3 次，见上方输出）。');
+  console.error('常见原因：token 缺少 Contents 写权限、分支保护规则拒绝 force push、或网络代理阻断 git。');
   process.exit(1);
 }
 scrubRemote();

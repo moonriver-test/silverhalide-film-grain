@@ -24,6 +24,14 @@ ui-preview/zoom-*.png
 # 要瘦身仓库可整体忽略：
 # out/
 
+# ---- 凭据（绝对不能进仓库）----
+.env
+.env.*
+gh_token.txt
+*token*.txt
+*credential*
+*pat*.txt
+
 # ---- 系统 ----
 Thumbs.db
 desktop.ini
