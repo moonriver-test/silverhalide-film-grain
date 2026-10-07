@@ -109,3 +109,7 @@ film-grain-plugin/
 2. **[`docs/research-report.html`](docs/research-report.html)** —— 为什么这么设计（颗粒的形成机理与视觉特征）
    - 顶部有 **「勘误 · 2026-10-03」** 卡片：三处结论被实现阶段实测推翻并已就地修正，
      引用旧版资料前务必先看它
+
+> **换到新电脑？** 直接看 [`docs/NEW-MACHINE-PROMPT.md`](docs/NEW-MACHINE-PROMPT.md) ——
+> 里面有一段可直接粘贴给 agent 的提示词，会自己完成「拉代码 → 装环境 → 验证 → 报结论」。
+
