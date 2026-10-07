@@ -25,6 +25,10 @@
 ## 快速开始
 
 ```bash
+# 0) 拿到代码
+git clone https://github.com/moonriver-test/silverhalide-film-grain.git
+cd silverhalide-film-grain
+
 # 1) 依赖（核心零依赖，只有打包与离线测试需要这两个包）
 npm install --no-audit --no-fund
 

@@ -3,7 +3,8 @@
 > 用途：在新电脑上打开 WorkBuddy，把下面**方框里的整段**粘进对话，
 > 让接手的 agent 自己完成「拉代码 → 装环境 → 验证 → 给出下一步」。
 >
-> 把 `<仓库地址>` 换成实际的仓库 URL。
+> 仓库地址已填好：`https://github.com/moonriver-test/silverhalide-film-grain`（public）。
+> 若仓库改过名或换了 owner，把下文里的 URL 一起替换。
 
 ---
 
@@ -13,7 +14,7 @@
 我要接手一个已经在别的电脑上开发了一段时间的项目，请帮我把它在本机恢复成可继续开发的状态。
 
 项目：银盐（Silver Halide）—— 基于胶片物理模型的 Photoshop UXP 胶片颗粒插件。
-仓库：<仓库地址>
+仓库：https://github.com/moonriver-test/silverhalide-film-grain
 
 请按下面的顺序做，每步都告诉我实际输出，不要跳过验证：
 
@@ -58,7 +59,7 @@
 ## 最短版本（如果你只想先看到东西跑起来）
 
 ```text
-克隆 <仓库地址> 到 D 盘，读 HANDOVER.md，然后按它的「§5 新机上手清单」一步步执行，
+克隆 https://github.com/moonriver-test/silverhalide-film-grain 到 D 盘，读 HANDOVER.md，然后按它的「§5 新机上手清单」一步步执行，
 每步把真实输出发我。有失败先诊断根因，别急着改代码。
 ```
 

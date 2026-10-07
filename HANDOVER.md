@@ -2,8 +2,17 @@
 
 **版本**：0.5.4　**日期**：2026-10-07　**验收状态**：41/41 通过、预检 10 节全过
 
+**仓库**：https://github.com/moonriver-test/silverhalide-film-grain （public，默认分支 `main`）
+
 > 这份文档的目标：**换一台电脑，只读这一份就能继续干活。**
 > 如果你只有 10 分钟，读「§5 新机上手清单」+「§7 已知问题」。
+
+新机第一步：
+
+```bash
+git clone https://github.com/moonriver-test/silverhalide-film-grain.git
+cd silverhalide-film-grain && npm test   # 期望 41/41
+```
 
 ---
 
@@ -314,8 +323,22 @@ node tools/diag-bias.mjs             # 二阶偏置补偿残差诊断（跨种�
   面板里写死数值会被断言拦下。
 - **UI 设计稿与实现同步**：改视觉先改 `ui-preview/build-dark.mjs` 的 token 生成，
   再让面板对齐，否则两边会再次分叉（v0.5 就吃过这个亏：圆角与字号整体漂了一档）。
-- **推送到 GitHub 需要凭据**：本机没有 git 凭据、也没有 `gh` CLI，
-  所以本仓库的推送要么用 PAT，要么逐文件走连接器。见仓库根的提交历史说明。
+- **推送到 GitHub**：仓库已建好（`moonriver-test/silverhalide-film-grain`，`main`），
+  本地 `origin` 已配置成不含凭据的 HTTPS URL。之后推送用 `tools/push-to-github.mjs`
+  配合一次性 PAT（`repo` scope），脚本会在结束时把 remote 里的 token 清掉。
+  详见脚本头部注释。
+
+  **本机特例**：这台机器的网络有 TLS 中间人代理，证书链验证会失败
+  （node 报 `UNABLE_TO_VERIFY_LEAF_SIGNATURE`，git 报 `SSL certificate problem`），
+  推送前必须放宽校验：
+
+  ```bash
+  NODE_TLS_REJECT_UNAUTHORIZED=0 GIT_SSL_NO_VERIFY=1 \
+    node tools/push-to-github.mjs --token-file D:/gh_token.txt
+  ```
+
+  换到证书配置正常的机器上就不要加这两个变量。另外**别用 GitHub 连接器推二进制**，
+  它会把 PNG 编码破坏掉。
 
 ---
 
