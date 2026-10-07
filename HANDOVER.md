@@ -360,6 +360,16 @@ node tools/diag-bias.mjs             # 二阶偏置补偿残差诊断（跨种�
   实测复现出的 commit SHA 与本地**完全相同**，即远程内容与本地逐字节一致。
   加 `--dry-run` 可先看计划。
 
+  **在这台机器上优先用 `publish-via-api.mjs`**，它全程不碰 `.git/config`。
+  `push-to-github.mjs` 会在 push 前把带 token 的 URL 写进 remote，而 push 又必被杀，
+  清理钩子没机会执行 —— 已实测踩到：`.git/config` 里残留了带 token 的 remote URL。
+  所以**每次用过 `push-to-github.mjs` 之后都要查一下**：
+
+  ```bash
+  grep -iE "ghp_|x-access-token" .git/config   # 有输出就说明要清理
+  git remote set-url origin https://github.com/moonriver-test/silverhalide-film-grain.git
+  ```
+
 ---
 
 ## 8. 后续继续任务的具体指引
